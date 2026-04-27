@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(top: 80, bottom: 100),
               child: Column(
                 children: const [
-                  SizedBox(height: 32),
+                  SizedBox(height: 70),
                   SearchSection(),
                   SizedBox(height: 48),
                   HeroCarousel(),
