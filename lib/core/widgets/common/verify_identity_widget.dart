@@ -1,7 +1,7 @@
- // الواجهة الثانية: إدخال كود OTP
+// الواجهة الثانية: إدخال كود OTP
 import 'package:eventsapp/core/theme/app_colors.dart';
-import 'package:eventsapp/widgets/common/custom_gold_button.dart';
-import 'package:eventsapp/widgets/custom_footer_links.dart';
+import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
+import 'package:eventsapp/core/widgets/common/custom_footer_links.dart';
 import 'package:flutter/material.dart';
 
 class VerifyIdentityWidget extends StatelessWidget {
@@ -15,9 +15,7 @@ class VerifyIdentityWidget extends StatelessWidget {
       children: [
         Text(
           "Verify Your Identity",
-          style: theme.textTheme.displayLarge?.copyWith(
-            fontSize: 26,
-          ),
+          style: theme.textTheme.displayLarge?.copyWith(fontSize: 26),
         ),
         const SizedBox(height: 15),
         Text(
@@ -26,12 +24,12 @@ class VerifyIdentityWidget extends StatelessWidget {
           style: theme.textTheme.bodySmall?.copyWith(height: 1.5),
         ),
         const SizedBox(height: 35),
-        
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: List.generate(5, (index) => _buildOTPBox()),
         ),
-        
+
         const SizedBox(height: 45),
 
         CustomGoldButton(
@@ -43,12 +41,12 @@ class VerifyIdentityWidget extends StatelessWidget {
         ),
 
         const SizedBox(height: 25),
-        
+
         CustomFooterLinks(
-        leftText: "< BACK TO EMAIL",
-        rightText: "RESEND CODE",
-        onLeftTap: () => Navigator.pop(context),
-        //onRightTap: () => _resendOTP(),
+          leftText: "< BACK TO EMAIL",
+          rightText: "RESEND CODE",
+          onLeftTap: () => Navigator.pop(context),
+          //onRightTap: () => _resendOTP(),
         ),
       ],
     );
@@ -64,9 +62,14 @@ class VerifyIdentityWidget extends StatelessWidget {
         border: Border.all(color: Colors.white10),
       ),
       child: Center(
-        child: Text("0", style: TextStyle(color: AppColors.greyText.withOpacity(0.5), fontSize: 22)),
+        child: Text(
+          "0",
+          style: TextStyle(
+            color: AppColors.greyText.withOpacity(0.5),
+            fontSize: 22,
+          ),
+        ),
       ),
     );
   }
 }
-

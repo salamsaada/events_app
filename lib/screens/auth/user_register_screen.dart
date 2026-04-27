@@ -1,8 +1,8 @@
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart'; 
 import 'package:eventsapp/screens/auth/user_log_in_screen.dart';
-import 'package:eventsapp/widgets/common/custom_gold_button.dart';
-import 'package:eventsapp/widgets/common/text_field_widget.dart';
+import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
+import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
 import 'package:flutter/material.dart';
 
 class UserRegisterScreen extends StatelessWidget {
