@@ -14,8 +14,6 @@ class ForgotPasswordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
-      backgroundColor: AppColors.background,
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(
@@ -25,7 +23,6 @@ class ForgotPasswordScreen extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               children: [
-            
                 Text(
                   "SECURE ACCESS", 
                   style: AppTextStyles.goldSubtitle.copyWith(letterSpacing: 3),
