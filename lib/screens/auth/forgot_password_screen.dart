@@ -1,42 +1,38 @@
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
-import 'package:eventsapp/widgets/common/custom_gold_button.dart';
-import 'package:eventsapp/widgets/common/text_field_widget.dart';
-import 'package:eventsapp/widgets/custom_footer_links.dart';
-import 'package:eventsapp/widgets/verify_identity_widget.dart';
+import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
+import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
+import 'package:eventsapp/core/widgets/common/custom_footer_links.dart';
+import 'package:eventsapp/core/widgets/common/verify_identity_widget.dart';
 import 'package:flutter/material.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
-  final bool isStepTwo = false; 
+  final bool isStepTwo = false;
 
   const ForgotPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
       backgroundColor: AppColors.background,
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
-          color: AppColors.background,
-        ),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: Center(
           child: SingleChildScrollView(
             child: Column(
               children: [
-            
                 Text(
-                  "SECURE ACCESS", 
+                  "SECURE ACCESS",
                   style: AppTextStyles.goldSubtitle.copyWith(letterSpacing: 3),
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  "Royal Events", 
+                  "Royal Events",
                   style: TextStyle(
-                    color: AppColors.primaryGold, 
-                    fontSize: 42, 
-                    fontFamily: 'Serif' 
+                    color: AppColors.primaryGold,
+                    fontSize: 42,
+                    fontFamily: 'Serif',
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -46,7 +42,9 @@ class ForgotPasswordScreen extends StatelessWidget {
                   constraints: const BoxConstraints(minHeight: 400),
                   padding: const EdgeInsets.all(40),
                   decoration: BoxDecoration(
-                    color: AppColors.cardBackground.withOpacity(0.9), // 0xFF161B22
+                    color: AppColors.cardBackground.withOpacity(
+                      0.9,
+                    ), // 0xFF161B22
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.white10),
                     boxShadow: [
@@ -54,17 +52,17 @@ class ForgotPasswordScreen extends StatelessWidget {
                         color: Colors.black.withOpacity(0.5),
                         blurRadius: 20,
                         spreadRadius: 5,
-                      )
+                      ),
                     ],
                   ),
-                  child: isStepTwo 
-                      ? const VerifyIdentityWidget() 
+                  child: isStepTwo
+                      ? const VerifyIdentityWidget()
                       : _buildRecoveryStep(context),
                 ),
-                
+
                 const SizedBox(height: 40),
                 Text(
-                  "THE LEGACY OF EXCELLENCE", 
+                  "THE LEGACY OF EXCELLENCE",
                   style: AppTextStyles.captionBold.copyWith(
                     color: Colors.white24,
                     letterSpacing: 4,
@@ -83,31 +81,22 @@ class ForgotPasswordScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          "SECURITY PROTOCOL", 
-          style: AppTextStyles.goldSubtitle,
-        ),
-        const Text(
-          "Password\nRecovery", 
-          style: AppTextStyles.mainTitle, 
-        ),
+        const Text("SECURITY PROTOCOL", style: AppTextStyles.goldSubtitle),
+        const Text("Password\nRecovery", style: AppTextStyles.mainTitle),
         const SizedBox(height: 15),
         const Text(
           "Enter your registered credentials to receive a secure access token via our concierge network.",
-          style: AppTextStyles.bodyGrey, 
+          style: AppTextStyles.bodyGrey,
         ),
         const SizedBox(height: 35),
-        
-        const Text(
-          "EMAIL OR MOBILE NUMBER", 
-          style: AppTextStyles.captionBold,
-        ),
+
+        const Text("EMAIL OR MOBILE NUMBER", style: AppTextStyles.captionBold),
         const SizedBox(height: 20),
-        
+
         const CustomTextField(
           label: "Email or Phone number",
           icon: Icons.stay_current_portrait,
-        ), 
+        ),
 
         const SizedBox(height: 30),
 
@@ -120,7 +109,7 @@ class ForgotPasswordScreen extends StatelessWidget {
         ),
 
         const SizedBox(height: 25),
-        
+
         CustomFooterLinks(
           leftText: "< RETURN TO LOGIN",
           onLeftTap: () => Navigator.pop(context),

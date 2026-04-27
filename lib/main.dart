@@ -1,22 +1,17 @@
-import 'package:eventsapp/screens/selection_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:eventsapp/core/theme/app_theme.dart';
+import 'package:flutter/services.dart';
 
-void main() {
-  runApp(const eventsapp());
-}
+import 'app/app.dart';
+import 'cache/cache_helper.dart';
 
-class eventsapp extends StatelessWidget {
-  const eventsapp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-      return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Royal Events',
-      theme: AppTheme.darkTheme,
-      home: SelectionScreen(),
-    );
-    
-  }
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await CacheHelper().init();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+    ),
+  );
+  runApp(const RoyalEventsApp());
 }
