@@ -12,10 +12,8 @@ class UserLogInScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background, 
-      
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        //backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.whiteText, size: 20),
@@ -88,10 +86,7 @@ class UserLogInScreen extends StatelessWidget {
               Center(
                 child: TextButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const UserRegisterScreen()),
-                    );
+                    Navigator.pop(context);
                   },
                   child: RichText(
                     text: const TextSpan(
