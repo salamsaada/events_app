@@ -1,14 +1,4 @@
-﻿import 'package:dartz/dartz.dart';
-import 'package:eventsapp/cache/cache_helper.dart';
-import 'package:eventsapp/core/api/api_consumer.dart';
-import 'package:eventsapp/core/api/end_ponits.dart';
-import 'package:eventsapp/core/errors/exceptions.dart';
-import 'package:eventsapp/core/functions/upload_image_to_api.dart';
-import 'package:eventsapp/models/sign_in_model.dart';
-import 'package:eventsapp/models/sign_up_model.dart';
-import 'package:eventsapp/models/user_model.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
+﻿import 'package:eventsapp/core/api/api_consumer.dart';
 
 class UserRepository {
   final ApiConsumer api;

@@ -9,13 +9,13 @@ class UserCubit extends Cubit<UserState> {
   UserCubit(this.userRepository) : super(UserInitial());
   final UserRepository userRepository;
   //Sign in Form key
-  GlobalKey<FormState> signInFormKey = GlobalKey();
+  GlobalKey<FormState> signInFormKey = GlobalKey<FormState>();
   //Sign in email
   TextEditingController signInEmail = TextEditingController();
   //Sign in password
   TextEditingController signInPassword = TextEditingController();
   //Sign Up Form key
-  GlobalKey<FormState> signUpFormKey = GlobalKey();
+  GlobalKey<FormState> signUpFormKey = GlobalKey<FormState>();
   //Profile Pic
   XFile? profilePic;
   //Sign up name
@@ -30,7 +30,7 @@ class UserCubit extends Cubit<UserState> {
   TextEditingController confirmPassword = TextEditingController();
   SignInModel? user;
 
-  uploadProfilePic(XFile image) {
+  void uploadProfilePic(XFile image) {
     profilePic = image;
     emit(UploadProfilePic());
   }

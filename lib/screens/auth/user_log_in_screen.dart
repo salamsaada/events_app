@@ -4,7 +4,6 @@ import 'package:eventsapp/screens/auth/forgot_password_screen.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
 import 'package:flutter/material.dart';
-import 'user_register_screen.dart';
 
 class UserLogInScreen extends StatelessWidget {
   const UserLogInScreen({super.key});
@@ -16,7 +15,11 @@ class UserLogInScreen extends StatelessWidget {
         //backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.whiteText, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.whiteText,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -27,16 +30,13 @@ class UserLogInScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              
-              const Text(
-                "SIGN IN",
-                style: AppTextStyles.mainTitle, 
-              ),
+
+              const Text("SIGN IN", style: AppTextStyles.mainTitle),
               const SizedBox(height: 10),
-              
+
               const Text(
                 "Welcome back to the gala.",
-                style: AppTextStyles.bodyGrey, 
+                style: AppTextStyles.bodyGrey,
               ),
               const SizedBox(height: 50),
 
@@ -51,22 +51,24 @@ class UserLogInScreen extends StatelessWidget {
                 icon: Icons.lock_outline,
                 isPassword: true,
               ),
-              
+
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const ForgotPasswordScreen(),
+                      ),
                     );
                   },
                   child: const Text(
                     "Forgot Password?",
                     style: TextStyle(
-                      color: AppColors.primaryGold, 
+                      color: AppColors.primaryGold,
                       fontSize: 13,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -80,7 +82,7 @@ class UserLogInScreen extends StatelessWidget {
                   // هنا منطق الكيوبت
                 },
               ),
-              
+
               const SizedBox(height: 30),
 
               Center(
@@ -96,8 +98,8 @@ class UserLogInScreen extends StatelessWidget {
                         TextSpan(
                           text: "Create One",
                           style: TextStyle(
-                            color: AppColors.primaryGold, 
-                            fontWeight: FontWeight.bold
+                            color: AppColors.primaryGold,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
