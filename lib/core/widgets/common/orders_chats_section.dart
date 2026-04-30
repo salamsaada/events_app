@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 class OrdersChatsSection extends StatelessWidget {
   const OrdersChatsSection({super.key});
@@ -13,10 +14,10 @@ class OrdersChatsSection extends StatelessWidget {
             width: 342,
             padding: const EdgeInsets.all(33),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1C21),
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: const Color(0xFFF9C54D).withOpacity(0.1),
+                color: AppColors.primaryGold.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -27,15 +28,18 @@ class OrdersChatsSection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF9C54D).withOpacity(0.1),
+                        color: AppColors.primaryGold.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: const Text(
                         '2 نشط',
                         style: TextStyle(
-                          color: Color(0xFFF9C54D),
+                          color: AppColors.primaryGold,
                           fontSize: 10,
                         ),
                       ),
@@ -54,10 +58,10 @@ class OrdersChatsSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(17),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF080808),
+                    color: AppColors.background,
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: const Color(0xFFF9C54D).withOpacity(0.05),
+                      color: AppColors.primaryGold.withValues(alpha: 0.05),
                       width: 1,
                     ),
                   ),
@@ -78,12 +82,18 @@ class OrdersChatsSection extends StatelessWidget {
                           children: [
                             Text(
                               'عشاء حفل الشركات',
-                              style: TextStyle(color: Colors.white, fontSize: 14),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
                             ),
                             SizedBox(height: 4),
                             Text(
                               'مجدول في 24 أكتوبر 2023',
-                              style: TextStyle(color: Color(0xFF737373), fontSize: 12),
+                              style: TextStyle(
+                                color: Color(0xFF737373),
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),
@@ -114,10 +124,10 @@ class OrdersChatsSection extends StatelessWidget {
             width: 342,
             padding: const EdgeInsets.all(33),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1C21),
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: const Color(0xFFF9C54D).withOpacity(0.1),
+                color: AppColors.primaryGold.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -144,11 +154,17 @@ class OrdersChatsSection extends StatelessWidget {
                             children: [
                               Text(
                                 '12:45 مساءً',
-                                style: TextStyle(color: Color(0xFF525252), fontSize: 10),
+                                style: TextStyle(
+                                  color: Color(0xFF525252),
+                                  fontSize: 10,
+                                ),
                               ),
                               Text(
                                 'ماركوس، كونسيرج',
-                                style: TextStyle(color: Colors.white, fontSize: 14),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
                               ),
                             ],
                           ),
@@ -156,7 +172,10 @@ class OrdersChatsSection extends StatelessWidget {
                           Text(
                             'تم الانتهاء من قائمة تقديم الطعام للحفل...',
                             textAlign: TextAlign.right,
-                            style: TextStyle(color: Color(0xFF737373), fontSize: 12),
+                            style: TextStyle(
+                              color: Color(0xFF737373),
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
@@ -215,11 +234,17 @@ class OrdersChatsSection extends StatelessWidget {
                               children: [
                                 Text(
                                   'بالأمس',
-                                  style: TextStyle(color: Color(0xFF525252), fontSize: 10),
+                                  style: TextStyle(
+                                    color: Color(0xFF525252),
+                                    fontSize: 10,
+                                  ),
                                 ),
                                 Text(
                                   'إيلينا، مسؤولة الزهور',
-                                  style: TextStyle(color: Colors.white, fontSize: 14),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ],
                             ),
@@ -227,7 +252,10 @@ class OrdersChatsSection extends StatelessWidget {
                             Text(
                               'لقد قمنا بتوفير الأوركيد الأبيض الذي طلبته.',
                               textAlign: TextAlign.right,
-                              style: TextStyle(color: Color(0xFF737373), fontSize: 12),
+                              style: TextStyle(
+                                color: Color(0xFF737373),
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../home/home_page.dart';
 import '../../core/widgets/common/bottom_navigation.dart';
 import '../settings/settings_page.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -10,7 +12,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080808),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 120),
@@ -26,16 +28,12 @@ class ProfilePage extends StatelessWidget {
                         MaterialPageRoute(builder: (_) => const SettingsPage()),
                       );
                     },
-                    icon: const Icon(Icons.settings, color: Color(0xFFF9C54D)),
-                  ),
-                  const Text(
-                    'الملف الشخصي',
-                    style: TextStyle(
-                      color: Color(0xFFF9C54D),
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
+                    icon: const Icon(
+                      Icons.settings,
+                      color: AppColors.primaryGold,
                     ),
                   ),
+                  const Text('الملف الشخصي', style: AppTextStyles.mainTitle),
                 ],
               ),
               const SizedBox(height: 20),
@@ -43,10 +41,10 @@ class ProfilePage extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A1C21),
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFFF9C54D).withOpacity(0.1),
+                    color: AppColors.primaryGold.withValues(alpha: 0.1),
                   ),
                 ),
                 child: Row(
@@ -54,29 +52,24 @@ class ProfilePage extends StatelessWidget {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
-                        children: const [
-                          Text(
+                        children: [
+                          const Text(
                             'سارة الحربي',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTextStyles.subtitle,
                           ),
-                          SizedBox(height: 6),
+                          const SizedBox(height: 6),
                           Text(
                             'عميل مميز - Elite',
-                            style: TextStyle(
-                              color: Color(0xFFF9C54D),
+                            style: AppTextStyles.bodyMain.copyWith(
+                              color: AppColors.primaryGold,
                               fontSize: 13,
                             ),
                           ),
-                          SizedBox(height: 6),
+                          const SizedBox(height: 6),
                           Text(
                             'sarah@royal-events.com',
-                            style: TextStyle(
-                              color: Color(0xFF9CA3AF),
-                              fontSize: 12,
+                            style: AppTextStyles.tileCaption.copyWith(
+                              color: AppColors.lightGrey,
                             ),
                           ),
                         ],
@@ -154,20 +147,13 @@ class _ProfileInfoCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1C21),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          Text(title, style: AppTextStyles.sectionTitle),
           const SizedBox(height: 12),
           ...rows.map(
             (row) => Padding(
@@ -178,18 +164,16 @@ class _ProfileInfoCard extends StatelessWidget {
                   Flexible(
                     child: Text(
                       row.value,
-                      style: const TextStyle(
-                        color: Color(0xFF9CA3AF),
-                        fontSize: 12,
+                      style: AppTextStyles.tileCaption.copyWith(
+                        color: AppColors.lightGrey,
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Text(
                     row.label,
-                    style: const TextStyle(
-                      color: Color(0xFFE5E7EB),
-                      fontSize: 13,
+                    style: AppTextStyles.tileTitle.copyWith(
+                      color: AppColors.mediumGrey,
                     ),
                   ),
                 ],

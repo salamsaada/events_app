@@ -65,7 +65,7 @@ class VerifyIdentityWidget extends StatelessWidget {
         child: Text(
           "0",
           style: TextStyle(
-            color: AppColors.greyText.withOpacity(0.5),
+            color: AppColors.greyText.withValues(alpha: 0.5),
             fontSize: 22,
           ),
         ),

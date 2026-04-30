@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 class SearchSection extends StatelessWidget {
   const SearchSection({super.key});
@@ -11,26 +12,26 @@ class SearchSection extends StatelessWidget {
         width: 342,
         height: 50,
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1C21),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            SizedBox(width: 16),
-            Icon(Icons.search, color: Color(0xFF737373), size: 20),
-            SizedBox(width: 12),
+            const SizedBox(width: 16),
+            Icon(Icons.search, color: AppColors.greyText, size: 20),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 'ابحث عن القاعات، الكادر، أو المخططين...',
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  color: Color(0xFF6B7280),
+                  color: AppColors.darkGrey,
                   fontSize: 16,
                   fontFamily: 'NotoSansArabic',
                 ),
               ),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
           ],
         ),
       ),

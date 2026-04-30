@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 class HeroCarousel extends StatelessWidget {
   const HeroCarousel({super.key});
@@ -15,12 +16,10 @@ class HeroCarousel extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)],
           ),
           image: const DecorationImage(
-            image: NetworkImage(
-              'https://picsum.photos/800/600',
-            ),
+            image: NetworkImage('https://picsum.photos/800/600'),
             fit: BoxFit.cover,
           ),
         ),
@@ -39,7 +38,7 @@ class HeroCarousel extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF9C54D),
+                      color: AppColors.primaryGold,
                       borderRadius: BorderRadius.circular(2),
                     ),
                     child: const Text(
@@ -77,7 +76,7 @@ class HeroCarousel extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF9C54D),
+                      backgroundColor: AppColors.primaryGold,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
                         vertical: 12,
@@ -107,20 +106,16 @@ class HeroCarousel extends StatelessWidget {
                   Container(
                     width: 32,
                     height: 4,
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                   ),
                   const SizedBox(width: 8),
                   Container(
                     width: 32,
                     height: 4,
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                   ),
                   const SizedBox(width: 8),
-                  Container(
-                    width: 32,
-                    height: 4,
-                    color: const Color(0xFFF9C54D),
-                  ),
+                  Container(width: 32, height: 4, color: AppColors.primaryGold),
                 ],
               ),
             ),

@@ -1,6 +1,5 @@
+import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-
-import '../../constants/app_colors.dart';
 
 class AppBottomNavigation extends StatelessWidget {
   final int selectedIndex;
@@ -19,7 +18,10 @@ class AppBottomNavigation extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background,
         border: Border(
-          top: BorderSide(color: AppColors.primary.withOpacity(0.1), width: 1),
+          top: BorderSide(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            width: 1,
+          ),
         ),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(8),
@@ -55,14 +57,14 @@ class AppBottomNavigation extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary : const Color(0xFF525252),
+              color: isSelected ? AppColors.primary : AppColors.iconGrey,
               size: 18,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppColors.primary : const Color(0xFF525252),
+                color: isSelected ? AppColors.primary : AppColors.iconGrey,
                 fontSize: 10,
                 letterSpacing: 0.5,
               ),

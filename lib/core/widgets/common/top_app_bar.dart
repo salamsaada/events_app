@@ -1,6 +1,5 @@
+import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-
-import '../../constants/app_colors.dart';
 
 class TopBar extends StatelessWidget {
   const TopBar({super.key});
@@ -13,7 +12,7 @@ class TopBar extends StatelessWidget {
         color: AppColors.background,
         border: Border(
           bottom: BorderSide(
-            color: AppColors.primary.withOpacity(0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             width: 1,
           ),
         ),

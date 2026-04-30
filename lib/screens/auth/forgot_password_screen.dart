@@ -41,14 +41,14 @@ class ForgotPasswordScreen extends StatelessWidget {
                   constraints: const BoxConstraints(minHeight: 400),
                   padding: const EdgeInsets.all(40),
                   decoration: BoxDecoration(
-                    color: AppColors.cardBackground.withOpacity(
-                      0.9,
+                    color: AppColors.cardBackground.withValues(
+                      alpha: 0.9,
                     ), // 0xFF161B22
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.white10),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         blurRadius: 20,
                         spreadRadius: 5,
                       ),

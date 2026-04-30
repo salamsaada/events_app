@@ -1,5 +1,5 @@
 import 'package:eventsapp/core/theme/app_colors.dart';
-import 'package:eventsapp/core/theme/app_text_styles.dart'; 
+import 'package:eventsapp/core/theme/app_text_styles.dart';
 import 'package:eventsapp/screens/auth/user_log_in_screen.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
@@ -12,13 +12,12 @@ class UserRegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-       // backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
-            Icons.arrow_back_ios_new, 
-            color: AppColors.whiteText, 
-            size: 20
+            Icons.arrow_back_ios_new,
+            color: AppColors.whiteText,
+            size: 20,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -29,16 +28,14 @@ class UserRegisterScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "CREATE\nACCOUNT",
-                style: AppTextStyles.mainTitle,
-              ),
+              const Text("CREATE\nACCOUNT", style: AppTextStyles.mainTitle),
               const SizedBox(height: 10),
               const Text(
                 "Fill in your details to join the gala.",
-                style: AppTextStyles.bodyGrey, 
+                style: AppTextStyles.bodyGrey,
               ),
               const SizedBox(height: 40),
+
               const CustomTextField(
                 label: "Full Name",
                 icon: Icons.person_outline,
@@ -63,24 +60,20 @@ class UserRegisterScreen extends StatelessWidget {
                 icon: Icons.lock_reset_outlined,
                 isPassword: true,
               ),
-              
               const SizedBox(height: 40),
 
-              CustomGoldButton(
-                text: "CREATE ACCOUNT",
-                onTap: () {
-                  // هنا منطق الـ Cubit لاحقاً
-                },
-              ),
-              
+              CustomGoldButton(text: "CREATE ACCOUNT", onTap: () {}),
+
               const SizedBox(height: 20),
-              
+
               Center(
                 child: TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const UserLogInScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const UserLogInScreen(),
+                      ),
                     );
                   },
                   child: RichText(
@@ -91,8 +84,8 @@ class UserRegisterScreen extends StatelessWidget {
                         TextSpan(
                           text: "Sign In",
                           style: TextStyle(
-                            color: AppColors.primaryGold, 
-                            fontWeight: FontWeight.bold
+                            color: AppColors.primaryGold,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
@@ -100,10 +93,9 @@ class UserRegisterScreen extends StatelessWidget {
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
-
-              _buildSocialSection(), 
-
+              _buildSocialSection(),
               const SizedBox(height: 40),
             ],
           ),
@@ -121,9 +113,9 @@ class UserRegisterScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Text(
-                "OR CONTINUE WITH", 
+                "OR CONTINUE WITH",
                 style: AppTextStyles.captionBold.copyWith(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                 ),
               ),
             ),
@@ -136,7 +128,10 @@ class UserRegisterScreen extends StatelessWidget {
           children: [
             _socialIcon('assets/images/images.png', () {}),
             const SizedBox(width: 25),
-            _socialIcon('assets/images/round-facebook-logo-isolated-white-background_469489-897.avif', () {}),
+            _socialIcon(
+              'assets/images/round-facebook-logo-isolated-white-background_469489-897.avif',
+              () {},
+            ),
           ],
         ),
       ],
@@ -149,7 +144,7 @@ class UserRegisterScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: AppColors.cardBackground, 
+          color: AppColors.cardBackground,
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white10),
         ),

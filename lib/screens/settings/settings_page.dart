@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../home/home_page.dart';
 import '../../core/widgets/common/bottom_navigation.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -19,7 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080808),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
@@ -33,17 +35,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(
                       Icons.arrow_back,
-                      color: Color(0xFFF9C54D),
+                      color: AppColors.primaryGold,
                     ),
                   ),
-                  const Text(
-                    'الإعدادات',
-                    style: TextStyle(
-                      color: Color(0xFFF9C54D),
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  const Text('الإعدادات', style: AppTextStyles.mainTitle),
                 ],
               ),
               const SizedBox(height: 18),
@@ -122,8 +117,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: OutlinedButton.icon(
                   onPressed: () {},
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFF87171),
-                    side: const BorderSide(color: Color(0xFF7F1D1D)),
+                    foregroundColor: AppColors.errorRed,
+                    side: const BorderSide(color: AppColors.errorDarkRed),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -164,20 +159,13 @@ class _SettingsSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1C21),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          Text(title, style: AppTextStyles.sectionTitle),
           const SizedBox(height: 8),
           ...children,
         ],
@@ -197,13 +185,13 @@ class _ActionTile extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       visualDensity: VisualDensity.compact,
-      leading: const Icon(Icons.chevron_right, color: Color(0xFF6B7280)),
+      leading: const Icon(Icons.chevron_right, color: AppColors.darkGrey),
       title: Text(
         title,
         textAlign: TextAlign.right,
-        style: const TextStyle(color: Color(0xFFE5E7EB), fontSize: 14),
+        style: AppTextStyles.tileTitle,
       ),
-      trailing: Icon(icon, color: const Color(0xFFF9C54D), size: 20),
+      trailing: Icon(icon, color: AppColors.primaryGold, size: 20),
       onTap: () {},
     );
   }
@@ -230,14 +218,14 @@ class _SwitchTile extends StatelessWidget {
       leading: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: const Color(0xFFF9C54D),
+        activeThumbColor: AppColors.primaryGold,
       ),
       title: Text(
         title,
         textAlign: TextAlign.right,
-        style: const TextStyle(color: Color(0xFFE5E7EB), fontSize: 14),
+        style: AppTextStyles.tileTitle,
       ),
-      trailing: Icon(icon, color: const Color(0xFFF9C54D), size: 20),
+      trailing: Icon(icon, color: AppColors.primaryGold, size: 20),
     );
   }
 }

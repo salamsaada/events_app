@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_text_styles.dart';
 
 class ServicesSection extends StatelessWidget {
   const ServicesSection({super.key});
@@ -19,7 +21,7 @@ class ServicesSection extends StatelessWidget {
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: const Color(0xFFF9C54D).withOpacity(0.3),
+                        color: AppColors.primaryGold.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -27,7 +29,7 @@ class ServicesSection extends StatelessWidget {
                   child: const Text(
                     'عرض الكل',
                     style: TextStyle(
-                      color: Color(0xFFF9C54D),
+                      color: AppColors.primaryGold,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.8,
@@ -35,20 +37,23 @@ class ServicesSection extends StatelessWidget {
                   ),
                 ),
               ),
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     'خدمات فاخرة',
-                    style: TextStyle(
-                      color: Color(0xFFF9C54D),
+                    style: AppTextStyles.mainTitle.copyWith(
+                      color: AppColors.primaryGold,
                       fontSize: 32,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   Text(
                     'مختارة بعناية لذوقكم الرفيع.',
-                    style: TextStyle(color: Color(0xFF737373), fontSize: 16),
+                    style: AppTextStyles.bodyGrey.copyWith(
+                      color: AppColors.greyText,
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
@@ -95,10 +100,10 @@ class _ServiceCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(33),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1C21),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: const Color(0xFFF9C54D).withOpacity(0.05),
+          color: AppColors.primaryGold.withValues(alpha: 0.05),
           width: 1,
         ),
       ),
@@ -112,26 +117,21 @@ class _ServiceCard extends StatelessWidget {
               color: const Color(0xFF25282E),
               borderRadius: BorderRadius.circular(24),
             ),
-            child: Icon(icon, color: const Color(0xFFF9C54D), size: 24),
+            child: Icon(icon, color: AppColors.primaryGold, size: 24),
           ),
           const SizedBox(height: 17),
           Text(
             title,
             textAlign: TextAlign.right,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppTextStyles.subtitle,
           ),
           const SizedBox(height: 8),
           Text(
             description,
             textAlign: TextAlign.right,
-            style: const TextStyle(
-              color: Color(0xFF737373),
+            style: AppTextStyles.bodyMain.copyWith(
+              color: AppColors.greyText,
               fontSize: 16,
-              height: 1.6,
             ),
           ),
         ],
