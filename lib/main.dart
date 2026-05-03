@@ -1,8 +1,11 @@
 import 'package:eventsapp/cubit/theme_cubit.dart';
+import 'package:eventsapp/cubit/language_cubit.dart';
 import 'package:eventsapp/screens/auth/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart'; 
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'generated/app_localizations.dart';
 
 import 'core/theme/app_theme.dart';
 import 'cache/cache_helper.dart';
@@ -26,23 +29,36 @@ class RoyalEventsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ThemeCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => ThemeCubit()),
+        BlocProvider(create: (context) => LanguageCubit()),
+      ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
-        builder: (context, state) {
+        builder: (context, themeState) {
+          return BlocBuilder<LanguageCubit, LanguageState>(
+            builder: (context, languageState) {
+              bool isDarkMode = context.read<ThemeCubit>().isDark;
+              String languageCode = context.read<LanguageCubit>().languageCode;
 
-          bool isDarkMode = context.read<ThemeCubit>().isDark;
-
-          return MaterialApp(
-            title: 'رويال إيفينتس',
-            debugShowCheckedModeBanner: false,
-
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            
-            themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            
-            home: const SplashScreen(),
+              return MaterialApp(
+                onGenerateTitle: (context) =>
+                    AppLocalizations.of(context)!.appTitle,
+                debugShowCheckedModeBanner: false,
+                locale: Locale(languageCode),
+                supportedLocales: const [Locale('en'), Locale('ar')],
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                theme: AppTheme.lightTheme,
+                darkTheme: AppTheme.darkTheme,
+                themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+                home: const SplashScreen(),
+              );
+            },
           );
         },
       ),

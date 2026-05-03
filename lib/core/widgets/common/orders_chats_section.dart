@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../../generated/app_localizations.dart';
 
 class OrdersChatsSection extends StatelessWidget {
   const OrdersChatsSection({super.key});
@@ -14,7 +15,7 @@ class OrdersChatsSection extends StatelessWidget {
             width: 342,
             padding: const EdgeInsets.all(33),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: AppColors.primaryGold.withValues(alpha: 0.1),
@@ -36,18 +37,18 @@ class OrdersChatsSection extends StatelessWidget {
                         color: AppColors.primaryGold.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: const Text(
-                        '2 نشط',
-                        style: TextStyle(
+                      child: Text(
+                        AppLocalizations.of(context)!.activeOrders,
+                        style: const TextStyle(
                           color: AppColors.primaryGold,
                           fontSize: 10,
                         ),
                       ),
                     ),
-                    const Text(
-                      'طلباتي',
+                    Text(
+                      AppLocalizations.of(context)!.myOrders,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -58,7 +59,9 @@ class OrdersChatsSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(17),
                   decoration: BoxDecoration(
-                    color: AppColors.background,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.background
+                        : const Color(0xFFF5F5F5),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: AppColors.primaryGold.withValues(alpha: 0.05),
@@ -76,22 +79,24 @@ class OrdersChatsSection extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              'عشاء حفل الشركات',
+                              AppLocalizations.of(context)!.corporateDinner,
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 14,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
-                              'مجدول في 24 أكتوبر 2023',
+                              AppLocalizations.of(context)!.scheduledDate,
                               style: TextStyle(
-                                color: Color(0xFF737373),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.5),
                                 fontSize: 12,
                               ),
                             ),
@@ -124,7 +129,7 @@ class OrdersChatsSection extends StatelessWidget {
             width: 342,
             padding: const EdgeInsets.all(33),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: AppColors.primaryGold.withValues(alpha: 0.1),
@@ -134,10 +139,10 @@ class OrdersChatsSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Text(
-                  'آخر المحادثات',
+                Text(
+                  AppLocalizations.of(context)!.lastConversations,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -145,7 +150,7 @@ class OrdersChatsSection extends StatelessWidget {
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -153,14 +158,14 @@ class OrdersChatsSection extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '12:45 مساءً',
-                                style: TextStyle(
+                                AppLocalizations.of(context)!.time1245,
+                                style: const TextStyle(
                                   color: Color(0xFF525252),
                                   fontSize: 10,
                                 ),
                               ),
                               Text(
-                                'ماركوس، كونسيرج',
+                                AppLocalizations.of(context)!.marcusConcierge,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
@@ -168,9 +173,9 @@ class OrdersChatsSection extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            'تم الانتهاء من قائمة تقديم الطعام للحفل...',
+                            AppLocalizations.of(context)!.menuCompletedMessage,
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: Color(0xFF737373),
@@ -225,7 +230,7 @@ class OrdersChatsSection extends StatelessWidget {
                   opacity: 0.6,
                   child: Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
@@ -233,14 +238,14 @@ class OrdersChatsSection extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'بالأمس',
-                                  style: TextStyle(
+                                  AppLocalizations.of(context)!.yesterday,
+                                  style: const TextStyle(
                                     color: Color(0xFF525252),
                                     fontSize: 10,
                                   ),
                                 ),
                                 Text(
-                                  'إيلينا، مسؤولة الزهور',
+                                  AppLocalizations.of(context)!.elenaFlowers,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
@@ -248,9 +253,11 @@ class OrdersChatsSection extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
-                              'لقد قمنا بتوفير الأوركيد الأبيض الذي طلبته.',
+                              AppLocalizations.of(
+                                context,
+                              )!.orchidProvidedMessage,
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: Color(0xFF737373),

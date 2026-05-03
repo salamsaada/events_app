@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
+import '../../../generated/app_localizations.dart';
 
 class NewsletterSection extends StatelessWidget {
   const NewsletterSection({super.key});
@@ -20,18 +21,26 @@ class NewsletterSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            'عضوية النخبة',
-            style: AppTextStyles.mainTitle.copyWith(fontSize: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              AppLocalizations.of(context)!.eliteMembership,
+              style: AppTextStyles.mainTitle.copyWith(
+                fontSize: 24,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
-              'انضم إلى دائرتنا الملكية للحصول على أولوية الحجز\nوالوصول الحصري للقاعات.',
+              AppLocalizations.of(context)!.eliteMembershipDesc,
               textAlign: TextAlign.center,
               style: AppTextStyles.bodyMain.copyWith(
-                color: AppColors.greyText,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
                 fontSize: 16,
               ),
             ),
@@ -42,19 +51,23 @@ class NewsletterSection extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(2),
                 border: Border.all(
-                  color: AppColors.darkGrey.withValues(alpha: 0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.2),
                 ),
               ),
               child: TextField(
                 textAlign: TextAlign.right,
                 style: AppTextStyles.bodyMain,
                 decoration: InputDecoration(
-                  hintText: 'بريدك الإلكتروني للعمل',
+                  hintText: AppLocalizations.of(context)!.emailPlaceholder,
                   hintStyle: AppTextStyles.bodyGrey.copyWith(
-                    color: AppColors.darkGrey,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                   border: InputBorder.none,
                 ),
@@ -74,7 +87,7 @@ class NewsletterSection extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'قدم الآن',
+                AppLocalizations.of(context)!.applyNow,
                 style: AppTextStyles.buttonText.copyWith(fontSize: 12),
               ),
             ),

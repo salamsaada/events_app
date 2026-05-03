@@ -7,6 +7,7 @@ import '../../core/widgets/common/orders_chats_section.dart';
 import '../../core/widgets/common/search_section.dart';
 import '../../core/widgets/common/services_section.dart';
 import '../../core/widgets/common/top_app_bar.dart';
+import '../../generated/app_localizations.dart';
 import '../profile/profile_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -76,9 +77,10 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     if (index == 1 || index == 2) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('هذه الصفحة ستكون متاحة قريبًا')),
-      );
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.pageWillBeAvailable)));
     }
   }
 }

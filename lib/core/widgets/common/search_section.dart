@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../../generated/app_localizations.dart';
 
 class SearchSection extends StatelessWidget {
   const SearchSection({super.key});
@@ -12,7 +13,7 @@ class SearchSection extends StatelessWidget {
         width: 342,
         height: 50,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -22,10 +23,12 @@ class SearchSection extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'ابحث عن القاعات، الكادر، أو المخططين...',
+                AppLocalizations.of(context)!.searchHint,
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  color: AppColors.darkGrey,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
                   fontSize: 16,
                   fontFamily: 'NotoSansArabic',
                 ),

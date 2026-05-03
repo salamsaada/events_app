@@ -1,5 +1,6 @@
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/screens/auth/forgot_password_screen.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
@@ -10,6 +11,8 @@ class UserLogInScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         //backgroundColor: Colors.transparent,
@@ -31,23 +34,20 @@ class UserLogInScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 20),
 
-              const Text("SIGN IN", style: AppTextStyles.mainTitle),
+              Text(l10n.authSignInTitle, style: AppTextStyles.mainTitle),
               const SizedBox(height: 10),
 
-              const Text(
-                "Welcome back to the gala.",
-                style: AppTextStyles.bodyGrey,
-              ),
+              Text(l10n.authWelcomeBack, style: AppTextStyles.bodyGrey),
               const SizedBox(height: 50),
 
-              const CustomTextField(
-                label: "Email Address",
+              CustomTextField(
+                label: l10n.authEmailAddress,
                 icon: Icons.email_outlined,
               ),
               const SizedBox(height: 25),
 
-              const CustomTextField(
-                label: "Password",
+              CustomTextField(
+                label: l10n.authPassword,
                 icon: Icons.lock_outline,
                 isPassword: true,
               ),
@@ -63,8 +63,8 @@ class UserLogInScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  child: const Text(
-                    "Forgot Password?",
+                  child: Text(
+                    l10n.authForgotPassword,
                     style: TextStyle(
                       color: AppColors.primaryGold,
                       fontSize: 13,
@@ -77,7 +77,7 @@ class UserLogInScreen extends StatelessWidget {
               const SizedBox(height: 30),
 
               CustomGoldButton(
-                text: "SIGN IN",
+                text: l10n.authSignInTitle,
                 onTap: () {
                   // هنا منطق الكيوبت
                 },
@@ -91,14 +91,14 @@ class UserLogInScreen extends StatelessWidget {
                     Navigator.pop(context);
                   },
                   child: RichText(
-                      text: TextSpan(
-                      text: "Don't have an account? ",
+                    text: TextSpan(
+                      text: l10n.authDontHaveAccount,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       children: [
                         TextSpan(
-                          text: "Create One",
+                          text: l10n.authCreateOne,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
@@ -106,7 +106,7 @@ class UserLogInScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

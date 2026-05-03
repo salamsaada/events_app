@@ -1,12 +1,13 @@
 import 'package:eventsapp/cubit/theme_cubit.dart';
+import 'package:eventsapp/cubit/language_cubit.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../home/home_page.dart';
 import '../../core/widgets/common/bottom_navigation.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
-
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -24,7 +25,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
@@ -41,41 +42,44 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: AppColors.primaryGold,
                     ),
                   ),
-                  const Text('الإعدادات', style: AppTextStyles.mainTitle),
+                  Text(
+                    AppLocalizations.of(context)!.settingsTitle,
+                    style: AppTextStyles.mainTitle,
+                  ),
                 ],
               ),
               const SizedBox(height: 18),
               _SettingsSection(
-                title: 'الحساب',
-                children: const [
+                title: AppLocalizations.of(context)!.account,
+                children: [
                   _ActionTile(
                     icon: Icons.person_outline,
-                    title: 'تعديل الملف الشخصي',
+                    title: AppLocalizations.of(context)!.editProfile,
                   ),
                   _ActionTile(
                     icon: Icons.credit_card_outlined,
-                    title: 'طرق الدفع',
+                    title: AppLocalizations.of(context)!.paymentMethods,
                   ),
                   _ActionTile(
                     icon: Icons.shopping_bag_outlined,
-                    title: 'طلباتي السابقة',
+                    title: AppLocalizations.of(context)!.previousOrders,
                   ),
                 ],
               ),
               const SizedBox(height: 14),
               _SettingsSection(
-                title: 'الإشعارات',
+                title: AppLocalizations.of(context)!.notifications,
                 children: [
                   _SwitchTile(
                     icon: Icons.notifications_active_outlined,
-                    title: 'إشعارات التطبيق',
+                    title: AppLocalizations.of(context)!.pushNotifications,
                     value: pushNotifications,
                     onChanged: (value) =>
                         setState(() => pushNotifications = value),
                   ),
                   _SwitchTile(
                     icon: Icons.sms_outlined,
-                    title: 'الرسائل النصية',
+                    title: AppLocalizations.of(context)!.smsNotifications,
                     value: smsNotifications,
                     onChanged: (value) =>
                         setState(() => smsNotifications = value),
@@ -84,36 +88,40 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: 14),
               _SettingsSection(
-                title: 'التفضيلات',
+                title: AppLocalizations.of(context)!.preferences,
                 children: [
                   _SwitchTile(
                     icon: Icons.dark_mode_outlined,
-                    title: 'الوضع الليلي',
+                    title: AppLocalizations.of(context)!.nightMode,
                     value: context.watch<ThemeCubit>().isDark,
                     onChanged: (value) {
                       context.read<ThemeCubit>().toggleTheme();
                     },
                   ),
-
-                  const _ActionTile(
+                  _LanguageTile(
                     icon: Icons.language_outlined,
-                    title: 'اللغة: العربية',
+                    currentLanguage: context
+                        .watch<LanguageCubit>()
+                        .languageCode,
+                    onChanged: (language) {
+                      context.read<LanguageCubit>().setLanguage(language);
+                    },
                   ),
                 ],
               ),
               const SizedBox(height: 14),
               _SettingsSection(
-                title: 'الأمان',
+                title: AppLocalizations.of(context)!.security,
                 children: [
                   _SwitchTile(
                     icon: Icons.fingerprint,
-                    title: 'الدخول بالبصمة',
+                    title: AppLocalizations.of(context)!.biometric,
                     value: biometric,
                     onChanged: (value) => setState(() => biometric = value),
                   ),
-                  const _ActionTile(
+                  _ActionTile(
                     icon: Icons.lock_outline,
-                    title: 'تغيير كلمة المرور',
+                    title: AppLocalizations.of(context)!.changePassword,
                   ),
                 ],
               ),
@@ -131,7 +139,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   icon: const Icon(Icons.logout),
-                  label: const Text('تسجيل الخروج'),
+                  label: Text(AppLocalizations.of(context)!.logout),
                 ),
               ),
             ],
@@ -165,13 +173,18 @@ class _SettingsSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(title, style: AppTextStyles.sectionTitle),
+          Text(
+            title,
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 8),
           ...children,
         ],
@@ -228,6 +241,42 @@ class _SwitchTile extends StatelessWidget {
       ),
       title: Text(
         title,
+        textAlign: TextAlign.right,
+        style: AppTextStyles.tileTitle,
+      ),
+      trailing: Icon(icon, color: AppColors.primaryGold, size: 20),
+      onTap: () {},
+    );
+  }
+}
+
+class _LanguageTile extends StatelessWidget {
+  final IconData icon;
+  final String currentLanguage;
+  final ValueChanged<String> onChanged;
+
+  const _LanguageTile({
+    required this.icon,
+    required this.currentLanguage,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      visualDensity: VisualDensity.compact,
+      leading: PopupMenuButton<String>(
+        onSelected: onChanged,
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+          const PopupMenuItem<String>(value: 'ar', child: Text('العربية')),
+          const PopupMenuItem<String>(value: 'en', child: Text('English')),
+        ],
+        child: Icon(Icons.chevron_right, color: AppColors.darkGrey),
+      ),
+      title: Text(
+        l10n.language,
         textAlign: TextAlign.right,
         style: AppTextStyles.tileTitle,
       ),

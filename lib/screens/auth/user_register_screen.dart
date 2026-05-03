@@ -1,5 +1,6 @@
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/screens/auth/user_log_in_screen.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
@@ -10,6 +11,8 @@ class UserRegisterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -28,41 +31,44 @@ class UserRegisterScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("CREATE\nACCOUNT", style: AppTextStyles.mainTitle),
+              Text(l10n.authCreateAccountTitle, style: AppTextStyles.mainTitle),
               const SizedBox(height: 10),
-              const Text(
-                "Fill in your details to join the gala.",
+              Text(
+                l10n.authCreateAccountSubtitle,
                 style: AppTextStyles.bodyGrey,
               ),
               const SizedBox(height: 40),
 
-              const CustomTextField(
-                label: "Full Name",
+              CustomTextField(
+                label: l10n.authFullName,
                 icon: Icons.person_outline,
               ),
               const SizedBox(height: 20),
 
-              const CustomTextField(
-                label: "Email or phone number",
+              CustomTextField(
+                label: l10n.authEmailOrPhoneNumber,
                 icon: Icons.stay_current_portrait,
               ),
               const SizedBox(height: 20),
 
-              const CustomTextField(
-                label: "Password",
+              CustomTextField(
+                label: l10n.authPassword,
                 icon: Icons.lock_outline,
                 isPassword: true,
               ),
               const SizedBox(height: 20),
 
-              const CustomTextField(
-                label: "Confirm Password",
+              CustomTextField(
+                label: l10n.authConfirmPassword,
                 icon: Icons.lock_reset_outlined,
                 isPassword: true,
               ),
               const SizedBox(height: 40),
 
-              CustomGoldButton(text: "CREATE ACCOUNT", onTap: () {}),
+              CustomGoldButton(
+                text: l10n.authCreateAccountButton,
+                onTap: () {},
+              ),
 
               const SizedBox(height: 20),
 
@@ -78,11 +84,11 @@ class UserRegisterScreen extends StatelessWidget {
                   },
                   child: RichText(
                     text: TextSpan(
-                      text: "Already have an account? ",
+                      text: l10n.authAlreadyHaveAccount,
                       style: Theme.of(context).textTheme.bodySmall,
                       children: [
                         TextSpan(
-                          text: "Sign In",
+                          text: l10n.authSignInLink,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
@@ -90,7 +96,7 @@ class UserRegisterScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ),
               ),
 
@@ -105,15 +111,20 @@ class UserRegisterScreen extends StatelessWidget {
   }
 
   Widget _buildSocialSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant,)),
+            Expanded(
+              child: Divider(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Text(
-                "OR CONTINUE WITH",
+                l10n.authOrContinueWith,
                 style: AppTextStyles.captionBold.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                   // 2. إذا كنتِ تريدين التحكم بالشفافية بشكل ديناميكي:
@@ -121,7 +132,11 @@ class UserRegisterScreen extends StatelessWidget {
                 ),
               ),
             ),
-             Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant,)),
+            Expanded(
+              child: Divider(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 25),
@@ -130,7 +145,8 @@ class UserRegisterScreen extends StatelessWidget {
           children: [
             _socialIcon(context, 'assets/images/images.png', () {}),
             const SizedBox(width: 25),
-            _socialIcon( context,
+            _socialIcon(
+              context,
               'assets/images/round-facebook-logo-isolated-white-background_469489-897.avif',
               () {},
             ),
@@ -140,29 +156,23 @@ class UserRegisterScreen extends StatelessWidget {
     );
   }
 
- Widget _socialIcon(BuildContext context, String path, VoidCallback onTap) {
-  final theme = Theme.of(context);
-  final isDark = theme.brightness == Brightness.dark;
+  Widget _socialIcon(BuildContext context, String path, VoidCallback onTap) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: isDark 
-            ? theme.colorScheme.surface 
-            : theme.colorScheme.primary.withOpacity(0.1), 
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: isDark
+              ? theme.colorScheme.surface
+              : theme.colorScheme.primary.withOpacity(0.1),
+          shape: BoxShape.circle,
+          border: Border.all(color: theme.colorScheme.outlineVariant),
         ),
+        child: Image.asset(path, height: 25, width: 25),
       ),
-      child: Image.asset(
-        path, 
-        height: 25, 
-        width: 25,
-      ),
-    ),
-  );
-}
+    );
+  }
 }

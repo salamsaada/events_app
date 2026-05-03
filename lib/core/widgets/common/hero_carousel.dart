@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../../generated/app_localizations.dart';
 
 class HeroCarousel extends StatelessWidget {
   const HeroCarousel({super.key});
@@ -41,9 +42,9 @@ class HeroCarousel extends StatelessWidget {
                       color: AppColors.primaryGold,
                       borderRadius: BorderRadius.circular(2),
                     ),
-                    child: const Text(
-                      'القاعة المميزة',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.featuredHall,
+                      style: const TextStyle(
                         color: Color(0xFF261A00),
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -52,10 +53,10 @@ class HeroCarousel extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'الجناح الذهبي',
+                  Text(
+                    AppLocalizations.of(context)!.goldSuite,
                     textAlign: TextAlign.right,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 40,
                       fontWeight: FontWeight.w600,
@@ -63,10 +64,10 @@ class HeroCarousel extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'استمتع بالفخامة المعمارية وخدمات\nالكونسيرج المصممة خصيصًا لفعاليتك\nالقادمة رفيعة المستوى.',
+                  Text(
+                    AppLocalizations.of(context)!.hallDescription,
                     textAlign: TextAlign.right,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Color(0xFFD2C5AF),
                       fontSize: 16,
                       height: 1.6,
@@ -85,9 +86,9 @@ class HeroCarousel extends StatelessWidget {
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                    child: const Text(
-                      'طلب حجز',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.bookRequest,
+                      style: const TextStyle(
                         color: Color(0xFF261A00),
                         fontSize: 12,
                         fontWeight: FontWeight.bold,

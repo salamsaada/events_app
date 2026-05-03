@@ -1,5 +1,5 @@
-import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/screens/auth/user_register_screen.dart';
 import 'package:eventsapp/core/widgets/common/choice_card_widget.dart';
 import 'package:eventsapp/screens/home/home_page.dart';
@@ -10,20 +10,22 @@ class SelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 60),
           child: Column(
             children: [
-              const Text(
-                "CHOOSE YOUR DESTINATION",
+              Text(
+                l10n.selectionChooseDestination,
                 style: AppTextStyles.goldSubtitle,
               ),
               const SizedBox(height: 10),
 
-               Text(
-                "Begin Your Journey",
+              Text(
+                l10n.selectionBeginJourney,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
@@ -36,20 +38,19 @@ class SelectionScreen extends StatelessWidget {
 
               buildChoiceCard(
                 context,
-                title: "User",
-                description: "For guests seeking access to signature events.",
+                title: l10n.selectionUserTitle,
+                description: l10n.selectionUserDescription,
                 imagePath: "assets/images/Screenshot 2026-04-21 162329.png",
-                buttonText: "JOIN THE GALA",
+                buttonText: l10n.selectionJoinTheGala,
                 destination: const UserRegisterScreen(),
               ),
 
               buildChoiceCard(
                 context,
-                title: "Guest Explorer",
-                description:
-                    "Just looking around? Browse our exclusive events collection without creating an account.",
+                title: l10n.selectionGuestExplorerTitle,
+                description: l10n.selectionGuestExplorerDescription,
                 imagePath: "assets/images/Screenshot 2026-04-21 162404.png",
-                buttonText: "EXPLORE AS GUEST",
+                buttonText: l10n.selectionExploreAsGuest,
                 isPreferred: false,
                 destination: const HomePage(),
               ),

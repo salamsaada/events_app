@@ -5,14 +5,17 @@ import '../../core/widgets/common/bottom_navigation.dart';
 import '../settings/settings_page.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../generated/app_localizations.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 120),
@@ -33,7 +36,12 @@ class ProfilePage extends StatelessWidget {
                       color: AppColors.primaryGold,
                     ),
                   ),
-                  const Text('الملف الشخصي', style: AppTextStyles.mainTitle),
+                  Text(
+                    l10n.profileTitle,
+                    style: AppTextStyles.mainTitle.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -41,7 +49,7 @@ class ProfilePage extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: AppColors.primaryGold.withValues(alpha: 0.1),
@@ -53,13 +61,15 @@ class ProfilePage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          const Text(
-                            'سارة الحربي',
-                            style: AppTextStyles.subtitle,
+                          Text(
+                            l10n.sarraHarbi,
+                            style: AppTextStyles.subtitle.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'عميل مميز - Elite',
+                            l10n.premium,
                             style: AppTextStyles.bodyMain.copyWith(
                               color: AppColors.primaryGold,
                               fontSize: 13,
@@ -67,9 +77,11 @@ class ProfilePage extends StatelessWidget {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'sarah@royal-events.com',
+                            l10n.email,
                             style: AppTextStyles.tileCaption.copyWith(
-                              color: AppColors.lightGrey,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
                         ],
@@ -91,29 +103,29 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              const _ProfileInfoCard(
-                title: 'معلومات الحساب',
+              _ProfileInfoCard(
+                title: l10n.accountInfo,
                 rows: [
-                  _InfoRowData('رقم الجوال', '+966 55 555 5555'),
-                  _InfoRowData('المدينة', 'الرياض'),
-                  _InfoRowData('نوع الفعاليات', 'أفراح - شركات - مناسبات خاصة'),
+                  _InfoRowData(l10n.phone, '+966 55 555 5555'),
+                  _InfoRowData(l10n.city, l10n.riyadh),
+                  _InfoRowData(l10n.eventTypes, l10n.weddingsCompaniesEvents),
                 ],
               ),
               const SizedBox(height: 16),
-              const _ProfileInfoCard(
-                title: 'الاشتراك والعضوية',
+              _ProfileInfoCard(
+                title: l10n.subscription,
                 rows: [
-                  _InfoRowData('الخطة الحالية', 'Royal Membership'),
-                  _InfoRowData('تاريخ التجديد', '15 مايو 2026'),
-                  _InfoRowData('الرصيد الحالي', '4,800 ريال'),
+                  _InfoRowData(l10n.currentPlan, l10n.royalMembership),
+                  _InfoRowData(l10n.renewalDate, l10n.renewalDateValue),
+                  _InfoRowData(l10n.currentBalance, l10n.balanceAmount),
                 ],
               ),
               const SizedBox(height: 16),
-              const _ProfileInfoCard(
-                title: 'العناوين المحفوظة',
+              _ProfileInfoCard(
+                title: l10n.savedAddresses,
                 rows: [
-                  _InfoRowData('المنزل', 'حي الياسمين، الرياض'),
-                  _InfoRowData('العمل', 'طريق الملك فهد، الرياض'),
+                  _InfoRowData(l10n.home, l10n.yasmineDistrict),
+                  _InfoRowData(l10n.work, l10n.kingFahdRoad),
                 ],
               ),
             ],
@@ -147,13 +159,18 @@ class _ProfileInfoCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(title, style: AppTextStyles.sectionTitle),
+          Text(
+            title,
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 12),
           ...rows.map(
             (row) => Padding(
@@ -165,7 +182,9 @@ class _ProfileInfoCard extends StatelessWidget {
                     child: Text(
                       row.value,
                       style: AppTextStyles.tileCaption.copyWith(
-                        color: AppColors.lightGrey,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.65),
                       ),
                     ),
                   ),
@@ -173,7 +192,9 @@ class _ProfileInfoCard extends StatelessWidget {
                   Text(
                     row.label,
                     style: AppTextStyles.tileTitle.copyWith(
-                      color: AppColors.mediumGrey,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.85),
                     ),
                   ),
                 ],
