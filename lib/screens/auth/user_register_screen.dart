@@ -77,25 +77,25 @@ class UserRegisterScreen extends StatelessWidget {
                     );
                   },
                   child: RichText(
-                    text: const TextSpan(
+                    text: TextSpan(
                       text: "Already have an account? ",
-                      style: AppTextStyles.bodyGrey,
+                      style: Theme.of(context).textTheme.bodySmall,
                       children: [
                         TextSpan(
                           text: "Sign In",
                           style: TextStyle(
-                            color: AppColors.primaryGold,
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                  ),
+                  )
                 ),
               ),
 
               const SizedBox(height: 20),
-              _buildSocialSection(),
+              _buildSocialSection(context),
               const SizedBox(height: 40),
             ],
           ),
@@ -104,31 +104,33 @@ class UserRegisterScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialSection() {
+  Widget _buildSocialSection(BuildContext context) {
     return Column(
       children: [
         Row(
           children: [
-            const Expanded(child: Divider(color: Colors.white10)),
+            Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant,)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Text(
                 "OR CONTINUE WITH",
                 style: AppTextStyles.captionBold.copyWith(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  // 2. إذا كنتِ تريدين التحكم بالشفافية بشكل ديناميكي:
+                  // color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
                 ),
               ),
             ),
-            const Expanded(child: Divider(color: Colors.white10)),
+             Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant,)),
           ],
         ),
         const SizedBox(height: 25),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _socialIcon('assets/images/images.png', () {}),
+            _socialIcon(context, 'assets/images/images.png', () {}),
             const SizedBox(width: 25),
-            _socialIcon(
+            _socialIcon( context,
               'assets/images/round-facebook-logo-isolated-white-background_469489-897.avif',
               () {},
             ),
@@ -138,18 +140,29 @@ class UserRegisterScreen extends StatelessWidget {
     );
   }
 
-  Widget _socialIcon(String path, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: AppColors.cardBackground,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white10),
+ Widget _socialIcon(BuildContext context, String path, VoidCallback onTap) {
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: isDark 
+            ? theme.colorScheme.surface 
+            : theme.colorScheme.primary.withOpacity(0.1), 
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant,
         ),
-        child: Image.asset(path, height: 25, width: 25),
       ),
-    );
-  }
+      child: Image.asset(
+        path, 
+        height: 25, 
+        width: 25,
+      ),
+    ),
+  );
+}
 }

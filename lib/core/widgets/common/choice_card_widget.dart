@@ -16,9 +16,23 @@ Widget buildChoiceCard(
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        // 1. التعديل هنا: استخدام لون السطح من الثيم
+        color: theme.colorScheme.surface, 
+        
         borderRadius: BorderRadius.circular(15),
-        border: isPreferred ? Border.all(color: AppColors.primaryGold, width: 1) : null,
+        
+        // 2. إضافة ظل خفيف (BoxShadow) لتمييز الكارد عن الخلفية تماماً
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+        
+        border: isPreferred 
+            ? Border.all(color: theme.colorScheme.primary, width: 1) 
+            : null,
       ),
       child: Column(
         children: [
@@ -61,17 +75,21 @@ Widget buildChoiceCard(
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                    Navigator.push(context, 
-                    MaterialPageRoute(builder: (context) => destination));
+                  onPressed: () {
+                  Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => destination),
+                     );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isPreferred ? AppColors.primaryGold : AppColors.buttonSubtle,
-                      foregroundColor: isPreferred ? Colors.black : AppColors.whiteText,
-                    ),
-                    child: Text(buttonText),
-                  ),
-                )
+                  style: ElevatedButton.styleFrom(
+
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+    
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                 ),
+                  child: Text(buttonText),
+                 ),
+                ),
               ],
             ),
           ),

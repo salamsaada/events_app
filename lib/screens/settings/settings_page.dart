@@ -1,9 +1,12 @@
+import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:flutter/material.dart';
 
 import '../home/home_page.dart';
 import '../../core/widgets/common/bottom_navigation.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -86,9 +89,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   _SwitchTile(
                     icon: Icons.dark_mode_outlined,
                     title: 'الوضع الليلي',
-                    value: darkMode,
-                    onChanged: (value) => setState(() => darkMode = value),
+                    value: context.watch<ThemeCubit>().isDark,
+                    onChanged: (value) {
+                      context.read<ThemeCubit>().toggleTheme();
+                    },
                   ),
+
                   const _ActionTile(
                     icon: Icons.language_outlined,
                     title: 'اللغة: العربية',

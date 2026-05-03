@@ -91,20 +91,22 @@ class UserLogInScreen extends StatelessWidget {
                     Navigator.pop(context);
                   },
                   child: RichText(
-                    text: const TextSpan(
+                      text: TextSpan(
                       text: "Don't have an account? ",
-                      style: AppTextStyles.bodyGrey,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                       children: [
                         TextSpan(
                           text: "Create One",
                           style: TextStyle(
-                            color: AppColors.primaryGold,
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                  ),
+                  )
                 ),
               ),
               const SizedBox(height: 20),

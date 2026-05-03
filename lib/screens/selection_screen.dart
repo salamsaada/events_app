@@ -22,11 +22,11 @@ class SelectionScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              const Text(
+               Text(
                 "Begin Your Journey",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.whiteText,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Serif',

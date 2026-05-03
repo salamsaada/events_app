@@ -1,4 +1,3 @@
-import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
@@ -13,23 +12,28 @@ class ForgotPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final theme = Theme.of(context);
+
     return Scaffold(
-      body: Container(
+      body: SizedBox(
         width: double.infinity,
-        decoration: const BoxDecoration(color: AppColors.background),
         child: Center(
           child: SingleChildScrollView(
             child: Column(
               children: [
                 Text(
                   "SECURE ACCESS",
-                  style: AppTextStyles.goldSubtitle.copyWith(letterSpacing: 3),
+                  style: AppTextStyles.goldSubtitle.copyWith(
+                    letterSpacing: 3,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   "Royal Events",
                   style: TextStyle(
-                    color: AppColors.primaryGold,
+                    color: theme.colorScheme.primary, 
                     fontSize: 42,
                     fontFamily: 'Serif',
                   ),
@@ -41,14 +45,12 @@ class ForgotPasswordScreen extends StatelessWidget {
                   constraints: const BoxConstraints(minHeight: 400),
                   padding: const EdgeInsets.all(40),
                   decoration: BoxDecoration(
-                    color: AppColors.cardBackground.withValues(
-                      alpha: 0.9,
-                    ), // 0xFF161B22
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: theme.colorScheme.outlineVariant),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.5),
+                        color: Colors.black.withOpacity(isStepTwo ? 0 : 0.1),
                         blurRadius: 20,
                         spreadRadius: 5,
                       ),
@@ -63,7 +65,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 Text(
                   "THE LEGACY OF EXCELLENCE",
                   style: AppTextStyles.captionBold.copyWith(
-                    color: Colors.white24,
+                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
                     letterSpacing: 4,
                   ),
                 ),
@@ -76,20 +78,31 @@ class ForgotPasswordScreen extends StatelessWidget {
   }
 
   Widget _buildRecoveryStep(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text("SECURITY PROTOCOL", style: AppTextStyles.goldSubtitle),
-        const Text("Password\nRecovery", style: AppTextStyles.mainTitle),
+        Text(
+          "SECURITY PROTOCOL", 
+          style: AppTextStyles.goldSubtitle.copyWith(color: theme.colorScheme.primary),
+        ),
+        Text(
+          "Password\nRecovery", 
+          style: AppTextStyles.mainTitle.copyWith(color: theme.colorScheme.onSurface),
+        ),
         const SizedBox(height: 15),
-        const Text(
+        Text(
           "Enter your registered credentials to receive a secure access token via our concierge network.",
-          style: AppTextStyles.bodyGrey,
+          style: AppTextStyles.bodyGrey.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 35),
 
-        const Text("EMAIL OR MOBILE NUMBER", style: AppTextStyles.captionBold),
+        Text(
+          "EMAIL OR MOBILE NUMBER", 
+          style: AppTextStyles.captionBold.copyWith(color: theme.colorScheme.onSurface),
+        ),
         const SizedBox(height: 20),
 
         const CustomTextField(
@@ -103,7 +116,7 @@ class ForgotPasswordScreen extends StatelessWidget {
           text: "REQUEST RESET CODE",
           icon: Icons.arrow_forward,
           onTap: () {
-            // منطق طلب الكود لاحقاً
+            // منطق طلب الكود
           },
         ),
 

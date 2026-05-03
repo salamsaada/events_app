@@ -3,23 +3,55 @@ import 'app_colors.dart';
 import 'app_text_styles.dart';
 
 class AppTheme {
+
   static ThemeData get darkTheme {
-    return ThemeData(
+    return _buildTheme(
       brightness: Brightness.dark,
+      bgColor: AppColors.background,
+      surfaceColor: AppColors.surface,
       primaryColor: AppColors.primaryGold,
-     
-      scaffoldBackgroundColor: AppColors.background, 
+    );
+  }
+
+  static ThemeData get lightTheme {
+    return _buildTheme(
+      brightness: Brightness.light,
+      bgColor: AppColors.lightBackground,
+      surfaceColor: AppColors.lightSurface,
+      primaryColor: AppColors.primaryGold, 
+    );
+  }
+
+  static ThemeData _buildTheme({
+    required Brightness brightness,
+    required Color bgColor,
+    required Color surfaceColor,
+    required Color primaryColor,
+  }) {
+    bool isDark = brightness == Brightness.dark;
+
+    return ThemeData(
+      brightness: brightness,
+      primaryColor: primaryColor,
+      scaffoldBackgroundColor: bgColor,
       
-      textTheme: const TextTheme(
-        displayLarge: AppTextStyles.mainTitle,
-        bodyLarge: AppTextStyles.bodyMain,
-        bodySmall: AppTextStyles.bodyGrey,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primaryColor,
+        brightness: brightness,
+        primary: primaryColor,
+        surface: surfaceColor,
+        onSurface: isDark ? Colors.white : Colors.black, 
       ),
 
-     
+     textTheme: TextTheme(
+  displayLarge: AppTextStyles.mainTitle.copyWith(color: isDark ? Colors.white : Colors.black),
+  bodyLarge: AppTextStyles.bodyMain.copyWith(color: isDark ? Colors.white : Colors.black),
+  bodySmall: AppTextStyles.bodyGrey.copyWith(color: isDark ? AppColors.secondaryText : AppColors.lightSecondaryText),
+),
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.cardBackground, 
+        fillColor: surfaceColor, 
         labelStyle: AppTextStyles.bodyGrey,
         hintStyle: AppTextStyles.bodyGrey,
         border: OutlineInputBorder(
@@ -28,18 +60,18 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.white10),
+          borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.black12),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primaryGold, width: 1),
+          borderSide: BorderSide(color: primaryColor, width: 1),
         ),
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryGold,
-          foregroundColor: Colors.black,
+          backgroundColor: primaryColor,
+          foregroundColor: isDark ? Colors.black : Colors.white,
           minimumSize: const Size(double.infinity, 55),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: AppTextStyles.buttonText,
@@ -47,10 +79,13 @@ class AppTheme {
         ),
       ),
 
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.background,
+      appBarTheme: AppBarTheme(
+        backgroundColor: bgColor,
         elevation: 0,
-        iconTheme: IconThemeData(color: AppColors.whiteText),
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black),
+        titleTextStyle: AppTextStyles.mainTitle.copyWith(
+          color: isDark ? Colors.white : Colors.black,
+        ),
       ),
     );
   }
