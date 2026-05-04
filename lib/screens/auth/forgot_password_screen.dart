@@ -7,9 +7,10 @@ import 'package:eventsapp/core/widgets/common/verify_identity_widget.dart';
 import 'package:flutter/material.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
+  TextEditingController emailOrPhoneController = TextEditingController();
   final bool isStepTwo = false;
 
-  const ForgotPasswordScreen({super.key});
+  ForgotPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +115,7 @@ class ForgotPasswordScreen extends StatelessWidget {
         const SizedBox(height: 20),
 
         CustomTextField(
+          controller: emailOrPhoneController,
           label: l10n.authEmailOrMobileNumber,
           icon: Icons.stay_current_portrait,
         ),

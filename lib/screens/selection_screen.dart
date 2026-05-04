@@ -42,7 +42,7 @@ class SelectionScreen extends StatelessWidget {
                 description: l10n.selectionUserDescription,
                 imagePath: "assets/images/Screenshot 2026-04-21 162329.png",
                 buttonText: l10n.selectionJoinTheGala,
-                destination: const UserRegisterScreen(),
+                destination: UserRegisterScreen(),
               ),
 
               buildChoiceCard(
@@ -52,7 +52,7 @@ class SelectionScreen extends StatelessWidget {
                 imagePath: "assets/images/Screenshot 2026-04-21 162404.png",
                 buttonText: l10n.selectionExploreAsGuest,
                 isPreferred: false,
-                destination: const HomePage(),
+                destination: HomePage(),
               ),
             ],
           ),

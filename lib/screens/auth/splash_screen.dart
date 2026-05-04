@@ -54,16 +54,19 @@ class _SplashScreenState extends State<SplashScreen>
     // Navigate after animation
     Future.delayed(const Duration(seconds: 5), () {
       if (mounted) {
-        final token = CacheHelper().getData(key: ApiKey.token);
-        if (token != null) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
-        } else {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const SelectionScreen()),
-          );
-        }
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const SelectionScreen()),
+        );
+        // final token = CacheHelper().getData(key: ApiKey.token);
+        // if (token != null) {
+        //   Navigator.of(context).pushReplacement(
+        //     MaterialPageRoute(builder: (context) => const HomePage()),
+        //   );
+        // } else {
+        //   Navigator.of(context).pushReplacement(
+        //     MaterialPageRoute(builder: (context) => const SelectionScreen()),
+        //   );
+        // }
       }
     });
   }

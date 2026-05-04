@@ -27,26 +27,32 @@ void handleDioExceptions(DioException e) {
       switch (e.response?.statusCode) {
         case 400: // Bad request
           throw ServerException(
-              errModel: ErrorModel.fromJson(e.response!.data));
+            errModel: ErrorModel.fromJson(e.response!.data),
+          );
         case 401: //unauthorized
           throw ServerException(
-              errModel: ErrorModel.fromJson(e.response!.data));
+            errModel: ErrorModel.fromJson(e.response!.data),
+          );
         case 403: //forbidden
           throw ServerException(
-              errModel: ErrorModel.fromJson(e.response!.data));
+            errModel: ErrorModel.fromJson(e.response!.data),
+          );
         case 404: //not found
           throw ServerException(
-              errModel: ErrorModel.fromJson(e.response!.data));
+            errModel: ErrorModel.fromJson(e.response!.data),
+          );
         case 409: //cofficient
           throw ServerException(
-              errModel: ErrorModel.fromJson(e.response!.data));
+            errModel: ErrorModel.fromJson(e.response!.data),
+          );
         case 422: //  Unprocessable Entity
           throw ServerException(
-              errModel: ErrorModel.fromJson(e.response!.data));
+            errModel: ErrorModel.fromJson(e.response!.data),
+          );
         case 504: // Server exception
           throw ServerException(
-              errModel: ErrorModel.fromJson(e.response!.data));
+            errModel: ErrorModel.fromJson(e.response!.data),
+          );
       }
   }
 }
-

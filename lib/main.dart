@@ -1,5 +1,9 @@
+import 'package:dio/dio.dart';
+import 'package:eventsapp/core/api/dio_consumer.dart';
 import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
+import 'package:eventsapp/cubit/user_cubit.dart';
+import 'package:eventsapp/repositories/user_repository.dart';
 import 'package:eventsapp/screens/auth/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,6 +35,10 @@ class RoyalEventsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(
+          create: (context) =>
+              UserCubit(UserRepository(api: DioConsumer(dio: Dio()))),
+        ),
         BlocProvider(create: (context) => ThemeCubit()),
         BlocProvider(create: (context) => LanguageCubit()),
       ],

@@ -7,7 +7,9 @@ import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
 import 'package:flutter/material.dart';
 
 class UserLogInScreen extends StatelessWidget {
-  const UserLogInScreen({super.key});
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  UserLogInScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +43,14 @@ class UserLogInScreen extends StatelessWidget {
               const SizedBox(height: 50),
 
               CustomTextField(
+                controller: emailController,
                 label: l10n.authEmailAddress,
                 icon: Icons.email_outlined,
               ),
               const SizedBox(height: 25),
 
               CustomTextField(
+                controller: passwordController,
                 label: l10n.authPassword,
                 icon: Icons.lock_outline,
                 isPassword: true,
@@ -59,7 +63,7 @@ class UserLogInScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ForgotPasswordScreen(),
+                        builder: (context) => ForgotPasswordScreen(),
                       ),
                     );
                   },

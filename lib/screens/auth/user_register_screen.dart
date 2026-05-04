@@ -1,109 +1,188 @@
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
+import 'package:eventsapp/cubit/user_cubit.dart';
+import 'package:eventsapp/cubit/user_state.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/screens/auth/user_log_in_screen.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+// ignore: must_be_immutable
 class UserRegisterScreen extends StatelessWidget {
-  const UserRegisterScreen({super.key});
-
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+  UserRegisterScreen({super.key});
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: AppColors.whiteText,
-            size: 20,
+    return BlocListener<UserCubit, UserState>(
+      listener: (context, state) {
+        if (state is SignUpSuccess) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => UserLogInScreen()),
+          );
+        } else if (state is SignUpFailure) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.errMessage)));
+        }
+      },
+      child: Form(
+        key: _formKey,
+        child: Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios_new,
+                color: AppColors.whiteText,
+                size: 20,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.authCreateAccountTitle, style: AppTextStyles.mainTitle),
-              const SizedBox(height: 10),
-              Text(
-                l10n.authCreateAccountSubtitle,
-                style: AppTextStyles.bodyGrey,
-              ),
-              const SizedBox(height: 40),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.authCreateAccountTitle,
+                    style: AppTextStyles.mainTitle,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    l10n.authCreateAccountSubtitle,
+                    style: AppTextStyles.bodyGrey,
+                  ),
+                  const SizedBox(height: 40),
 
-              CustomTextField(
-                label: l10n.authFullName,
-                icon: Icons.person_outline,
-              ),
-              const SizedBox(height: 20),
+                  CustomTextField(
+                    controller: nameController,
+                    onChanged: (value) {
+                      context.read<UserCubit>().setFirstName(value);
+                    },
+                    label: l10n.authFullName,
+                    icon: Icons.person_outline,
+                    validator: (p0) {
+                      if (p0 == null || p0.isEmpty) {
+                        return "l10n.authFullNameValidation";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
 
-              CustomTextField(
-                label: l10n.authEmailOrPhoneNumber,
-                icon: Icons.stay_current_portrait,
-              ),
-              const SizedBox(height: 20),
+                  CustomTextField(
+                    controller: emailController,
+                    onChanged: (value) {
+                      context.read<UserCubit>().setEmailController(value);
+                    },
+                    label: l10n.authEmailOrPhoneNumber,
+                    icon: Icons.stay_current_portrait,
+                    validator: (p0) {
+                      if (p0 == null || p0.isEmpty) {
+                        return "l10n.authEmailOrPhoneValidation";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
 
-              CustomTextField(
-                label: l10n.authPassword,
-                icon: Icons.lock_outline,
-                isPassword: true,
-              ),
-              const SizedBox(height: 20),
+                  CustomTextField(
+                    controller: passwordController,
+                    onChanged: (value) {
+                      context.read<UserCubit>().setPasswordController(value);
+                    },
+                    label: l10n.authPassword,
+                    icon: Icons.lock_outline,
+                    isPassword: true,
+                    validator: (p0) {
+                      if (p0 == null || p0.isEmpty) {
+                        return "l10n.authPasswordValidation";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
 
-              CustomTextField(
-                label: l10n.authConfirmPassword,
-                icon: Icons.lock_reset_outlined,
-                isPassword: true,
-              ),
-              const SizedBox(height: 40),
+                  CustomTextField(
+                    controller: confirmPasswordController,
+                    onChanged: (value) {
+                      context.read<UserCubit>().setConfirmPasswordController(
+                        value,
+                      );
+                    },
+                    label: l10n.authConfirmPassword,
+                    icon: Icons.lock_reset_outlined,
+                    isPassword: true,
+                    validator: (p0) {
+                      if (p0 == null || p0.isEmpty) {
+                        return "l10n.authConfirmPasswordValidation";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 40),
 
-              CustomGoldButton(
-                text: l10n.authCreateAccountButton,
-                onTap: () {},
-              ),
+                  CustomGoldButton(
+                    text: l10n.authCreateAccountButton,
+                    onTap: State is SignUpLoading
+                        ? null
+                        : () {
+                            if (_formKey.currentState!.validate()) {
+                              context.read<UserCubit>().signUp();
+                            }
+                          },
+                  ),
 
-              const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const UserLogInScreen(),
-                      ),
-                    );
-                  },
-                  child: RichText(
-                    text: TextSpan(
-                      text: l10n.authAlreadyHaveAccount,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      children: [
-                        TextSpan(
-                          text: l10n.authSignInLink,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UserLogInScreen(),
                           ),
+                        );
+                      },
+                      child: RichText(
+                        text: TextSpan(
+                          text: l10n.authAlreadyHaveAccount,
+                          style: Theme.of(context).textTheme.bodySmall,
+                          children: [
+                            TextSpan(
+                              text: l10n.authSignInLink,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
 
-              const SizedBox(height: 20),
-              _buildSocialSection(context),
-              const SizedBox(height: 40),
-            ],
+                  const SizedBox(height: 20),
+                  _buildSocialSection(context),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
           ),
         ),
       ),

@@ -1,11 +1,21 @@
 ﻿import 'package:eventsapp/core/api/end_ponits.dart';
 
-class SignUpModel {
+class AuthResponseModel {
   final String message;
+  final String accessToken;
+  final String tokenType;
 
-  SignUpModel({required this.message});
-  factory SignUpModel.fromJson(Map<String, dynamic> jsonData) {
-    return SignUpModel(message: jsonData[ApiKey.message]);
+  AuthResponseModel({
+    required this.message,
+    required this.accessToken,
+    required this.tokenType,
+  });
+
+  factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
+    return AuthResponseModel(
+      message: json[ApiKey.message],
+      accessToken: json[ApiKey.accessToken],
+      tokenType: json[ApiKey.tokenType],
+    );
   }
 }
-
