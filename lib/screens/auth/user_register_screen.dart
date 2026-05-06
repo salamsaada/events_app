@@ -1,9 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
 import 'package:eventsapp/screens/auth/user_log_in_screen.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
+import 'package:eventsapp/screens/home/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_appauth/flutter_appauth.dart';
 
 class UserRegisterScreen extends StatelessWidget {
   const UserRegisterScreen({super.key});
@@ -12,7 +15,6 @@ class UserRegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
@@ -35,37 +37,35 @@ class UserRegisterScreen extends StatelessWidget {
                 style: AppTextStyles.bodyGrey,
               ),
               const SizedBox(height: 40),
-
               const CustomTextField(
-                label: "Full Name",
+                label: "First Name",
                 icon: Icons.person_outline,
               ),
               const SizedBox(height: 20),
-
+              const CustomTextField(
+                label: "Last Name",
+                icon: Icons.family_restroom,
+              ),
+              const SizedBox(height: 20),
               const CustomTextField(
                 label: "Email or phone number",
                 icon: Icons.stay_current_portrait,
               ),
               const SizedBox(height: 20),
-
               const CustomTextField(
                 label: "Password",
                 icon: Icons.lock_outline,
                 isPassword: true,
               ),
               const SizedBox(height: 20),
-
               const CustomTextField(
                 label: "Confirm Password",
                 icon: Icons.lock_reset_outlined,
                 isPassword: true,
               ),
               const SizedBox(height: 40),
-
               CustomGoldButton(text: "CREATE ACCOUNT", onTap: () {}),
-
               const SizedBox(height: 20),
-
               Center(
                 child: TextButton(
                   onPressed: () {
@@ -90,10 +90,9 @@ class UserRegisterScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ),
               ),
-
               const SizedBox(height: 20),
               _buildSocialSection(context),
               const SizedBox(height: 40),
@@ -109,30 +108,93 @@ class UserRegisterScreen extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant,)),
+            Expanded(
+                child: Divider(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            )),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Text(
                 "OR CONTINUE WITH",
                 style: AppTextStyles.captionBold.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  // 2. إذا كنتِ تريدين التحكم بالشفافية بشكل ديناميكي:
-                  // color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
                 ),
               ),
             ),
-             Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant,)),
+            Expanded(
+                child: Divider(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            )),
           ],
         ),
         const SizedBox(height: 25),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _socialIcon(context, 'assets/images/images.png', () {}),
-            const SizedBox(width: 25),
-            _socialIcon( context,
-              'assets/images/round-facebook-logo-isolated-white-background_469489-897.avif',
-              () {},
+            _socialIcon(
+              context,
+              "assets/images/Screenshot 2026-05-06 014545.png",
+              () async {
+                try {
+                  final appAuth = const FlutterAppAuth();
+
+                  // 1. طلب تسجيل الدخول من جوجل
+                  final AuthorizationTokenResponse? result =
+                      await appAuth.authorizeAndExchangeCode(
+                    AuthorizationTokenRequest(
+                      '644185664828-ksjjqf3obmurcamrk1rolefonj17icrd.apps.googleusercontent.com',
+                      'com.example.eventsapp:/oauth2redirect',
+                      issuer: 'https://accounts.google.com',
+                      scopes: ['openid', 'profile', 'email'],
+                    ),
+                  );
+
+                  if (result != null && result.idToken != null) {
+        
+                    print("---------------------------------------");
+                    print("ID TOKEN SUCCESS: ${result.idToken}");
+                    print("---------------------------------------");
+
+                    try {
+
+                      String baseUrl = "https://api.eventsapp.com"; // الرابط الأساسي (يتغير مرة واحدة)
+                      String endpoint = "/api/google-login";        // المسار الخاص بالعملية
+
+                      final response = await Dio().post(
+                        baseUrl + endpoint, 
+                        data: {
+                          "token": result.idToken,
+                        },
+                      );
+
+                      if (response.statusCode == 200) {
+                        if (context.mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HomePage(),
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      print("Server Error: $e");
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Server Connection Error: $e")),
+                        );
+                      }
+                    }
+                  }
+                } catch (e) {
+                  print("Google Sign-In Error: $e");
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Google Sign-In Error: $e")),
+                    );
+                  }
+                }
+              },
             ),
           ],
         ),
@@ -140,29 +202,30 @@ class UserRegisterScreen extends StatelessWidget {
     );
   }
 
- Widget _socialIcon(BuildContext context, String path, VoidCallback onTap) {
-  final theme = Theme.of(context);
-  final isDark = theme.brightness == Brightness.dark;
+  Widget _socialIcon(BuildContext context, String path, VoidCallback onTap) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: isDark 
-            ? theme.colorScheme.surface 
-            : theme.colorScheme.primary.withOpacity(0.1), 
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(30),
+        decoration: BoxDecoration(
+          color: isDark
+              ? theme.colorScheme.surface
+              : theme.colorScheme.primary.withOpacity(0.1),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant,
+          ),
+        ),
+        child: Image.asset(
+          path,
+          height: 40,
+          width: 40,
+          errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
         ),
       ),
-      child: Image.asset(
-        path, 
-        height: 25, 
-        width: 25,
-      ),
-    ),
-  );
-}
+    );
+  }
 }

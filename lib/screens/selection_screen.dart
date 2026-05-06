@@ -1,4 +1,3 @@
-import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
 import 'package:eventsapp/screens/auth/user_register_screen.dart';
 import 'package:eventsapp/core/widgets/common/choice_card_widget.dart';
@@ -21,7 +20,6 @@ class SelectionScreen extends StatelessWidget {
                 style: AppTextStyles.goldSubtitle,
               ),
               const SizedBox(height: 10),
-
                Text(
                 "Begin Your Journey",
                 textAlign: TextAlign.center,
