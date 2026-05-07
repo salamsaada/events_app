@@ -7,14 +7,14 @@ class CustomTextField extends StatelessWidget {
   final IconData icon;
   final bool isPassword;
   final int maxLines;
-  TextEditingController controller;
+  TextEditingController? controller;
   String? Function(String?)? validator;
   void Function(String)? onChanged;
   CustomTextField({
     super.key,
     this.onChanged,
     this.validator,
-    required this.controller,
+     this.controller,
     required this.label,
     required this.icon,
     this.isPassword = false,
