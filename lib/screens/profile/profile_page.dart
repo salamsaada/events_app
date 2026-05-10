@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../home/home_page.dart';
 import '../../core/widgets/common/bottom_navigation.dart';
+import '../chat/chat_page.dart';
 import '../settings/settings_page.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -91,12 +92,15 @@ class ProfilePage extends StatelessWidget {
                     Container(
                       width: 72,
                       height: 72,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: NetworkImage('https://picsum.photos/800/600'),
-                          fit: BoxFit.cover,
-                        ),
+                        color: const Color(0xFFD4AF37),
+                        border: Border.all(color: Colors.grey[300]!, width: 2),
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 40,
                       ),
                     ),
                   ],
@@ -140,6 +144,18 @@ class ProfilePage extends StatelessWidget {
               MaterialPageRoute(builder: (_) => const HomePage()),
               (route) => false,
             );
+            return;
+          }
+          if (index == 1) {
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const ChatPage()));
+            return;
+          }
+          if (index == 2) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(l10n.pageWillBeAvailable)));
           }
         },
       ),

@@ -6,8 +6,8 @@ class ResultCard extends StatelessWidget {
   final String price;
   final String imageUrl;
   final double rating;
-  final String? location; 
-  final String? capacity; 
+  final String? location;
+  final String? capacity;
   final VoidCallback onTap;
 
   const ResultCard({
@@ -25,7 +25,7 @@ class ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -35,7 +35,7 @@ class ResultCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -45,15 +45,17 @@ class ResultCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(15),
+              ),
               child: Image.network(
                 imageUrl,
                 height: 180,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  height: 180, 
-                  color: Colors.grey[300], 
+                errorBuilder: (context, error, stackTrace) => Container(
+                  height: 180,
+                  color: Colors.grey[300],
                   child: const Icon(Icons.image_not_supported),
                 ),
               ),
@@ -66,42 +68,79 @@ class ResultCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text(
+                        title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       Row(
                         children: [
-                          const Icon(Icons.star, color: Color(0xFFF9C54D), size: 18),
+                          const Icon(
+                            Icons.star,
+                            color: Color(0xFFF9C54D),
+                            size: 18,
+                          ),
                           Text(" $rating", style: theme.textTheme.bodySmall),
                         ],
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text("By $companyName", style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                  Text(
+                    "By $companyName",
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  
+
                   if (location != null || capacity != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Row(
                         children: [
                           if (location != null) ...[
-                            const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                            Text(" $location  ", style: theme.textTheme.bodySmall),
+                            const Icon(
+                              Icons.location_on,
+                              size: 14,
+                              color: Colors.grey,
+                            ),
+                            Text(
+                              " $location  ",
+                              style: theme.textTheme.bodySmall,
+                            ),
                           ],
                           if (capacity != null) ...[
-                            const Icon(Icons.people, size: 14, color: Colors.grey),
-                            Text(" $capacity", style: theme.textTheme.bodySmall),
+                            const Icon(
+                              Icons.people,
+                              size: 14,
+                              color: Colors.grey,
+                            ),
+                            Text(
+                              " $capacity",
+                              style: theme.textTheme.bodySmall,
+                            ),
                           ],
                         ],
                       ),
                     ),
-                  
+
                   const Divider(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(price, style: theme.textTheme.titleMedium?.copyWith(color: const Color(0xFFF9C54D), fontWeight: FontWeight.bold)),
-                      const Text("View Details", style: TextStyle(color: Colors.blue, fontSize: 12)),
+                      Text(
+                        price,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: const Color(0xFFF9C54D),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        "View Details",
+                        style: TextStyle(color: Colors.blue, fontSize: 12),
+                      ),
                     ],
                   ),
                 ],

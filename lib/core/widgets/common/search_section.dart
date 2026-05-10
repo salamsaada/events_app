@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
 import '../../../generated/app_localizations.dart';
 
 class SearchSection extends StatelessWidget {
@@ -7,6 +6,7 @@ class SearchSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
@@ -19,7 +19,11 @@ class SearchSection extends StatelessWidget {
         child: Row(
           children: [
             const SizedBox(width: 16),
-            Icon(Icons.search, color: AppColors.greyText, size: 20),
+            Icon(
+              Icons.search,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+              size: 20,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

@@ -1,4 +1,3 @@
-import 'package:eventsapp/screens/booking_path_page.dart';
 import 'package:eventsapp/screens/professional_Staff_Page.dart';
 import 'package:eventsapp/screens/ready_made_packages_page.dart';
 import 'package:eventsapp/screens/services_categories_page.dart';
@@ -13,6 +12,9 @@ class ServicesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subtitleColor = theme.colorScheme.onSurface.withValues(alpha: 0.7);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -63,7 +65,7 @@ class ServicesSection extends StatelessWidget {
                     Text(
                       AppLocalizations.of(context)!.selectedCarefully,
                       style: AppTextStyles.bodyGrey.copyWith(
-                        color: AppColors.greyText,
+                        color: subtitleColor,
                         fontSize: 16,
                       ),
                     ),
@@ -158,6 +160,16 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBackground = isDark
+        ? AppColors.surface
+        : theme.colorScheme.surface;
+    final tileBackground = isDark
+        ? const Color(0xFF25282E)
+        : AppColors.primaryGold.withValues(alpha: 0.12);
+    final bodyColor = theme.colorScheme.onSurface.withValues(alpha: 0.7);
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -165,7 +177,7 @@ class _ServiceCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(33),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: cardBackground,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: AppColors.primaryGold.withValues(alpha: 0.05),
@@ -179,7 +191,7 @@ class _ServiceCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: const Color(0xFF25282E),
+                color: tileBackground,
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Icon(icon, color: AppColors.primaryGold, size: 24),
@@ -188,14 +200,16 @@ class _ServiceCard extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.right,
-              style: AppTextStyles.subtitle,
+              style: AppTextStyles.subtitle.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               description,
               textAlign: TextAlign.right,
               style: AppTextStyles.bodyMain.copyWith(
-                color: AppColors.greyText,
+                color: bodyColor,
                 fontSize: 16,
               ),
             ),

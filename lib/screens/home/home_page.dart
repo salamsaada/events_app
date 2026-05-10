@@ -7,7 +7,8 @@ import '../../core/widgets/common/orders_chats_section.dart';
 import '../../core/widgets/common/search_section.dart';
 import '../../core/widgets/common/services_section.dart';
 import '../../core/widgets/common/top_app_bar.dart';
-import '../../generated/app_localizations.dart';
+import '../chat/chat_page.dart';
+import '../orders/orders_page.dart';
 import '../profile/profile_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -70,17 +71,23 @@ class _HomePageState extends State<HomePage> {
 
   void _onItemSelected(int index) {
     setState(() => _selectedIndex = index);
+    if (index == 1) {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const ChatPage()));
+      return;
+    }
+    if (index == 2) {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const OrdersPage()));
+      return;
+    }
     if (index == 3) {
       Navigator.of(
         context,
       ).push(MaterialPageRoute(builder: (_) => const ProfilePage()));
       return;
-    }
-    if (index == 1 || index == 2) {
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.pageWillBeAvailable)));
     }
   }
 }
