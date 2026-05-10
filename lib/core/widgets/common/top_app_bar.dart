@@ -10,7 +10,7 @@ class TopBar extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final iconAndTextColor = isDark ? AppColors.whiteText : AppColors.primary;
-    final borderColor = theme.colorScheme.onSurface.withOpacity(0.08);
+    final borderColor = theme.colorScheme.onSurface.withValues(alpha: 0.08);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),

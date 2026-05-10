@@ -7,6 +7,18 @@ class OrdersChatsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final surfaceColor = theme.colorScheme.surface;
+    final headlineColor = theme.colorScheme.onSurface;
+    final mutedTextColor = theme.colorScheme.onSurface.withValues(alpha: 0.55);
+    final cardInnerColor = isDark
+        ? AppColors.background
+        : const Color(0xFFF5F5F5);
+    final avatarBackground = isDark
+        ? const Color(0xFF231F17)
+        : AppColors.primaryGold.withValues(alpha: 0.12);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -15,7 +27,7 @@ class OrdersChatsSection extends StatelessWidget {
             width: 342,
             padding: const EdgeInsets.all(33),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: surfaceColor,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: AppColors.primaryGold.withValues(alpha: 0.1),
@@ -48,7 +60,7 @@ class OrdersChatsSection extends StatelessWidget {
                     Text(
                       AppLocalizations.of(context)!.myOrders,
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
+                        color: headlineColor,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -59,9 +71,7 @@ class OrdersChatsSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(17),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.background
-                        : const Color(0xFFF5F5F5),
+                    color: cardInnerColor,
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: AppColors.primaryGold.withValues(alpha: 0.05),
@@ -86,7 +96,7 @@ class OrdersChatsSection extends StatelessWidget {
                             Text(
                               AppLocalizations.of(context)!.corporateDinner,
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface,
+                                color: headlineColor,
                                 fontSize: 14,
                               ),
                             ),
@@ -94,9 +104,7 @@ class OrdersChatsSection extends StatelessWidget {
                             Text(
                               AppLocalizations.of(context)!.scheduledDate,
                               style: TextStyle(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.5),
+                                color: mutedTextColor,
                                 fontSize: 12,
                               ),
                             ),
@@ -108,13 +116,17 @@ class OrdersChatsSection extends StatelessWidget {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF231F17),
+                          color: avatarBackground,
                           borderRadius: BorderRadius.circular(4),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                              'https://picsum.photos/800/600',
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Container(
+                            color: Colors.grey[300],
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              color: Colors.grey,
                             ),
-                            fit: BoxFit.cover,
                           ),
                         ),
                       ),
@@ -129,7 +141,7 @@ class OrdersChatsSection extends StatelessWidget {
             width: 342,
             padding: const EdgeInsets.all(33),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: surfaceColor,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: AppColors.primaryGold.withValues(alpha: 0.1),
@@ -142,146 +154,40 @@ class OrdersChatsSection extends StatelessWidget {
                 Text(
                   AppLocalizations.of(context)!.lastConversations,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: headlineColor,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                AppLocalizations.of(context)!.time1245,
-                                style: const TextStyle(
-                                  color: Color(0xFF525252),
-                                  fontSize: 10,
-                                ),
-                              ),
-                              Text(
-                                AppLocalizations.of(context)!.marcusConcierge,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            AppLocalizations.of(context)!.menuCompletedMessage,
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: Color(0xFF737373),
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Stack(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0xFFF9C54D),
-                              width: 2,
-                            ),
-                            image: const DecorationImage(
-                              image: NetworkImage(
-                                'https://picsum.photos/800/600',
-                              ),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          child: Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF22C55E),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFF1A1C21),
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                _ConversationRow(
+                  time: AppLocalizations.of(context)!.time1245,
+                  name: AppLocalizations.of(context)!.marcusConcierge,
+                  message: AppLocalizations.of(context)!.menuCompletedMessage,
+                  timeColor: mutedTextColor,
+                  nameColor: headlineColor,
+                  messageColor: mutedTextColor,
+                  avatarBorderColor: const Color(0xFFF9C54D),
+                  avatarBackground: avatarBackground,
+                  showOnline: true,
                 ),
                 const SizedBox(height: 24),
                 Opacity(
-                  opacity: 0.6,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!.yesterday,
-                                  style: const TextStyle(
-                                    color: Color(0xFF525252),
-                                    fontSize: 10,
-                                  ),
-                                ),
-                                Text(
-                                  AppLocalizations.of(context)!.elenaFlowers,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.orchidProvidedMessage,
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: Color(0xFF737373),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: NetworkImage(
-                              'https://picsum.photos/800/600',
-                            ),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ],
+                  opacity: 0.7,
+                  child: _ConversationRow(
+                    time: AppLocalizations.of(context)!.yesterday,
+                    name: AppLocalizations.of(context)!.elenaFlowers,
+                    message: AppLocalizations.of(
+                      context,
+                    )!.orchidProvidedMessage,
+                    timeColor: mutedTextColor,
+                    nameColor: headlineColor,
+                    messageColor: mutedTextColor,
+                    avatarBorderColor: AppColors.primaryGold,
+                    avatarBackground: isDark
+                        ? const Color(0xFF1A1C21)
+                        : AppColors.primaryGold.withValues(alpha: 0.08),
+                    showOnline: false,
                   ),
                 ),
               ],
@@ -289,6 +195,99 @@ class OrdersChatsSection extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ConversationRow extends StatelessWidget {
+  final String time;
+  final String name;
+  final String message;
+  final Color timeColor;
+  final Color nameColor;
+  final Color messageColor;
+  final Color avatarBorderColor;
+  final Color avatarBackground;
+  final bool showOnline;
+
+  const _ConversationRow({
+    required this.time,
+    required this.name,
+    required this.message,
+    required this.timeColor,
+    required this.nameColor,
+    required this.messageColor,
+    required this.avatarBorderColor,
+    required this.avatarBackground,
+    required this.showOnline,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(time, style: TextStyle(color: timeColor, fontSize: 10)),
+                  Text(name, style: TextStyle(color: nameColor, fontSize: 14)),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                message,
+                textAlign: TextAlign.right,
+                style: TextStyle(color: messageColor, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 16),
+        Stack(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: avatarBorderColor, width: 2),
+                color: avatarBackground,
+              ),
+              child: ClipOval(
+                child: Container(
+                  color: const Color(0xFFD4AF37),
+                  child: const Icon(
+                    Icons.person,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+            if (showOnline)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                child: Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF22C55E),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF1A1C21),
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }

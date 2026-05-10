@@ -7,6 +7,9 @@ class HeroCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
@@ -17,11 +20,17 @@ class HeroCarousel extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)],
+            colors: [
+              Colors.transparent,
+              (isDark ? Colors.black : Colors.black87).withValues(alpha: 0.72),
+            ],
           ),
-          image: const DecorationImage(
-            image: NetworkImage('https://picsum.photos/800/600'),
+          image: DecorationImage(
+            image: NetworkImage(
+              'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=800&h=600&fit=crop',
+            ),
             fit: BoxFit.cover,
+            onError: (exception, stackTrace) {},
           ),
         ),
         child: Stack(

@@ -13,10 +13,21 @@ class AppBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = isDark
+        ? AppColors.background
+        : theme.colorScheme.surface;
+    final selectedBackground = isDark
+        ? AppColors.surface
+        : AppColors.primaryGold.withValues(alpha: 0.14);
+    final selectedColor = AppColors.primaryGold;
+    final unselectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.55);
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: backgroundColor,
         border: Border(
           top: BorderSide(
             color: AppColors.primary.withValues(alpha: 0.1),
@@ -32,24 +43,59 @@ class AppBottomNavigation extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(Icons.person, 'الملف الشخصي', 3),
-            _buildNavItem(Icons.receipt_long, 'الطلبات', 2),
-            _buildNavItem(Icons.chat_bubble, 'الدردشة', 1),
-            _buildNavItem(Icons.home, 'الرئيسية', 0),
+            _buildNavItem(
+              Icons.person,
+              'الملف الشخصي',
+              3,
+              selectedBackground,
+              selectedColor,
+              unselectedColor,
+            ),
+            _buildNavItem(
+              Icons.receipt_long,
+              'الطلبات',
+              2,
+              selectedBackground,
+              selectedColor,
+              unselectedColor,
+            ),
+            _buildNavItem(
+              Icons.chat_bubble,
+              'الدردشة',
+              1,
+              selectedBackground,
+              selectedColor,
+              unselectedColor,
+            ),
+            _buildNavItem(
+              Icons.home,
+              'الرئيسية',
+              0,
+              selectedBackground,
+              selectedColor,
+              unselectedColor,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
+  Widget _buildNavItem(
+    IconData icon,
+    String label,
+    int index,
+    Color selectedBackground,
+    Color selectedColor,
+    Color unselectedColor,
+  ) {
     final isSelected = selectedIndex == index;
     return GestureDetector(
       onTap: () => onItemSelected(index),
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.surface : Colors.transparent,
+          color: isSelected ? selectedBackground : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -57,14 +103,14 @@ class AppBottomNavigation extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary : AppColors.iconGrey,
+              color: isSelected ? selectedColor : unselectedColor,
               size: 18,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppColors.primary : AppColors.iconGrey,
+                color: isSelected ? selectedColor : unselectedColor,
                 fontSize: 10,
                 letterSpacing: 0.5,
               ),

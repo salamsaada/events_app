@@ -28,7 +28,7 @@ class CustomGoldButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           // إذا كان معطلاً (أثناء التحميل) اجعله باهتاً قليلاً
           backgroundColor: isDisabled
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
               : null, // إذا لم يكن معطلاً اترك اللون الافتراضي
         ),
         child: Text(

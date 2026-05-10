@@ -9,7 +9,6 @@ class ProfessionalStaffPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -20,10 +19,7 @@ class ProfessionalStaffPage extends StatelessWidget {
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
-            title: Text(
-              eventName,
-              style: theme.appBarTheme.titleTextStyle,
-            ),
+            title: Text(eventName, style: theme.appBarTheme.titleTextStyle),
             backgroundColor: theme.appBarTheme.backgroundColor,
             centerTitle: true,
             iconTheme: theme.appBarTheme.iconTheme,
@@ -55,7 +51,7 @@ class ProfessionalStaffPage extends StatelessWidget {
 
   Widget _buildStaffGridCard(BuildContext context, bool isDark) {
     final theme = Theme.of(context);
-    
+
     return GestureDetector(
       onTap: () => print("Navigating to Details..."),
       child: Container(
@@ -77,11 +73,11 @@ class ProfessionalStaffPage extends StatelessWidget {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[800] : theme.colorScheme.primary.withOpacity(0.1),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                  image: const DecorationImage(
-                    image: NetworkImage('https://via.placeholder.com/150'),
-                    fit: BoxFit.cover,
+                  color: isDark
+                      ? Colors.grey[700]
+                      : theme.colorScheme.primary.withValues(alpha: 0.15),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
                   ),
                 ),
               ),
@@ -109,17 +105,23 @@ class ProfessionalStaffPage extends StatelessWidget {
                       Text(
                         "700 SR",
                         style: TextStyle(
-                          color: theme.colorScheme.primary, 
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Row(
                         children: [
-                          Icon(Icons.star, color: theme.colorScheme.primary, size: 14),
+                          Icon(
+                            Icons.star,
+                            color: theme.colorScheme.primary,
+                            size: 14,
+                          ),
                           Text(
                             " 4.9",
                             style: TextStyle(
-                              color: theme.colorScheme.onSurface.withOpacity(0.7),
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.7,
+                              ),
                               fontSize: 12,
                             ),
                           ),
@@ -153,7 +155,12 @@ class ProfessionalStaffPage extends StatelessWidget {
     );
   }
 
-  Widget _filterChip(BuildContext context, String label, bool isSelected, bool isDark) {
+  Widget _filterChip(
+    BuildContext context,
+    String label,
+    bool isSelected,
+    bool isDark,
+  ) {
     final theme = Theme.of(context);
 
     return Container(
@@ -164,15 +171,17 @@ class ProfessionalStaffPage extends StatelessWidget {
         selectedColor: theme.colorScheme.primary,
         backgroundColor: theme.colorScheme.surface,
         labelStyle: TextStyle(
-          color: isSelected 
-            ? (isDark ? Colors.black : Colors.white) 
-            : theme.colorScheme.onSurface,
+          color: isSelected
+              ? (isDark ? Colors.black : Colors.white)
+              : theme.colorScheme.onSurface,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
           side: BorderSide(
-            color: isSelected ? Colors.transparent : theme.colorScheme.primary.withOpacity(0.2),
+            color: isSelected
+                ? Colors.transparent
+                : theme.colorScheme.primary.withOpacity(0.2),
           ),
         ),
       ),
