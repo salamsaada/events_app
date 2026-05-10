@@ -151,4 +151,10 @@
   ,"servicesSoundLightPreview": "معاينة الصوت والإضاءة"
   ,"servicesCakesGallery": "معرض الكيك والحلويات"
   ,"servicesDjPreview": "الدي جي والترفيه"
+  ,"notificationsTitle": "الإشعارات"
+  ,"notificationsMarkAllRead": "وضع الكل كمقروء"
+  ,"notificationsNoItems": "لا توجد إشعارات — كل شيء مُطابق." 
+  ,"notificationsClear": "مسح"
+  ,"notificationsMarkRead": "وضع كمقروء"
+  ,"notificationsDelete": "حذف"
 }
