@@ -11,16 +11,30 @@ class NotificationsPage extends StatefulWidget {
 class _NotificationsPageState extends State<NotificationsPage> {
   final List<Map<String, dynamic>> _items = List.generate(
     6,
-    (i) => {
-      'id': i,
-      'title': 'Reservation update #${i + 1}',
-      'body': i % 2 == 0
-          ? 'Your booking time changed.'
-          : 'A new message from concierge.',
-      'time': '${i + 1}h',
-      'unread': i % 3 == 0,
-    },
+    (i) => {'id': i, 'type': i % 3, 'time': '${i + 1}', 'unread': i % 3 == 0},
   );
+
+  String _title(AppLocalizations l10n, int id, int type) {
+    switch (type) {
+      case 0:
+        return l10n.notificationReservationUpdated(id + 1);
+      case 1:
+        return l10n.notificationNewMessage(id + 1);
+      default:
+        return l10n.notificationReminder(id + 1);
+    }
+  }
+
+  String _body(AppLocalizations l10n, int type) {
+    switch (type) {
+      case 0:
+        return l10n.notificationBookingChanged;
+      case 1:
+        return l10n.notificationConciergeMessage;
+      default:
+        return l10n.notificationUpcomingEvent;
+    }
+  }
 
   void _markAllRead() {
     setState(() {
@@ -83,12 +97,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         color: theme.colorScheme.primary,
                       ),
                     ),
-                    title: Text(item['title']),
-                    subtitle: Text(item['body']),
+                    title: Text(
+                      _title(l10n, item['id'] as int, item['type'] as int),
+                    ),
+                    subtitle: Text(_body(l10n, item['type'] as int)),
                     trailing: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(item['time'], style: theme.textTheme.bodySmall),
+                        Text(
+                          '${item['time']}${l10n.notificationsHourSuffix}',
+                          style: theme.textTheme.bodySmall,
+                        ),
                         if (item['unread'])
                           Container(
                             margin: const EdgeInsets.only(top: 6),
@@ -103,9 +122,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     ),
                     onTap: () {
                       setState(() => item['unread'] = false);
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(item['body'])));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(_body(l10n, item['type'] as int)),
+                        ),
+                      );
                     },
                   ),
                 );

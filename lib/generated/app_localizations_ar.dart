@@ -468,6 +468,51 @@ class AppLocalizationsAr extends AppLocalizations {
   String get servicesCateringSampleMenu => 'نماذج قوائم الطعام';
 
   @override
+  String get notificationsTitle => 'الإشعارات';
+
+  @override
+  String get notificationsMarkAllRead => 'وضع الكل كمقروء';
+
+  @override
+  String get notificationsNoItems => 'لا توجد إشعارات — كل شيء مُطابق.';
+
+  @override
+  String get notificationsClear => 'مسح';
+
+  @override
+  String get notificationsMarkRead => 'وضع كمقروء';
+
+  @override
+  String get notificationsDelete => 'حذف';
+
+  @override
+  String get notificationsHourSuffix => 'س';
+
+  @override
+  String notificationReservationUpdated(Object index) {
+    return 'تحديث الحجز رقم #$index';
+  }
+
+  @override
+  String notificationNewMessage(Object index) {
+    return 'رسالة جديدة رقم #$index';
+  }
+
+  @override
+  String notificationReminder(Object index) {
+    return 'تذكير رقم #$index';
+  }
+
+  @override
+  String get notificationBookingChanged => 'تم تغيير وقت الحجز الخاص بك.';
+
+  @override
+  String get notificationConciergeMessage => 'وصلتك رسالة جديدة من الكونسيرج.';
+
+  @override
+  String get notificationUpcomingEvent => 'فعاليتك القادمة أصبحت قريبة جدًا.';
+
+  @override
   String get servicesFloralGallery => 'معرض الزهور';
 
   @override

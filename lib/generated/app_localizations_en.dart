@@ -472,6 +472,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get servicesCateringSampleMenu => 'Sample Menus';
 
   @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsMarkAllRead => 'Mark all as read';
+
+  @override
+  String get notificationsNoItems =>
+      'You\'re all caught up — no notifications.';
+
+  @override
+  String get notificationsClear => 'Clear';
+
+  @override
+  String get notificationsMarkRead => 'Mark as read';
+
+  @override
+  String get notificationsDelete => 'Delete';
+
+  @override
+  String get notificationsHourSuffix => 'h';
+
+  @override
+  String notificationReservationUpdated(Object index) {
+    return 'Reservation update #$index';
+  }
+
+  @override
+  String notificationNewMessage(Object index) {
+    return 'New message #$index';
+  }
+
+  @override
+  String notificationReminder(Object index) {
+    return 'Reminder #$index';
+  }
+
+  @override
+  String get notificationBookingChanged => 'Your booking time changed.';
+
+  @override
+  String get notificationConciergeMessage => 'A new message from concierge.';
+
+  @override
+  String get notificationUpcomingEvent => 'Your upcoming event is almost here.';
+
+  @override
   String get servicesFloralGallery => 'Floral Gallery';
 
   @override

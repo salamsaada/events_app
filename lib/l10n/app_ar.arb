@@ -157,4 +157,11 @@
   ,"notificationsClear": "مسح"
   ,"notificationsMarkRead": "وضع كمقروء"
   ,"notificationsDelete": "حذف"
+  ,"notificationsHourSuffix": "س"
+  ,"notificationReservationUpdated": "تحديث الحجز رقم #{index}"
+  ,"notificationNewMessage": "رسالة جديدة رقم #{index}"
+  ,"notificationReminder": "تذكير رقم #{index}"
+  ,"notificationBookingChanged": "تم تغيير وقت الحجز الخاص بك."
+  ,"notificationConciergeMessage": "وصلتك رسالة جديدة من الكونسيرج."
+  ,"notificationUpcomingEvent": "فعاليتك القادمة أصبحت قريبة جدًا."
 }

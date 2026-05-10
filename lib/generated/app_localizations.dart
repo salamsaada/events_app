@@ -986,6 +986,84 @@ abstract class AppLocalizations {
   /// **'Sample Menus'**
   String get servicesCateringSampleMenu;
 
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get notificationsMarkAllRead;
+
+  /// No description provided for @notificationsNoItems.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up — no notifications.'**
+  String get notificationsNoItems;
+
+  /// No description provided for @notificationsClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get notificationsClear;
+
+  /// No description provided for @notificationsMarkRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get notificationsMarkRead;
+
+  /// No description provided for @notificationsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get notificationsDelete;
+
+  /// No description provided for @notificationsHourSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'h'**
+  String get notificationsHourSuffix;
+
+  /// No description provided for @notificationReservationUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Reservation update #{index}'**
+  String notificationReservationUpdated(Object index);
+
+  /// No description provided for @notificationNewMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'New message #{index}'**
+  String notificationNewMessage(Object index);
+
+  /// No description provided for @notificationReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder #{index}'**
+  String notificationReminder(Object index);
+
+  /// No description provided for @notificationBookingChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Your booking time changed.'**
+  String get notificationBookingChanged;
+
+  /// No description provided for @notificationConciergeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A new message from concierge.'**
+  String get notificationConciergeMessage;
+
+  /// No description provided for @notificationUpcomingEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your upcoming event is almost here.'**
+  String get notificationUpcomingEvent;
+
   /// No description provided for @servicesFloralGallery.
   ///
   /// In en, this message translates to:
