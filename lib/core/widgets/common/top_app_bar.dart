@@ -1,6 +1,7 @@
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../../../generated/app_localizations.dart';
+import '../../../screens/notifications_page.dart';
 
 class TopBar extends StatelessWidget {
   const TopBar({super.key});
@@ -46,7 +47,22 @@ class TopBar extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(width: 20),
-                Icon(Icons.notifications, color: iconAndTextColor, size: 20),
+                // Make notifications icon tappable to open NotificationsPage
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationsPage(),
+                      ),
+                    );
+                  },
+                  child: Icon(
+                    Icons.notifications,
+                    color: iconAndTextColor,
+                    size: 20,
+                  ),
+                ),
               ],
             ),
             Text(
