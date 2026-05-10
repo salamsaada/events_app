@@ -315,4 +315,167 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get orchidProvidedMessage =>
       'لقد قمنا بتوفير الأوركيد الأبيض الذي طلبته.';
+
+  @override
+  String get servicesCategoryFloralDesign => 'تنسيق الزهور';
+
+  @override
+  String get servicesCategoryPhotography => 'التصوير';
+
+  @override
+  String get servicesCategoryCatering => 'الضيافة';
+
+  @override
+  String get servicesCategorySoundLight => 'الصوت والإضاءة';
+
+  @override
+  String get servicesCategoryCakesSweets => 'الكيك والحلويات';
+
+  @override
+  String get servicesCategoryDjMusic => 'الدي جي والموسيقى';
+
+  @override
+  String get servicesHeaderDescription =>
+      'خيارات مصممة بعناية لتناسب أسلوب فعاليتك وتجربة ضيوفك.';
+
+  @override
+  String get servicesFloralDescription =>
+      'تصاميم زهرية راقية، تنسيق الطاولات، وتزيين مداخل الفعالية.';
+
+  @override
+  String get servicesPhotographyDescription =>
+      'التقط أجمل اللحظات بعدسات احترافية وإخراج إبداعي مميز.';
+
+  @override
+  String get servicesCateringDescription =>
+      'قوائم طعام راقية، محطات تقديم مباشرة، وخدمة متكاملة لضيوفك.';
+
+  @override
+  String get servicesSoundLightDescription =>
+      'مشاهد إضاءة غامرة وصوت نقي يغطي كل مراحل الفعالية.';
+
+  @override
+  String get servicesCakesSweetsDescription =>
+      'كيكات فنية وحلويات خاصة مصممة بما يتناسب مع طابع مناسبتك.';
+
+  @override
+  String get servicesDjMusicDescription =>
+      'قوائم موسيقية مختارة وعروض دي جي ترفع حماس الأجواء طوال الأمسية.';
+
+  @override
+  String get servicesStylesTitle => 'أنماط الخدمة';
+
+  @override
+  String get servicesPackagesTitle => 'الباقات المقترحة';
+
+  @override
+  String get servicesPackageEssential => 'الأساسية';
+
+  @override
+  String get servicesPackagePremium => 'المميزة';
+
+  @override
+  String get servicesPackageSignature => 'النخبة';
+
+  @override
+  String get servicesHoursLabel => 'ساعات';
+
+  @override
+  String get servicesItemsLabel => 'مخرجات';
+
+  @override
+  String get servicesBookAction => 'احجز هذه الخدمة';
+
+  @override
+  String get servicesBookingSent => 'تم إرسال طلب الحجز بنجاح.';
+
+  @override
+  String get servicesStyleClassic => 'كلاسيكي';
+
+  @override
+  String get servicesStyleLuxury => 'فاخر';
+
+  @override
+  String get servicesStyleGarden => 'حدائقي';
+
+  @override
+  String get servicesStyleMinimal => 'ناعم';
+
+  @override
+  String get servicesStyleWedding => 'زفاف';
+
+  @override
+  String get servicesStyleOutdoor => 'خارجي';
+
+  @override
+  String get servicesStyleStudio => 'استوديو';
+
+  @override
+  String get servicesStyleCinematic => 'سينمائي';
+
+  @override
+  String get servicesStyleBuffet => 'بوفيه';
+
+  @override
+  String get servicesStylePlated => 'تقديم فردي';
+
+  @override
+  String get servicesStyleLiveStations => 'محطات حية';
+
+  @override
+  String get servicesStyleDessertBar => 'ركن حلويات';
+
+  @override
+  String get servicesStyleAmbient => 'أجواء هادئة';
+
+  @override
+  String get servicesStyleStage => 'عروض مسرحية';
+
+  @override
+  String get servicesStyleConcert => 'نمط حفلات';
+
+  @override
+  String get servicesStyleSmartLighting => 'إضاءة ذكية';
+
+  @override
+  String get servicesStyleClassicCakes => 'كيك كلاسيكي';
+
+  @override
+  String get servicesStyleModernDesigns => 'تصاميم عصرية';
+
+  @override
+  String get servicesStyleMiniDesserts => 'حلويات صغيرة';
+
+  @override
+  String get servicesStyleSignatureSweets => 'حلويات مميزة';
+
+  @override
+  String get servicesStyleArabicMix => 'مزيج عربي';
+
+  @override
+  String get servicesStyleInternational => 'موسيقى عالمية';
+
+  @override
+  String get servicesStyleLiveDj => 'دي جي مباشر';
+
+  @override
+  String get servicesStyleCustomPlaylist => 'قائمة مخصصة';
+
+  @override
+  String get servicesPhotographyGallery => 'معرض التصوير';
+
+  @override
+  String get servicesCateringSampleMenu => 'نماذج قوائم الطعام';
+
+  @override
+  String get servicesFloralGallery => 'معرض الزهور';
+
+  @override
+  String get servicesSoundLightPreview => 'معاينة الصوت والإضاءة';
+
+  @override
+  String get servicesCakesGallery => 'معرض الكيك والحلويات';
+
+  @override
+  String get servicesDjPreview => 'الدي جي والترفيه';
 }

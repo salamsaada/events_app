@@ -697,6 +697,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We have provided the white orchid you requested.'**
   String get orchidProvidedMessage;
+
+  /// No description provided for @servicesCategoryFloralDesign.
+  ///
+  /// In en, this message translates to:
+  /// **'Floral Design'**
+  String get servicesCategoryFloralDesign;
+
+  /// No description provided for @servicesCategoryPhotography.
+  ///
+  /// In en, this message translates to:
+  /// **'Photography'**
+  String get servicesCategoryPhotography;
+
+  /// No description provided for @servicesCategoryCatering.
+  ///
+  /// In en, this message translates to:
+  /// **'Catering'**
+  String get servicesCategoryCatering;
+
+  /// No description provided for @servicesCategorySoundLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound & Light'**
+  String get servicesCategorySoundLight;
+
+  /// No description provided for @servicesCategoryCakesSweets.
+  ///
+  /// In en, this message translates to:
+  /// **'Cakes & Sweets'**
+  String get servicesCategoryCakesSweets;
+
+  /// No description provided for @servicesCategoryDjMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'DJ & Music'**
+  String get servicesCategoryDjMusic;
+
+  /// No description provided for @servicesHeaderDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tailored options crafted for your event style and guest experience.'**
+  String get servicesHeaderDescription;
+
+  /// No description provided for @servicesFloralDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Elegant floral concepts, centerpiece styling, and entrance arrangements.'**
+  String get servicesFloralDescription;
+
+  /// No description provided for @servicesPhotographyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture the most meaningful moments with premium lenses and creative direction.'**
+  String get servicesPhotographyDescription;
+
+  /// No description provided for @servicesCateringDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Refined menus, live stations, and flawless service for every guest.'**
+  String get servicesCateringDescription;
+
+  /// No description provided for @servicesSoundLightDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Immersive lighting scenes and crystal-clear sound for every stage of your event.'**
+  String get servicesSoundLightDescription;
+
+  /// No description provided for @servicesCakesSweetsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Artistic cakes and signature desserts designed to match your celebration theme.'**
+  String get servicesCakesSweetsDescription;
+
+  /// No description provided for @servicesDjMusicDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Curated playlists and dynamic DJ sets to keep the energy high all night.'**
+  String get servicesDjMusicDescription;
+
+  /// No description provided for @servicesStylesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Styles'**
+  String get servicesStylesTitle;
+
+  /// No description provided for @servicesPackagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended Packages'**
+  String get servicesPackagesTitle;
+
+  /// No description provided for @servicesPackageEssential.
+  ///
+  /// In en, this message translates to:
+  /// **'Essential'**
+  String get servicesPackageEssential;
+
+  /// No description provided for @servicesPackagePremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get servicesPackagePremium;
+
+  /// No description provided for @servicesPackageSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'Signature'**
+  String get servicesPackageSignature;
+
+  /// No description provided for @servicesHoursLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'hours'**
+  String get servicesHoursLabel;
+
+  /// No description provided for @servicesItemsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'deliverables'**
+  String get servicesItemsLabel;
+
+  /// No description provided for @servicesBookAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Book This Service'**
+  String get servicesBookAction;
+
+  /// No description provided for @servicesBookingSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your booking request has been sent successfully.'**
+  String get servicesBookingSent;
+
+  /// No description provided for @servicesStyleClassic.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get servicesStyleClassic;
+
+  /// No description provided for @servicesStyleLuxury.
+  ///
+  /// In en, this message translates to:
+  /// **'Luxury'**
+  String get servicesStyleLuxury;
+
+  /// No description provided for @servicesStyleGarden.
+  ///
+  /// In en, this message translates to:
+  /// **'Garden'**
+  String get servicesStyleGarden;
+
+  /// No description provided for @servicesStyleMinimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimal'**
+  String get servicesStyleMinimal;
+
+  /// No description provided for @servicesStyleWedding.
+  ///
+  /// In en, this message translates to:
+  /// **'Wedding'**
+  String get servicesStyleWedding;
+
+  /// No description provided for @servicesStyleOutdoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor'**
+  String get servicesStyleOutdoor;
+
+  /// No description provided for @servicesStyleStudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Studio'**
+  String get servicesStyleStudio;
+
+  /// No description provided for @servicesStyleCinematic.
+  ///
+  /// In en, this message translates to:
+  /// **'Cinematic'**
+  String get servicesStyleCinematic;
+
+  /// No description provided for @servicesStyleBuffet.
+  ///
+  /// In en, this message translates to:
+  /// **'Buffet'**
+  String get servicesStyleBuffet;
+
+  /// No description provided for @servicesStylePlated.
+  ///
+  /// In en, this message translates to:
+  /// **'Plated'**
+  String get servicesStylePlated;
+
+  /// No description provided for @servicesStyleLiveStations.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Stations'**
+  String get servicesStyleLiveStations;
+
+  /// No description provided for @servicesStyleDessertBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Dessert Bar'**
+  String get servicesStyleDessertBar;
+
+  /// No description provided for @servicesStyleAmbient.
+  ///
+  /// In en, this message translates to:
+  /// **'Ambient'**
+  String get servicesStyleAmbient;
+
+  /// No description provided for @servicesStyleStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage Show'**
+  String get servicesStyleStage;
+
+  /// No description provided for @servicesStyleConcert.
+  ///
+  /// In en, this message translates to:
+  /// **'Concert Mode'**
+  String get servicesStyleConcert;
+
+  /// No description provided for @servicesStyleSmartLighting.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Lighting'**
+  String get servicesStyleSmartLighting;
+
+  /// No description provided for @servicesStyleClassicCakes.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic Cakes'**
+  String get servicesStyleClassicCakes;
+
+  /// No description provided for @servicesStyleModernDesigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Modern Designs'**
+  String get servicesStyleModernDesigns;
+
+  /// No description provided for @servicesStyleMiniDesserts.
+  ///
+  /// In en, this message translates to:
+  /// **'Mini Desserts'**
+  String get servicesStyleMiniDesserts;
+
+  /// No description provided for @servicesStyleSignatureSweets.
+  ///
+  /// In en, this message translates to:
+  /// **'Signature Sweets'**
+  String get servicesStyleSignatureSweets;
+
+  /// No description provided for @servicesStyleArabicMix.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic Mix'**
+  String get servicesStyleArabicMix;
+
+  /// No description provided for @servicesStyleInternational.
+  ///
+  /// In en, this message translates to:
+  /// **'International Hits'**
+  String get servicesStyleInternational;
+
+  /// No description provided for @servicesStyleLiveDj.
+  ///
+  /// In en, this message translates to:
+  /// **'Live DJ'**
+  String get servicesStyleLiveDj;
+
+  /// No description provided for @servicesStyleCustomPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Playlist'**
+  String get servicesStyleCustomPlaylist;
+
+  /// No description provided for @servicesPhotographyGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Photography Gallery'**
+  String get servicesPhotographyGallery;
+
+  /// No description provided for @servicesCateringSampleMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample Menus'**
+  String get servicesCateringSampleMenu;
+
+  /// No description provided for @servicesFloralGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Floral Gallery'**
+  String get servicesFloralGallery;
+
+  /// No description provided for @servicesSoundLightPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound & Lighting Preview'**
+  String get servicesSoundLightPreview;
+
+  /// No description provided for @servicesCakesGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Cakes & Desserts'**
+  String get servicesCakesGallery;
+
+  /// No description provided for @servicesDjPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'DJ & Entertainment'**
+  String get servicesDjPreview;
 }
 
 class _AppLocalizationsDelegate

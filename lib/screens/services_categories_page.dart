@@ -1,48 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
+
+import 'service_details_page.dart';
 
 class ServicesCategoriesPage extends StatelessWidget {
   ServicesCategoriesPage({super.key});
 
   final List<Map<String, dynamic>> categories = [
     {
-      "name": "Floral Design",
+      "id": "floral",
       "icon": Icons.local_florist,
-      "image": "assets/flowers.jpg"
+      "image": "assets/flowers.jpg",
     },
     {
-      "name": "Photography",
+      "id": "photography",
       "icon": Icons.camera_alt,
-      "image": "assets/camera.jpg"
+      "image": "assets/camera.jpg",
     },
     {
-      "name": "Catering",
+      "id": "catering",
       "icon": Icons.restaurant,
-      "image": "assets/catering.jpg"
+      "image": "assets/catering.jpg",
     },
     {
-      "name": "Sound & Light",
+      "id": "soundLight",
       "icon": Icons.surround_sound,
-      "image": "assets/sound.jpg"
+      "image": "assets/sound.jpg",
     },
-    {
-      "name": "Cakes & Sweets",
-      "icon": Icons.cake,
-      "image": "assets/cake.jpg"
-    },
-    {
-      "name": "DJ & Music",
-      "icon": Icons.music_note,
-      "image": "assets/music.jpg"
-    },
+    {"id": "cakesSweets", "icon": Icons.cake, "image": "assets/cake.jpg"},
+    {"id": "djMusic", "icon": Icons.music_note, "image": "assets/music.jpg"},
   ];
+
+  String _categoryName(AppLocalizations l10n, String categoryId) {
+    switch (categoryId) {
+      case 'floral':
+        return l10n.servicesCategoryFloralDesign;
+      case 'photography':
+        return l10n.servicesCategoryPhotography;
+      case 'catering':
+        return l10n.servicesCategoryCatering;
+      case 'soundLight':
+        return l10n.servicesCategorySoundLight;
+      case 'cakesSweets':
+        return l10n.servicesCategoryCakesSweets;
+      case 'djMusic':
+        return l10n.servicesCategoryDjMusic;
+      default:
+        return l10n.individualServices;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Individual Services"),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text(l10n.individualServices), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.builder(
@@ -55,16 +68,20 @@ class ServicesCategoriesPage extends StatelessWidget {
           itemCount: categories.length,
           itemBuilder: (context, index) {
             final category = categories[index];
+            final categoryId = category['id'] as String;
+            final categoryName = _categoryName(l10n, categoryId);
+
             return GestureDetector(
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => ReadyMadePackagesPage(
-                //       categoryName: category['name'],
-                //     ),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ServiceDetailsPage(
+                      categoryId: categoryId,
+                      icon: category['icon'] as IconData,
+                    ),
+                  ),
+                );
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -92,7 +109,7 @@ class ServicesCategoriesPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 15),
                     Text(
-                      category['name'],
+                      categoryName,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,

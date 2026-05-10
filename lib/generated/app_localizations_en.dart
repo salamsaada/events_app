@@ -318,4 +318,168 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get orchidProvidedMessage =>
       'We have provided the white orchid you requested.';
+
+  @override
+  String get servicesCategoryFloralDesign => 'Floral Design';
+
+  @override
+  String get servicesCategoryPhotography => 'Photography';
+
+  @override
+  String get servicesCategoryCatering => 'Catering';
+
+  @override
+  String get servicesCategorySoundLight => 'Sound & Light';
+
+  @override
+  String get servicesCategoryCakesSweets => 'Cakes & Sweets';
+
+  @override
+  String get servicesCategoryDjMusic => 'DJ & Music';
+
+  @override
+  String get servicesHeaderDescription =>
+      'Tailored options crafted for your event style and guest experience.';
+
+  @override
+  String get servicesFloralDescription =>
+      'Elegant floral concepts, centerpiece styling, and entrance arrangements.';
+
+  @override
+  String get servicesPhotographyDescription =>
+      'Capture the most meaningful moments with premium lenses and creative direction.';
+
+  @override
+  String get servicesCateringDescription =>
+      'Refined menus, live stations, and flawless service for every guest.';
+
+  @override
+  String get servicesSoundLightDescription =>
+      'Immersive lighting scenes and crystal-clear sound for every stage of your event.';
+
+  @override
+  String get servicesCakesSweetsDescription =>
+      'Artistic cakes and signature desserts designed to match your celebration theme.';
+
+  @override
+  String get servicesDjMusicDescription =>
+      'Curated playlists and dynamic DJ sets to keep the energy high all night.';
+
+  @override
+  String get servicesStylesTitle => 'Service Styles';
+
+  @override
+  String get servicesPackagesTitle => 'Recommended Packages';
+
+  @override
+  String get servicesPackageEssential => 'Essential';
+
+  @override
+  String get servicesPackagePremium => 'Premium';
+
+  @override
+  String get servicesPackageSignature => 'Signature';
+
+  @override
+  String get servicesHoursLabel => 'hours';
+
+  @override
+  String get servicesItemsLabel => 'deliverables';
+
+  @override
+  String get servicesBookAction => 'Book This Service';
+
+  @override
+  String get servicesBookingSent =>
+      'Your booking request has been sent successfully.';
+
+  @override
+  String get servicesStyleClassic => 'Classic';
+
+  @override
+  String get servicesStyleLuxury => 'Luxury';
+
+  @override
+  String get servicesStyleGarden => 'Garden';
+
+  @override
+  String get servicesStyleMinimal => 'Minimal';
+
+  @override
+  String get servicesStyleWedding => 'Wedding';
+
+  @override
+  String get servicesStyleOutdoor => 'Outdoor';
+
+  @override
+  String get servicesStyleStudio => 'Studio';
+
+  @override
+  String get servicesStyleCinematic => 'Cinematic';
+
+  @override
+  String get servicesStyleBuffet => 'Buffet';
+
+  @override
+  String get servicesStylePlated => 'Plated';
+
+  @override
+  String get servicesStyleLiveStations => 'Live Stations';
+
+  @override
+  String get servicesStyleDessertBar => 'Dessert Bar';
+
+  @override
+  String get servicesStyleAmbient => 'Ambient';
+
+  @override
+  String get servicesStyleStage => 'Stage Show';
+
+  @override
+  String get servicesStyleConcert => 'Concert Mode';
+
+  @override
+  String get servicesStyleSmartLighting => 'Smart Lighting';
+
+  @override
+  String get servicesStyleClassicCakes => 'Classic Cakes';
+
+  @override
+  String get servicesStyleModernDesigns => 'Modern Designs';
+
+  @override
+  String get servicesStyleMiniDesserts => 'Mini Desserts';
+
+  @override
+  String get servicesStyleSignatureSweets => 'Signature Sweets';
+
+  @override
+  String get servicesStyleArabicMix => 'Arabic Mix';
+
+  @override
+  String get servicesStyleInternational => 'International Hits';
+
+  @override
+  String get servicesStyleLiveDj => 'Live DJ';
+
+  @override
+  String get servicesStyleCustomPlaylist => 'Custom Playlist';
+
+  @override
+  String get servicesPhotographyGallery => 'Photography Gallery';
+
+  @override
+  String get servicesCateringSampleMenu => 'Sample Menus';
+
+  @override
+  String get servicesFloralGallery => 'Floral Gallery';
+
+  @override
+  String get servicesSoundLightPreview => 'Sound & Lighting Preview';
+
+  @override
+  String get servicesCakesGallery => 'Cakes & Desserts';
+
+  @override
+  String get servicesDjPreview => 'DJ & Entertainment';
 }
