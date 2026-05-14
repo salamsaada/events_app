@@ -70,4 +70,32 @@ class UserRepository {
       return Left(e.errModel.errorMessage);
     }
   }
+
+  // // Function to fetch filtered items (Services or Products) from Laravel
+  // Future<Either<String, List<dynamic>>> getFilteredItems({
+  //   required String type,
+  //   String? city,
+  //   int? capacity,
+  //   required double maxPrice,
+  //   String? style,
+  // }) async {
+  //   try {
+  //     final response = await api.get(
+  //       EndPoint.getUserDataEndPoint, // استبدليه بالـ Endpoint الصحيح للفلترة مثلاً "items/filter"
+  //       queryParameters: {
+  //         'type': type,
+  //         if (city != null) 'city': city,
+  //         if (capacity != null) 'capacity': capacity,
+  //         'max_price': maxPrice,
+  //         if (style != null) 'style': style,
+  //       },
+  //     );
+
+  //     // افترضنا هنا أن السيرفر يرجع قائمة من البيانات
+  //     // يمكنك تحويلها لاحقاً لـ List<ItemModel>
+  //     return Right(response); 
+  //   } on ServerException catch (e) {
+  //     return Left(e.errModel.errorMessage);
+  //   }
+  // }
 }

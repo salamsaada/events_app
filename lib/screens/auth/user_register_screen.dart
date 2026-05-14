@@ -1,15 +1,41 @@
-import 'package:dio/dio.dart';
+import 'package:eventsapp/cubit/auth_cubit.dart';
+import 'package:eventsapp/cubit/auth_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
 import 'package:eventsapp/screens/auth/user_log_in_screen.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
 import 'package:eventsapp/screens/home/home_page.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_appauth/flutter_appauth.dart';
 
-class UserRegisterScreen extends StatelessWidget {
+class UserRegisterScreen extends StatefulWidget {
   const UserRegisterScreen({super.key});
+
+  @override
+  State<UserRegisterScreen> createState() => _UserRegisterScreenState();
+}
+
+class _UserRegisterScreenState extends State<UserRegisterScreen> {
+
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,79 +50,176 @@ class UserRegisterScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("CREATE\nACCOUNT", style: AppTextStyles.mainTitle),
-              const SizedBox(height: 10),
-              const Text(
-                "Fill in your details to join the gala.",
-                style: AppTextStyles.bodyGrey,
-              ),
-              const SizedBox(height: 40),
-              CustomTextField(
-                label: "First Name",
-                icon: Icons.person_outline,
-              ),
-              const SizedBox(height: 20),
-              CustomTextField(
-                label: "Last Name",
-                icon: Icons.family_restroom,
-              ),
-              const SizedBox(height: 20),
-              CustomTextField(
-                label: "Email or phone number",
-                icon: Icons.stay_current_portrait,
-              ),
-              const SizedBox(height: 20),
-              CustomTextField(
-                label: "Password",
-                icon: Icons.lock_outline,
-                isPassword: true,
-              ),
-              const SizedBox(height: 20),
-              CustomTextField(
-                label: "Confirm Password",
-                icon: Icons.lock_reset_outlined,
-                isPassword: true,
-              ),
-              const SizedBox(height: 40),
-              CustomGoldButton(text: "CREATE ACCOUNT", onTap: () {}),
-              const SizedBox(height: 20),
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => UserLogInScreen(),
-                      ),
-                    );
-                  },
-                  child: RichText(
-                    text: TextSpan(
-                      text: "Already have an account? ",
-                      style: Theme.of(context).textTheme.bodySmall,
-                      children: [
-                        TextSpan(
-                          text: "Sign In",
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
+      body: BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.successMessage), backgroundColor: Colors.green),
+            );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+          } else if (state is AuthFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.errorMessage), backgroundColor: Colors.red),
+            );
+          }
+        },
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("CREATE\nACCOUNT", style: AppTextStyles.mainTitle),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "Fill in your details to join the gala.",
+                    style: AppTextStyles.bodyGrey,
+                  ),
+                  const SizedBox(height: 40),
+              
+                  CustomTextField(
+                    label: "First Name",
+                    icon: Icons.person_outline,
+                    controller: _firstNameController, 
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "please enter your first name"; 
+                      }
+                      return null; 
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: "Last Name",
+                    icon: Icons.family_restroom,
+                    controller: _lastNameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "please enter your last name"; 
+                      }
+                      return null; // null تعني أن الحقل سليم
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: "Email",
+                    icon: Icons.email,
+                    controller: _emailController, 
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "please enter your email or phone number";
+                      }
+                      return null; 
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: "Phone Number",
+                    icon: Icons.phone,
+                    controller: _phoneController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "please enter your phone number";
+                      }
+                      return null; 
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: "Password",
+                    icon: Icons.lock_outline,
+                    isPassword: true,
+                    controller: _passwordController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "please enter your password";
+                      }
+                      if (value.length < 8) {
+                        return "password must be at least 8 characters";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: "Confirm Password",
+                    icon: Icons.lock_reset_outlined,
+                    isPassword: true,
+                    controller: _confirmPasswordController, 
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "please confirm your password";
+                      }
+                      if (value != _passwordController.text) {
+                        return "passwords do not match";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 40),
+ 
+                  BlocBuilder<AuthCubit, AuthState>(
+                    builder: (context, state) {
+                      if (state is AuthLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      return CustomGoldButton(
+                        text: "CREATE ACCOUNT",
+                       onTap: () {
+                          if (_formKey.currentState!.validate()) {
+                            context.read<AuthCubit>().signUpUser(
+                              firstName: _firstNameController.text,
+                              lastName: _lastNameController.text,
+                              email: _emailController.text,
+                              phone: _phoneController.text,
+                              password: _passwordController.text,
+                              confirmPassword: _confirmPasswordController.text,
+                            );
+                          }
+                        },
+                      );
+                    },
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UserLogInScreen(),
                           ),
+                        );
+                      },
+                      child: RichText(
+                        text: TextSpan(
+                          text: "Already have an account? ",
+                          style: Theme.of(context).textTheme.bodySmall,
+                          children: [
+                            TextSpan(
+                              text: "Sign In",
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  _buildSocialSection(context),
+                  const SizedBox(height: 40),
+                ],
               ),
-              const SizedBox(height: 20),
-              _buildSocialSection(context),
-              const SizedBox(height: 40),
-            ],
+            ),
           ),
         ),
       ),
@@ -134,67 +257,6 @@ class UserRegisterScreen extends StatelessWidget {
             _socialIcon(
               context,
               "assets/images/Screenshot 2026-05-06 014545.png",
-              () async {
-                try {
-                  final appAuth = const FlutterAppAuth();
-
-                  // 1. طلب تسجيل الدخول من جوجل
-                  final AuthorizationTokenResponse? result =
-                      await appAuth.authorizeAndExchangeCode(
-                    AuthorizationTokenRequest(
-                      '644185664828-ksjjqf3obmurcamrk1rolefonj17icrd.apps.googleusercontent.com',
-                      'com.example.eventsapp:/oauth2redirect',
-                      issuer: 'https://accounts.google.com',
-                      scopes: ['openid', 'profile', 'email'],
-                    ),
-                  );
-
-                  if (result != null && result.idToken != null) {
-        
-                    print("---------------------------------------");
-                    print("ID TOKEN SUCCESS: ${result.idToken}");
-                    print("---------------------------------------");
-
-                    try {
-
-                      String baseUrl = "https://api.eventsapp.com"; // الرابط الأساسي (يتغير مرة واحدة)
-                      String endpoint = "/api/google-login";        // المسار الخاص بالعملية
-
-                      final response = await Dio().post(
-                        baseUrl + endpoint, 
-                        data: {
-                          "token": result.idToken,
-                        },
-                      );
-
-                      if (response.statusCode == 200) {
-                        if (context.mounted) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomePage(),
-                            ),
-                          );
-                        }
-                      }
-                    } catch (e) {
-                      print("Server Error: $e");
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Server Connection Error: $e")),
-                        );
-                      }
-                    }
-                  }
-                } catch (e) {
-                  print("Google Sign-In Error: $e");
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Google Sign-In Error: $e")),
-                    );
-                  }
-                }
-              },
             ),
           ],
         ),
@@ -202,30 +264,44 @@ class UserRegisterScreen extends StatelessWidget {
     );
   }
 
-  Widget _socialIcon(BuildContext context, String path, VoidCallback onTap) {
+  Widget _socialIcon(BuildContext context, String path) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(30),
-        decoration: BoxDecoration(
-          color: isDark
-              ? theme.colorScheme.surface
-              : theme.colorScheme.primary.withOpacity(0.1),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: theme.colorScheme.outlineVariant,
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        return GestureDetector(
+          onTap: () {
+            if (state is AuthLoading) return;
+            context.read<AuthCubit>().signInWithGoogleMobile();
+          },
+          child: Container(
+            padding: const EdgeInsets.all(30),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? theme.colorScheme.surface
+                  : theme.colorScheme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: theme.colorScheme.outlineVariant,
+              ),
+            ),
+            child: state is AuthLoading
+                ? const SizedBox(
+                    height: 40,
+                    width: 40,
+                    child: CircularProgressIndicator(strokeWidth: 3),
+                  )
+                : Image.asset(
+                    path,
+                    height: 40,
+                    width: 40,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.error),
+                  ),
           ),
-        ),
-        child: Image.asset(
-          path,
-          height: 40,
-          width: 40,
-          errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
-        ),
-      ),
+        );
+      },
     );
   }
 }
