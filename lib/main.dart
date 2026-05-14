@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:eventsapp/core/api/dio_consumer.dart';
+import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
@@ -41,6 +42,7 @@ class RoyalEventsApp extends StatelessWidget {
         ),
         BlocProvider(create: (context) => ThemeCubit()),
         BlocProvider(create: (context) => LanguageCubit()),
+        BlocProvider(create: (context) => AuthCubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {

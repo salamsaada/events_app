@@ -14,7 +14,7 @@ class CustomTextField extends StatelessWidget {
     super.key,
     this.onChanged,
     this.validator,
-     this.controller,
+    this.controller,
     required this.label,
     required this.icon,
     this.isPassword = false,
