@@ -1,5 +1,8 @@
 import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/auth_state.dart';
+import 'package:eventsapp/screens/auth/verify_email_verification_screen.dart';
+import 'package:eventsapp/screens/auth/verify_identity_screen.dart';
+import 'package:eventsapp/screens/home/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/core/theme/app_colors.dart';
@@ -7,7 +10,6 @@ import 'package:eventsapp/core/theme/app_text_styles.dart';
 import 'package:eventsapp/screens/auth/user_log_in_screen.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
-import 'package:eventsapp/screens/home/home_page.dart';
 
 class UserRegisterScreen extends StatefulWidget {
   const UserRegisterScreen({super.key});
@@ -22,8 +24,8 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _identityController = TextEditingController();
+ // final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
@@ -31,7 +33,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _emailController.dispose();
+    _identityController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -50,22 +52,67 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: BlocListener<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state is AuthSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.successMessage), backgroundColor: Colors.green),
-            );
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-            );
-          } else if (state is AuthFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage), backgroundColor: Colors.red),
-            );
-          }
-        },
+     body:BlocListener<AuthCubit, AuthState>(
+  listener: (context, state) {
+    if (state is AuthSuccess) {
+      // 🌟 الفحص الذكي: هل نجاح التسجيل قادم من مسار جوجل؟
+      bool isGoogleSignIn = state.successMessage.contains('success_google');
+
+      if (isGoogleSignIn) {
+        // 1. عرض رسالة نجاح نظيفة للمستخدم
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("تم تسجيل الدخول بواسطة جوجل بنجاح!"), 
+            backgroundColor: Colors.green,
+          ),
+        );
+        
+        // 2. 🚀 الطيران الآمن والمباشر (استبدلي HomeScreen بكلاس صفحة الهوم الفعلي عندكِ)
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()), // 🌟 التوجيه المباشر بالكلاس أضمن من الـ Named Routes
+          (route) => false,
+        );
+        return; // 🔥 حاسمة جداً لمنع التطبيق من قراءة الأسطر التالية وعمل كراش!
+      }
+
+      // ------------------------------------------------------------------
+      // 📝 المسار التقليدي القديم (عند تسجيل حساب جديد بالحقول اليدوية)
+      // ------------------------------------------------------------------
+      String identity = _identityController.text.trim();
+      bool isEmail = identity.contains('@');
+
+      if (isEmail) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EmailVerificationWaitScreen(
+              email: identity,
+              isForgotPassword: false,
+            ),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VerifyIdentityScreen(
+              identity: identity,
+              isForgotPassword: false,
+            ),
+          ),
+        );
+      }
+    } else if (state is AuthFailure) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.errorMessage), 
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  },
+  // ... باقي كود الـ child كما هو دون تغيير
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -107,24 +154,12 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
-                    label: "Email",
+                    label: "Email or phone number",
                     icon: Icons.email,
-                    controller: _emailController, 
+                    controller: _identityController, 
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "please enter your email or phone number";
-                      }
-                      return null; 
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    label: "Phone Number",
-                    icon: Icons.phone,
-                    controller: _phoneController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "please enter your phone number";
                       }
                       return null; 
                     },
@@ -175,8 +210,8 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                             context.read<AuthCubit>().signUpUser(
                               firstName: _firstNameController.text,
                               lastName: _lastNameController.text,
-                              email: _emailController.text,
-                              phone: _phoneController.text,
+                              identity: _identityController.text,
+                             // phone: _phoneController.text,
                               password: _passwordController.text,
                               confirmPassword: _confirmPasswordController.text,
                             );
