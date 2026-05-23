@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:eventsapp/core/theme/app_text_styles.dart'; // تأكدي من مسار الـ styles المعتمد لديكِ
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
-import 'package:eventsapp/core/widgets/common/text_field_widget.dart'; // هنا تم استخدام الـ CustomTextField المطور لحل مشكلة ألوان الثيم الفاتح والغامق
-import 'package:eventsapp/screens/auth/reset_password_screen.dart'; // تأكدي من مسار شاشتكِ المخصصة لتعيين الكلمة الجديدة
+import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
+import 'package:eventsapp/screens/auth/reset_password_screen.dart'; 
 
 class EmailVerificationWaitScreen extends StatefulWidget {
   final String email;
@@ -49,15 +48,12 @@ class _EmailVerificationWaitScreenState extends State<EmailVerificationWaitScree
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // ✉️ أيقونة متحركة أو جمالية تعبر عن إرسال البريد
                 Icon(
                   Icons.mark_email_read_outlined,
                   size: 100,
                   color: theme.colorScheme.primary,
                 ),
                 const SizedBox(height: 30),
-                
-                // العنوان الرئيسي للشاشة
                 Text(
                   "تحقق من بريدك الإلكتروني",
                   style: TextStyle(
@@ -68,8 +64,6 @@ class _EmailVerificationWaitScreenState extends State<EmailVerificationWaitScree
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 15),
-                
-                // نص إرشادي ديناميكي يظهر إيميل المستخدم الحالي
                 Text(
                   "لقد أرسلنا رابط تفعيل آمن إلى الحساب:\n${widget.email}",
                   style: TextStyle(
@@ -103,8 +97,6 @@ class _EmailVerificationWaitScreenState extends State<EmailVerificationWaitScree
                     icon: Icons.key_outlined,
                   ),
                   const SizedBox(height: 25),
-                  
-                  // زر التأكيد الذهبي للانتقال السلس لشاشة تعيين كلمة السر الخاصة بكِ
                   CustomGoldButton(
                     text: "تأكيد الرمز وتغيير كلمة المرور",
                     icon: Icons.arrow_forward,
@@ -119,13 +111,11 @@ class _EmailVerificationWaitScreenState extends State<EmailVerificationWaitScree
                         );
                         return;
                       }
-
-                      // 🚀 طيران فوري ومستقر لشاشتكِ reset_password_screen لتغيير الكلمة في السيرفر
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ResetPasswordScreen(
-                            identity: widget.email, // نمرر الإيميل كـ identity للهوية الموحدة
+                            identity: widget.email, 
                             code: token,           // رمز الـ Token يحل محل كود الـ OTP
                           ),
                         ),

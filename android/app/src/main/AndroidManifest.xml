@@ -30,7 +30,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 
                 <data android:scheme="http" />
-                <data android:host="192.168.1.103" />
+                <data android:host="192.168.1.106" />
                 <data android:port="8000" />
                 <data android:pathPattern=".*" /> ```
             </intent-filter>

@@ -5,7 +5,6 @@ import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
 import 'package:eventsapp/core/widgets/common/custom_footer_links.dart';
-// 🌟 قمنا بحذف استيراد شاشة الـ Wait لأننا لم نعد بحاجتها هنا
 import 'package:eventsapp/screens/auth/verify_identity_screen.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -53,7 +52,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               MaterialPageRoute(
                 builder: (context) => VerifyIdentityScreen(
                   identity: identity,
-                  isForgotPassword: true, // تفعيل مسار نسيان كلمة السر بالداخل
+                  isForgotPassword: true, 
                 ),
               ),
             );

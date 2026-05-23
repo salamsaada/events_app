@@ -14,6 +14,11 @@ import 'generated/app_localizations.dart';
 
 import 'core/theme/app_theme.dart';
 import 'cache/cache_helper.dart';
+// 🌟 استيراد ملف الخدمة الجديد الذي أنشأتِهِ
+import 'core/services/deep_link_service.dart'; 
+
+// 🌟 تعريف مفتاح عام للتحكم بالتنقل من خارج شجر الـ Widgets (كلاس الـ DeepLink)
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +30,11 @@ Future<void> main() async {
       statusBarIconBrightness: Brightness.light,
     ),
   );
+
+  // 🌟 إنشاء نسخة من خدمة الديب لينك وتمرير الـ navigatorKey بداخلها
+  final deepLinkService = DeepLinkService(navigatorKey);
+  // تشغيل الاستماع للروابط العميقة فور صعود التطبيق
+  await deepLinkService.init();
 
   runApp(const RoyalEventsApp());
 }
@@ -52,6 +62,9 @@ class RoyalEventsApp extends StatelessWidget {
               String languageCode = context.read<LanguageCubit>().languageCode;
 
               return MaterialApp(
+                // 🌟 ربط الـ navigatorKey لكي ينجح كلاس الـ Service في توجيه المستخدم لصفحة الـ Login
+                navigatorKey: navigatorKey, 
+                
                 onGenerateTitle: (context) =>
                     AppLocalizations.of(context)!.appTitle,
                 debugShowCheckedModeBanner: false,

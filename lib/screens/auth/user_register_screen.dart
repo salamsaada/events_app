@@ -1,7 +1,6 @@
 import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/auth_state.dart';
-import 'package:eventsapp/screens/auth/verify_email_verification_screen.dart';
-import 'package:eventsapp/screens/auth/verify_identity_screen.dart';
+import 'package:eventsapp/screens/auth/verify_identity_screen.dart'; 
 import 'package:eventsapp/screens/home/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,7 +24,6 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _identityController = TextEditingController();
- // final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
@@ -52,67 +50,47 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-     body:BlocListener<AuthCubit, AuthState>(
-  listener: (context, state) {
-    if (state is AuthSuccess) {
-      // 🌟 الفحص الذكي: هل نجاح التسجيل قادم من مسار جوجل؟
-      bool isGoogleSignIn = state.successMessage.contains('success_google');
+      body: BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthSuccess) {
+            // 🌟 الفحص الذكي: هل نجاح التسجيل قادم من مسار جوجل؟
+            bool isGoogleSignIn = state.successMessage.contains('success_google');
 
-      if (isGoogleSignIn) {
-        // 1. عرض رسالة نجاح نظيفة للمستخدم
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("تم تسجيل الدخول بواسطة جوجل بنجاح!"), 
-            backgroundColor: Colors.green,
-          ),
-        );
-        
-        // 2. 🚀 الطيران الآمن والمباشر (استبدلي HomeScreen بكلاس صفحة الهوم الفعلي عندكِ)
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()), // 🌟 التوجيه المباشر بالكلاس أضمن من الـ Named Routes
-          (route) => false,
-        );
-        return; // 🔥 حاسمة جداً لمنع التطبيق من قراءة الأسطر التالية وعمل كراش!
-      }
+            if (isGoogleSignIn) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("تم تسجيل الدخول بواسطة جوجل بنجاح!"), 
+                  backgroundColor: Colors.green,
+                ),
+              );
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+                (route) => false,
+              );
+              return; // 🔥 حاسمة جداً لمنع التطبيق من قراءة الأسطر التالية وعمل كراش!
+            }
 
-      // ------------------------------------------------------------------
-      // 📝 المسار التقليدي القديم (عند تسجيل حساب جديد بالحقول اليدوية)
-      // ------------------------------------------------------------------
-      String identity = _identityController.text.trim();
-      bool isEmail = identity.contains('@');
+            String identity = _identityController.text.trim();
 
-      if (isEmail) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => EmailVerificationWaitScreen(
-              email: identity,
-              isForgotPassword: false,
-            ),
-          ),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => VerifyIdentityScreen(
-              identity: identity,
-              isForgotPassword: false,
-            ),
-          ),
-        );
-      }
-    } else if (state is AuthFailure) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(state.errorMessage), 
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  },
-  // ... باقي كود الـ child كما هو دون تغيير
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VerifyIdentityScreen(
+                  identity: identity,
+                  isForgotPassword: false,
+                ),
+              ),
+            );
+          } else if (state is AuthFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage), 
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -149,7 +127,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                       if (value == null || value.isEmpty) {
                         return "please enter your last name"; 
                       }
-                      return null; // null تعني أن الحقل سليم
+                      return null;
                     },
                   ),
                   const SizedBox(height: 20),
@@ -205,13 +183,12 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                       }
                       return CustomGoldButton(
                         text: "CREATE ACCOUNT",
-                       onTap: () {
+                        onTap: () {
                           if (_formKey.currentState!.validate()) {
                             context.read<AuthCubit>().signUpUser(
                               firstName: _firstNameController.text,
                               lastName: _lastNameController.text,
                               identity: _identityController.text,
-                             // phone: _phoneController.text,
                               password: _passwordController.text,
                               confirmPassword: _confirmPasswordController.text,
                             );
@@ -228,7 +205,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => UserLogInScreen(),
+                            builder: (context) => const UserLogInScreen(),
                           ),
                         );
                       },
@@ -267,9 +244,10 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
         Row(
           children: [
             Expanded(
-                child: Divider(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            )),
+              child: Divider(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Text(
@@ -280,9 +258,10 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
               ),
             ),
             Expanded(
-                child: Divider(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            )),
+              child: Divider(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 25),

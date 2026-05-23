@@ -3,7 +3,8 @@ import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/custom_footer_links.dart';
 import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/auth_state.dart'; 
-import 'package:eventsapp/screens/auth/reset_password_screen.dart'; // 🌟 استيراد شاشتك المخصصة لتعيين الكلمة الجديدة
+import 'package:eventsapp/screens/auth/reset_password_screen.dart'; 
+import 'package:eventsapp/screens/home/home_page.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pinput/pinput.dart';
@@ -23,6 +24,7 @@ class VerifyIdentityWidget extends StatefulWidget {
 }
 
 class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
+
   final TextEditingController _otpController = TextEditingController();
 
   @override
@@ -34,13 +36,10 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    // 🎨 🌟 تعديل الثيم الخاص بحقول الـ Pinput ليدعم الوضع الفاتح والغامق تلقائياً
     final defaultPinTheme = PinTheme(
       width: 48,
       height: 58,
       textStyle: TextStyle(
-        // جعل لون الرقم داخل المربع أسود في الفاتح وأبيض في الغامق تلقائياً
         color: theme.colorScheme.onSurface, 
         fontSize: 22,
         fontWeight: FontWeight.bold,
@@ -60,16 +59,18 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.successMessage), backgroundColor: Colors.green),
           );
-
           if (!widget.isForgotPassword) {
-            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+              (route) => false,
+            );
           } else {
-            // 🚀 🌟 الحل الحاسم لخطأ الـ Route: الطيران المباشر والديناميكي وتمرير البيانات لشاشتكِ الفخمة
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => ResetPasswordScreen(
-                  identity: widget.email,         // تمرير البريد أو الهاتف كـ identity
+                  identity: widget.email,        
                   code: _otpController.text.trim(), // تمرير كود الـ OTP المكون من 6 أرقام
                 ),
               ),
@@ -131,15 +132,13 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
                   }
 
                   if (widget.isForgotPassword) {
-                    // 🚀 🌟 التعديل الجديد: استدعاء دالة الفحص عبر السيرفر فوراً
                     context.read<AuthCubit>().verifyForgotPasswordOtpOnly(
                       email: widget.email,
                       otp: code,
                     );
                   } else {
-                    // مسار تفعيل الحساب العادي عند إنشاء الحساب (اتركيه كما هو)
                     context.read<AuthCubit>().verifyAccountOtp(
-                      phone: widget.email,
+                      email: widget.email,
                       code: code,
                     );
                   }

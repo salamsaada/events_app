@@ -38,7 +38,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      // 🌟 التعديل: جعل الخلفية تقرأ من ثيم النظام لتدعم الغامق والفاتح تلقائياً
       backgroundColor: theme.colorScheme.background, 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -55,10 +54,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               const SnackBar(content: Text("تم تغيير كلمة المرور بنجاح!"), backgroundColor: Colors.green),
             );
             
-            // 🚀 الطيران المباشر والآمن لشاشة الـ Login لتفادي مشكلة توقف التطبيق المفاجئ
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const UserLogInScreen()), // ⚠️ تأكدي من كتابة اسم شاشة الـ Login لديكِ هنا
+              MaterialPageRoute(builder: (context) => const UserLogInScreen()), 
               (route) => false,
             );
           } else if (state is AuthFailure) {
@@ -71,21 +69,18 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
             key: _formKey,
-            child: Center( // تبريز المحتوى في وسط الشاشة جمالياً
+            child: Center( 
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // قفل جمالي يعبر عن حماية الحساب وتغيير الكلمة
                     const Icon(
                       Icons.lock_reset_outlined,
                       size: 80,
                       color: AppColors.primaryGold,
                     ),
                     const SizedBox(height: 25),
-                    
-                    // العنوان الرئيسي المحدث بلون متناسق مع الثيم
                     Text(
                       "Create New Password",
                       style: TextStyle(
@@ -97,7 +92,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     ),
                     const SizedBox(height: 12),
                     
-                    // النص الفرعي بلون رمادي ناعم ومقروء في كل الأوضاع
                     Text(
                       "Your new password must be different from previous used passwords.",
                       textAlign: TextAlign.center,
@@ -108,7 +102,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     ),
                     const SizedBox(height: 40),
                     
-                    // حقل كلمة السر الجديدة
                     CustomTextField(
                       label: "New Password",
                       icon: Icons.lock_outline,
@@ -121,7 +114,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     ),
                     const SizedBox(height: 20),
                     
-                    // تأكيد كلمة السر
                     CustomTextField(
                       label: "Confirm Password",
                       icon: Icons.lock_reset,
@@ -135,7 +127,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     
                     const SizedBox(height: 35),
 
-                    // زر الحفظ الذهبي مع حالة التحميل
                     BlocBuilder<AuthCubit, AuthState>(
                       builder: (context, state) {
                         if (state is AuthLoading) {

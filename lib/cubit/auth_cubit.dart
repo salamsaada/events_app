@@ -7,7 +7,7 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthInitial());
 
   // ⚠️ نصيحة سريعة: تأكدي دائماً من مطابقة هذا الـ IP مع الـ IP الحالي لجهاز الباك إند يوم المناقشة
-  final String _baseUrl = "http://192.168.137.167:8000/api";
+  final String _baseUrl = "http://192.168.1.106:8000/api";
 
   Future<void> signInWithGoogleMobile() async {
   emit(AuthLoading());
@@ -50,7 +50,7 @@ class AuthCubit extends Cubit<AuthState> {
     required String identity,
     required String password,
     required String confirmPassword,
-    String role='client',
+    String role='organizer',
   }) async {
     emit(AuthLoading());
     try {
@@ -155,14 +155,14 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> verifyAccountOtp({required String phone, required String code}) async {
+  Future<void> verifyAccountOtp({required String email, required String code}) async {
     emit(AuthLoading());
     try {
       final response = await Dio().post(
-        "$_baseUrl/auth/verify-otp",
+        "$_baseUrl/auth/verify-email-otp", // 🌟 1. تم تعديل الرابط للمسار الجديد
         data: {
-          "phone": phone, 
-          "code": code
+          "email": email, // 🌟 2. تم تعديل الحقل ليصبح email بدلاً من phone
+          "otp": code,    // 🌟 3. تم تعديل الحقل ليصبح otp بدلاً من code
         },
         options: Options(headers: {'Accept': 'application/json'}),
       );
@@ -172,7 +172,6 @@ class AuthCubit extends Cubit<AuthState> {
       _handleDioError(e, "كود التحقق غير صحيح");
     }
   }
-
   // دالة معالجة الأخطاء الذكية والموحدة للمشروع لقراءة ردود لارافل
   void _handleDioError(DioException e, String defaultMessage) {
     String serverMessage = defaultMessage;
