@@ -1,5 +1,7 @@
 import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/auth_state.dart';
+import 'package:eventsapp/screens/auth/verify_identity_screen.dart'; 
+import 'package:eventsapp/screens/home/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/core/theme/app_colors.dart';
@@ -7,7 +9,6 @@ import 'package:eventsapp/core/theme/app_text_styles.dart';
 import 'package:eventsapp/screens/auth/user_log_in_screen.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
-import 'package:eventsapp/screens/home/home_page.dart';
 
 class UserRegisterScreen extends StatefulWidget {
   const UserRegisterScreen({super.key});
@@ -22,8 +23,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _identityController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
@@ -31,7 +31,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _emailController.dispose();
+    _identityController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -53,16 +53,41 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.successMessage), backgroundColor: Colors.green),
-            );
+            // 🌟 الفحص الذكي: هل نجاح التسجيل قادم من مسار جوجل؟
+            bool isGoogleSignIn = state.successMessage.contains('success_google');
+
+            if (isGoogleSignIn) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("تم تسجيل الدخول بواسطة جوجل بنجاح!"), 
+                  backgroundColor: Colors.green,
+                ),
+              );
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+                (route) => false,
+              );
+              return; // 🔥 حاسمة جداً لمنع التطبيق من قراءة الأسطر التالية وعمل كراش!
+            }
+
+            String identity = _identityController.text.trim();
+
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
+              MaterialPageRoute(
+                builder: (context) => VerifyIdentityScreen(
+                  identity: identity,
+                  isForgotPassword: false,
+                ),
+              ),
             );
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.errorMessage), 
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
@@ -102,29 +127,17 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                       if (value == null || value.isEmpty) {
                         return "please enter your last name"; 
                       }
-                      return null; // null تعني أن الحقل سليم
+                      return null;
                     },
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
-                    label: "Email",
+                    label: "Email or phone number",
                     icon: Icons.email,
-                    controller: _emailController, 
+                    controller: _identityController, 
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "please enter your email or phone number";
-                      }
-                      return null; 
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    label: "Phone Number",
-                    icon: Icons.phone,
-                    controller: _phoneController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "please enter your phone number";
                       }
                       return null; 
                     },
@@ -170,13 +183,12 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                       }
                       return CustomGoldButton(
                         text: "CREATE ACCOUNT",
-                       onTap: () {
+                        onTap: () {
                           if (_formKey.currentState!.validate()) {
                             context.read<AuthCubit>().signUpUser(
                               firstName: _firstNameController.text,
                               lastName: _lastNameController.text,
-                              email: _emailController.text,
-                              phone: _phoneController.text,
+                              identity: _identityController.text,
                               password: _passwordController.text,
                               confirmPassword: _confirmPasswordController.text,
                             );
@@ -193,7 +205,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => UserLogInScreen(),
+                            builder: (context) => const UserLogInScreen(),
                           ),
                         );
                       },
@@ -232,9 +244,10 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
         Row(
           children: [
             Expanded(
-                child: Divider(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            )),
+              child: Divider(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Text(
@@ -245,9 +258,10 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
               ),
             ),
             Expanded(
-                child: Divider(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            )),
+              child: Divider(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 25),

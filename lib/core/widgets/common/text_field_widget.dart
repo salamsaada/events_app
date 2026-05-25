@@ -30,9 +30,18 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       obscureText: isPassword,
       maxLines: maxLines,
-      style: const TextStyle(color: AppColors.whiteText),
+
+      style: TextStyle(
+        color: theme.brightness == Brightness.dark 
+            ? AppColors.whiteText 
+            : Colors.black,    
+      ),
+      
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(
+          color: theme.brightness == Brightness.dark ? Colors.white70 : Colors.black54,
+        ),
         prefixIcon: Icon(icon, color: theme.primaryColor, size: 22),
       ),
     );

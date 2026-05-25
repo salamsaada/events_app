@@ -18,7 +18,6 @@ class UserLogInScreen extends StatefulWidget {
 }
 
 class _UserLogInScreenState extends State<UserLogInScreen> {
-
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _emailController = TextEditingController();
@@ -52,9 +51,12 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.successMessage), backgroundColor: Colors.green),
             );
-            Navigator.pushReplacement(
+            
+            Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const HomePage()),
+              (route) =>
+                  false, // هذا الشرط (false) يضمن حذف كل الشاشات والروابط السابقة نهائياً
             );
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -77,6 +79,7 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
 
                   Text(l10n.authWelcomeBack, style: AppTextStyles.bodyGrey),
                   const SizedBox(height: 50),
+                  
                   CustomTextField(
                     controller: _emailController,
                     label: l10n.authEmailAddress,
@@ -110,7 +113,7 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>  ForgotPasswordScreen(),
+                            builder: (context) => ForgotPasswordScreen(),
                           ),
                         );
                       },
@@ -137,7 +140,7 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
                         onTap: () {
                           if (_formKey.currentState!.validate()) {
                             context.read<AuthCubit>().signInUser(
-                                  email: _emailController.text,
+                                  identity: _emailController.text.trim(),
                                   password: _passwordController.text,
                                 );
                           }
