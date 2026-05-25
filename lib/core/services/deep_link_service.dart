@@ -14,7 +14,7 @@ class DeepLinkService {
   final Dio _dio = Dio(); 
 
   // الـ IP المحلي المشترك بينك وبين الباك إند
-  final String _baseUrl = "http://192.168.1.106:8000/api"; 
+  final String _baseUrl = "http://192.168.137.31:8000/api"; 
 
   Future<void> init() async {
     // 1. التقاط الرابط إذا كان التطبيق مغلقاً تماماً وضغط المستخدم على الرابط في الإيميل

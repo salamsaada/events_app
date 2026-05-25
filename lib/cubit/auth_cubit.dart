@@ -7,7 +7,7 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthInitial());
 
   // ⚠️ نصيحة سريعة: تأكدي دائماً من مطابقة هذا الـ IP مع الـ IP الحالي لجهاز الباك إند يوم المناقشة
-  final String _baseUrl = "http://192.168.1.106:8000/api";
+  final String _baseUrl = "http://192.168.137.31:8000/api";
 
   Future<void> signInWithGoogleMobile() async {
   emit(AuthLoading());
