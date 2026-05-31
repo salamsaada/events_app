@@ -37,7 +37,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           if (state is AuthSuccess) {
             String identity = _identityController.text.trim();
 
-            // 🌟 إظهار رسالة النجاح القادمة من السيرفر مباشرة لتكون ديناميكية ومناسبة للإيميل أو الهاتف
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.successMessage),

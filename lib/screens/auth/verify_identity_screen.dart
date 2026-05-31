@@ -68,7 +68,7 @@ class VerifyIdentityScreen extends StatelessWidget {
                     ],
                   ),
                   child: VerifyIdentityWidget(
-                    email: identity, 
+                    identity: identity, 
                     isForgotPassword: isForgotPassword,
                   ),
                 ),
