@@ -1,80 +1,79 @@
-import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart';
+//import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
+import 'package:eventsapp/cache/cache_helper.dart'; 
+import 'package:eventsapp/core/api/end_ponits.dart';
+import 'package:eventsapp/core/api/api_consumer.dart'; 
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  AuthCubit() : super(AuthInitial());
+  final ApiConsumer _api; 
 
-  final String _baseUrl = "http://192.168.1.104:8000/api";
+  // الـ Constructor يستقبل الـ api الجاهزة من الـ main
+  AuthCubit(this._api) : super(AuthInitial());
 
   Future<void> signInWithGoogleMobile() async {
-  emit(AuthLoading());
-  try {
-    final appAuth = const FlutterAppAuth();
+    emit(AuthLoading());
+    try {
+      final appAuth = const FlutterAppAuth();
 
-    final AuthorizationTokenResponse? result = await appAuth.authorizeAndExchangeCode(
-      AuthorizationTokenRequest(
-        '45320069047-hsglkfoe70gvltgroni6e5ggert8v72m.apps.googleusercontent.com',
-        'com.example.eventsapp:/oauth2redirect',
-        issuer: 'https://accounts.google.com',
-        scopes: ['openid', 'profile', 'email'],
-      ),
-    );
+      final AuthorizationTokenResponse? result = await appAuth.authorizeAndExchangeCode(
+        AuthorizationTokenRequest(
+          '45320069047-hsglkfoe70gvltgroni6e5ggert8v72m.apps.googleusercontent.com',
+          'com.example.eventsapp:/oauth2redirect',
+          issuer: 'https://accounts.google.com',
+          scopes: ['openid', 'profile', 'email'],
+        ),
+      );
 
-    if (result != null && result.idToken != null) {
-      try {
-        final response = await Dio().post(
-          "$_baseUrl/auth/google/mobile-login",
-          data: {"id_token": result.idToken},
-        );
+      if (result != null && result.idToken != null) {
+        try {
+          final responseData = await _api.post(
+            "/auth/google/mobile-login",
+            data: {"id_token": result.idToken},
+          );
 
-        if (response.statusCode == 200) {
-          emit(AuthSuccess(successMessage: "success_google: تم تسجيل الدخول بجوجل بنجاح!"));
+          if (responseData != null) {
+            await _saveUserSession(responseData);
+            emit(AuthSuccess(successMessage: "success_google: تم تسجيل الدخول بجوجل بنجاح!"));
+          }
+        } catch (e) {
+          emit(AuthFailure(errorMessage: "فشل الاتصال بسيرفر جوجل"));
         }
-      } on DioException catch (e) {
-        _handleDioError(e, "فشل الاتصال بسيرفر جوجل");
+      } else {
+        emit(AuthFailure(errorMessage: "تم إلغاء تسجيل الدخول"));
       }
-    } else {
-      emit(AuthFailure(errorMessage: "تم إلغاء تسجيل الدخول"));
+    } catch (e) {
+      emit(AuthFailure(errorMessage: "حدث خطأ: $e"));
     }
-  } catch (e) {
-    emit(AuthFailure(errorMessage: "حدث خطأ: $e"));
   }
-}
+
   Future<void> signUpUser({
     required String firstName,
     required String lastName,
     required String identity,
     required String password,
     required String confirmPassword,
-    String role='organizer',
+    String role = 'organizer',
   }) async {
     emit(AuthLoading());
     try {
-      final response = await Dio().post(
-        "$_baseUrl/auth/register",
+      final responseData = await _api.post(
+        "/auth/register", 
         data: {
           "first_name": firstName,
           "last_name": lastName,
-          "identity": identity,
+          "identity": identity.trim(),
           "password": password,
-          "password_confirmation": confirmPassword,
+          "password_confirmation": confirmPassword, 
           "role": role,
         },
-        options: Options(headers: {'Accept': 'application/json'}),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        String serverMessage = response.data['message'] ?? "تم إنشاء الحساب بنجاح!";
-        emit(AuthSuccess(successMessage: serverMessage));
-      } else {
-        emit(AuthFailure(errorMessage: "فشل إنشاء الحساب، يرجى المحاولة لاحقاً"));
-      }
-    } on DioException catch (e) {
-      _handleDioError(e, "خطأ في التسجيل");
+      String serverMessage = responseData[ApiKey.message] ?? "تم إنشاء الحساب بنجاح!";
+      emit(AuthSuccess(successMessage: serverMessage));
     } catch (e) {
-      emit(AuthFailure(errorMessage: "حدث خطأ غير متوقع: $e"));
+      emit(AuthFailure(errorMessage: e.toString()));
     }
   }
 
@@ -84,67 +83,59 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(AuthLoading());
     try {
-      final response = await Dio().post(
-        "$_baseUrl/auth/login",
+      final responseData = await _api.post(
+        "/auth/login", 
         data: {
           "identity": identity, 
           "password": password,
         },
-        options: Options(headers: {'Accept': 'application/json'}),
       );
 
-      if (response.statusCode == 200) {
-        final accessToken = response.data['access_token']; 
-        emit(AuthSuccess(successMessage: "تم تسجيل الدخول بنجاح!"));
-      }
-    } on DioException catch (e) {
-      _handleDioError(e, "فشل تسجيل الدخول، تأكد من البيانات والتحقق");
+      await _saveUserSession(responseData); 
+
+      emit(AuthSuccess(successMessage: "تم تسجيل الدخول بنجاح!"));
     } catch (e) {
-      emit(AuthFailure(errorMessage: "حدث خطأ غير متوقع: $e"));
+      emit(AuthFailure(errorMessage: "فشل تسجيل الدخول، تأكد من البيانات والتحقق"));
     }
   }
 
-  // دالة نسيان كلمة المرور و ادخال الايميل لحتى ينبعت رمز ال otp
-  Future<void> requestPasswordReset({
-    required String identity
-    }) async {
+  // 4️⃣ طلب نسيان كلمة المرور
+  Future<void> requestPasswordReset({required String identity}) async {
     emit(AuthLoading());
     try {
-      final response = await Dio().post(
-        "$_baseUrl/forgot-password", 
+      final responseData = await _api.post(
+        "/forgot-password", 
         data: {
           "email": identity, 
         },
-        options: Options(headers: {'Accept': 'application/json'}),
       );
 
-      String serverMessage = response.data['message'] ?? "تم إرسال طلب إعادة التعيين!";
+      String serverMessage = responseData[ApiKey.message] ?? "تم إرسال طلب إعادة التعيين!";
       emit(AuthSuccess(successMessage: serverMessage));
-      
-    } on DioException catch (e) {
-      _handleDioError(e, "حدث خطأ أثناء طلب إعادة تعيين كلمة المرور");
+    } catch (e) {
+      emit(AuthFailure(errorMessage: "حدث خطأ أثناء طلب إعادة تعيين كلمة المرور"));
     }
   }
 
-   Future<void> verifyForgotPasswordOtpOnly({
+  // 5️⃣ التحقق من الـ OTP لنسيان كلمة المرور
+  Future<void> verifyForgotPasswordOtpOnly({
     required String email,
     required String otp,
   }) async {
     emit(AuthLoading());
     try {
-      final response = await Dio().post(
-        "$_baseUrl/verify-otp",
+      await _api.post(
+        "/verify-otp",
         data: {"email": email, "otp": otp},
-        options: Options(headers: {'Accept': 'application/json'}),
       );
 
       emit(AuthSuccess(successMessage: "تم التحقق من الرمز بنجاح!"));
-    } on DioException catch (e) {
-      _handleDioError(e, "رمز التحقق غير صحيح أو منتهي الصلاحية");
+    } catch (e) {
+      emit(AuthFailure(errorMessage: "رمز التحقق غير صحيح أو منتهي الصلاحية"));
     }
   }
 
-  // 🌟 دالة تأكيد كود الـ OTP الرقمي للهاتف وتغيير كلمة المرور في نفس الوقت
+  // 6️⃣ تعيين كلمة المرور الجديدة
   Future<void> resetPassword({
     required String identity, 
     required String code, 
@@ -152,101 +143,79 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(AuthLoading());
     try {
-      final response = await Dio().post(
-        "$_baseUrl/reset-password", 
+      final responseData = await _api.post(
+        "/reset-password", 
         data: {
           "email": identity,
           "otp": code,
           "password": newPassword,
           "password_confirmation": newPassword,
         },
-        options: Options(headers: {'Accept': 'application/json'}),
       );
 
-      String serverMessage = response.data['message'] ?? "تم تغيير كلمة المرور بنجاح!";
+      String serverMessage = responseData[ApiKey.message] ?? "تم تغيير كلمة المرور بنجاح!";
       emit(AuthSuccess(successMessage: serverMessage));
-    } on DioException catch (e) {
-      _handleDioError(e, "فشل تغيير كلمة المرور، يرجى التأكد من الكود");
     } catch (e) {
-      emit(AuthFailure(errorMessage: "حدث خطأ غير متوقع"));
+      emit(AuthFailure(errorMessage: "فشل تغيير كلمة المرور، يرجى التأكد من الكود"));
     }
   }
 
-
-  // دالة بعد التسجيل مباشرة، يرسل التطبيق المستخدم لشاشة تفعيل
+  // 7️⃣ تفعيل الحساب عبر كود الإيميل
   Future<void> verifyAccountOtp({
     required String email, 
-    required String code
-    }) async {
+    required String code,
+  }) async {
     emit(AuthLoading());
     try {
-      final response = await Dio().post(
-        "$_baseUrl/auth/verify-email-otp", 
+      final responseData = await _api.post(
+        "/auth/verify-email-otp", 
         data: {
           "email": email, 
           "otp": code,    
         },
-        options: Options(headers: {'Accept': 'application/json'}),
       );
 
-      emit(AuthSuccess(successMessage: "تم تفعيل الحساب بنجاح!"));
-    } on DioException catch (e) {
-      _handleDioError(e, "كود التحقق غير صحيح");
+      await _saveUserSession(responseData);
+
+      emit(AuthSuccess(successMessage: "تم تفعيل الحساب بنجاح عبر الإيميل!"));
+    } catch (e) {
+      emit(AuthFailure(errorMessage: "كود التحقق غير صحيح"));
     }
   }
 
-  //  دالة تفعيل الحساب عبر كود الواتساب (متطابقة تماماً مع طلب الباكيند الجديد)
+  // 8️⃣ دالة تفعيل الحساب عبر كود الواتساب
   Future<void> verifyWhatsAppOtp({
     required String phone, 
     required String code,
   }) async {
     emit(AuthLoading());
     try {
-      final response = await Dio().post(
-        "$_baseUrl/auth/verify-otp", 
+      final responseData = await _api.post(
+        "/auth/verify-otp", 
         data: {
           "phone": phone,
           "code": code,
         },
-        options: Options(headers: {'Accept': 'application/json'}),
       );
 
-      if (response.statusCode == 200) {
-        final accessToken = response.data['data']['access_token'];
-        final refreshToken = response.data['data']['refresh_token'];
-        
-        // TODO: يمكنك هنا حفظ التوكنز في SharedPreferences إذا أردتِ استمرار الجلسة
+      await _saveUserSession(responseData);
 
-        emit(AuthSuccess(successMessage: "تم تفعيل الحساب بنجاح عبر واتساب!"));
-      } else {
-        emit(AuthFailure(errorMessage: "فشل التحقق، يرجى المحاولة لاحقاً"));
-      }
-    } on DioException catch (e) {
-      _handleDioError(e, "كود التحقق غير صحيح أو انتهت صلاحيته");
+      emit(AuthSuccess(successMessage: "تم تفعيل الحساب بنجاح عبر واتساب!"));
     } catch (e) {
-      emit(AuthFailure(errorMessage: "حدث خطأ غير متوقع: $e"));
+      emit(AuthFailure(errorMessage: "كود التحقق غير صحيح أو انتهت صلاحيته"));
     }
   }
-  
-  void _handleDioError(DioException e, String defaultMessage) {
-    String serverMessage = defaultMessage;
 
-    if (e.response != null) {
-      try {
-        final data = e.response?.data;
-        if (data is Map) {
-          serverMessage = data['message']?.toString() ?? data.toString();
-        } else if (data is String) {
-          serverMessage = data;
-        } else {
-          serverMessage = data?.toString() ?? defaultMessage;
-        }
-      } catch (_) {
-        serverMessage = defaultMessage;
+  Future<void> _saveUserSession(dynamic responseData) async {
+    if (responseData is Map) {
+      final dataPart = responseData['data'] ?? responseData;
+      final accessToken = dataPart['access_token'];
+
+      if (accessToken != null) {
+        // الحفظ داخل كلاس زميلكِ باستخدام المفتاح الموحد ليلقطه الـ Interceptor تلقائياً
+        await CacheHelper().saveData(key: ApiKey.token, value: accessToken);
+        await CacheHelper().saveData(key: "is_logged_in", value: true);
       }
-      emit(AuthFailure(errorMessage: serverMessage));
-    } else {
-      emit(AuthFailure(errorMessage: "فشل الاتصال بالسيرفر، تأكد من تشغيل الباك إند والإنترنت بنفس الشبكة"));
     }
   }
 }

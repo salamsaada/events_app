@@ -11,13 +11,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'generated/app_localizations.dart';
-
 import 'core/theme/app_theme.dart';
 import 'cache/cache_helper.dart';
-// 🌟 استيراد ملف الخدمة الجديد الذي أنشأتِهِ
 import 'core/services/deep_link_service.dart'; 
 
-// 🌟 تعريف مفتاح عام للتحكم بالتنقل من خارج شجر الـ Widgets (كلاس الـ DeepLink)
+// تعريف مفتاح عام للتحكم بالتنقل من خارج شجرة الـ Widgets
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
@@ -31,7 +29,7 @@ Future<void> main() async {
     ),
   );
 
-  // 🌟 إنشاء نسخة من خدمة الديب لينك وتمرير الـ navigatorKey بداخلها
+  // إنشاء نسخة من خدمة الديب لينك وتمرير الـ navigatorKey بداخلها
   final deepLinkService = DeepLinkService(navigatorKey);
   // تشغيل الاستماع للروابط العميقة فور صعود التطبيق
   await deepLinkService.init();
@@ -44,15 +42,24 @@ class RoyalEventsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🌐 إنشاء نسخة واحدة مركزية ومشتركة من محرك الإنترنت الخاص بزميلكِ لخدمة كل الـ Cubits
+    final dioConsumer = DioConsumer(dio: Dio());
+
     return MultiBlocProvider(
       providers: [
+        // 1️⃣ الـ UserCubit يستخدم النسخة المركزية
         BlocProvider(
-          create: (context) =>
-              UserCubit(UserRepository(api: DioConsumer(dio: Dio()))),
+          create: (context) => UserCubit(UserRepository(api: dioConsumer)),
         ),
+        
+        // 2️⃣ الـ AuthCubit المحدث يستقبل الآن نفس النسخة ليتوافق مع الـ Interceptor والـ Cache تلقائياً
+        BlocProvider(
+          create: (context) => AuthCubit(dioConsumer),
+        ),
+
+        // باقي الـ Cubits الخاصة بالتطبيق كما هي دون أي تغيير
         BlocProvider(create: (context) => ThemeCubit()),
         BlocProvider(create: (context) => LanguageCubit()),
-        BlocProvider(create: (context) => AuthCubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {
@@ -62,7 +69,7 @@ class RoyalEventsApp extends StatelessWidget {
               String languageCode = context.read<LanguageCubit>().languageCode;
 
               return MaterialApp(
-                // 🌟 ربط الـ navigatorKey لكي ينجح كلاس الـ Service في توجيه المستخدم لصفحة الـ Login
+                // ربط الـ navigatorKey لكي ينجح كلاس الـ Service في توجيه المستخدم
                 navigatorKey: navigatorKey, 
                 
                 onGenerateTitle: (context) =>
