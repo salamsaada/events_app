@@ -1,5 +1,6 @@
 import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/auth_state.dart';
+import 'package:eventsapp/screens/auth/provider_web_link_page.dart';
 import 'package:eventsapp/screens/auth/verify_identity_screen.dart'; 
 import 'package:eventsapp/screens/home/home_page.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,8 @@ class UserRegisterScreen extends StatefulWidget {
 class _UserRegisterScreenState extends State<UserRegisterScreen> {
 
   final _formKey = GlobalKey<FormState>();
+
+  String _selectedRole = 'organizer';
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -53,7 +56,6 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            // 🌟 الفحص الذكي: هل نجاح التسجيل قادم من مسار جوجل؟
             bool isGoogleSignIn = state.successMessage.contains('success_google');
 
             if (isGoogleSignIn) {
@@ -68,20 +70,28 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 MaterialPageRoute(builder: (context) => const HomePage()),
                 (route) => false,
               );
-              return; // 🔥 حاسمة جداً لمنع التطبيق من قراءة الأسطر التالية وعمل كراش!
+              return; 
             }
 
-            String identity = _identityController.text.trim();
-
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => VerifyIdentityScreen(
-                  identity: identity,
-                  isForgotPassword: false,
+            // 🌟 الفحص الذكي بناءً على خيار المستخدم في الواجهة (حسب طلبكِ الأخير)
+            if (_selectedRole == 'provider') {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const ProviderWebLinkPage()),
+                (route) => false,
+              );
+            } else {
+              String identity = _identityController.text.trim();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => VerifyIdentityScreen(
+                    identity: identity,
+                    isForgotPassword: false,
+                  ),
                 ),
-              ),
-            );
+              );
+            }
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -174,8 +184,68 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                       return null;
                     },
                   ),
+
+                  const SizedBox(height: 20),
+
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+                      child: Text(
+                        "Account Type",
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // 🌟 قائمة الـ Dropdown العادية والمباشرة المدمجة بالثيم الخاص بكِ
+                  DropdownButtonFormField<String>(
+                    value: _selectedRole, 
+                    dropdownColor: const Color(0xFF1E1E1E), 
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    icon: const Icon(
+                      Icons.arrow_drop_down,
+                      color: Color(0xFFE5B842),
+                    ), 
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(
+                        Icons.person_outline,
+                        color: Color(0xFFE5B842),
+                      ), 
+                      filled: true,
+                      fillColor: const Color(0xFF1E1E1E), 
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.transparent), 
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE5B842), width: 1.5), 
+                      ),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'organizer',
+                        child: Text("Organizer"),
+                      ),
+                      DropdownMenuItem(
+                        value: 'provider',
+                        child: Text("Provider"),
+                      ),
+                    ],
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedRole = newValue!; 
+                      });
+                    },
+                  ),
+
                   const SizedBox(height: 40),
- 
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
                       if (state is AuthLoading) {
@@ -191,6 +261,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                               identity: _identityController.text,
                               password: _passwordController.text,
                               confirmPassword: _confirmPasswordController.text,
+                              role: _selectedRole, 
                             );
                           }
                         },
@@ -243,11 +314,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
       children: [
         Row(
           children: [
-            Expanded(
-              child: Divider(
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
-            ),
+            Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Text(
@@ -257,21 +324,14 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 ),
               ),
             ),
-            Expanded(
-              child: Divider(
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
-            ),
+            Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant)),
           ],
         ),
         const SizedBox(height: 25),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _socialIcon(
-              context,
-              "assets/images/Screenshot 2026-05-06 014545.png",
-            ),
+            _socialIcon(context, "assets/images/Screenshot 2026-05-06 014545.png"),
           ],
         ),
       ],
@@ -296,9 +356,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                   ? theme.colorScheme.surface
                   : theme.colorScheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
-              border: Border.all(
-                color: theme.colorScheme.outlineVariant,
-              ),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: state is AuthLoading
                 ? const SizedBox(
@@ -310,8 +368,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                     path,
                     height: 40,
                     width: 40,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.error),
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
                   ),
           ),
         );

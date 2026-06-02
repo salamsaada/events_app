@@ -56,7 +56,7 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
               context,
               MaterialPageRoute(builder: (context) => const HomePage()),
               (route) =>
-                  false, // هذا الشرط (false) يضمن حذف كل الشاشات والروابط السابقة نهائياً
+                  false, 
             );
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(

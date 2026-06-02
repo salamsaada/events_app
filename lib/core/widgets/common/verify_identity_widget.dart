@@ -10,12 +10,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pinput/pinput.dart';
 
 class VerifyIdentityWidget extends StatefulWidget {
-  final String email; 
+  final String identity; 
   final bool isForgotPassword; 
 
   const VerifyIdentityWidget({
     super.key,
-    required this.email,
+    required this.identity, 
     this.isForgotPassword = false,
   });
 
@@ -45,10 +45,8 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
         fontWeight: FontWeight.bold,
       ),
       decoration: BoxDecoration(
-        // جعل لون خلفية المربعات يقرأ من ألوان النظام المحايدة
         color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
         borderRadius: BorderRadius.circular(8),
-        // حدود خفيفة متناسقة تظهر بوضوح في كلا الوضعين
         border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
     );
@@ -70,8 +68,8 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
               context,
               MaterialPageRoute(
                 builder: (context) => ResetPasswordScreen(
-                  identity: widget.email,        
-                  code: _otpController.text.trim(), // تمرير كود الـ OTP المكون من 6 أرقام
+                  identity: widget.identity, // 🌟        
+                  code: _otpController.text.trim(), 
                 ),
               ),
             );
@@ -90,18 +88,20 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
             style: theme.textTheme.displayLarge?.copyWith(fontSize: 26),
           ),
           const SizedBox(height: 15),
+          
           Text(
-            "A unique 6-digit code has been sent to ${widget.email}. Please enter it below to proceed.",
+            widget.identity.contains('@')
+                ? "A unique 6-digit code has been sent to your email: ${widget.identity}. Please enter it below to proceed."
+                : "A unique 6-digit code has been sent to your WhatsApp: ${widget.identity}. Please enter it below to proceed.",
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(height: 1.5),
           ),
           const SizedBox(height: 35),
 
           Pinput(
-            length: 6, 
+            length: 6,
             controller: _otpController,
             defaultPinTheme: defaultPinTheme,
-            // ثيم المربع النشط عند الكتابة بحدود ذهبية فخمة تظهر في الوضعين
             focusedPinTheme: defaultPinTheme.copyDecorationWith(
               border: Border.all(color: AppColors.primaryGold, width: 2), 
               color: theme.colorScheme.surface,
@@ -133,14 +133,24 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
 
                   if (widget.isForgotPassword) {
                     context.read<AuthCubit>().verifyForgotPasswordOtpOnly(
-                      email: widget.email,
+                      email: widget.identity,
                       otp: code,
                     );
                   } else {
-                    context.read<AuthCubit>().verifyAccountOtp(
-                      email: widget.email,
-                      code: code,
-                    );
+   
+                    if (widget.identity.contains('@')) {
+                    
+                      context.read<AuthCubit>().verifyAccountOtp(
+                        email: widget.identity,
+                        code: code,
+                      );
+                    } else {
+                
+                      context.read<AuthCubit>().verifyWhatsAppOtp(
+                        phone: widget.identity,
+                        code: code,
+                      );
+                    }
                   }
                 },
               );
@@ -150,10 +160,10 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
           const SizedBox(height: 25),
 
           CustomFooterLinks(
-            leftText: "< BACK TO EMAIL",
+            leftText: widget.identity.contains('@') ? "< BACK TO EMAIL" : "< BACK TO PHONE",
             rightText: "RESEND CODE",
             onLeftTap: () => Navigator.pop(context),
-            // onRightTap: () => context.read<AuthCubit>().resendOtp(widget.email),
+            // onRightTap: () => context.read<AuthCubit>().resendOtp(widget.identity),
           ),
         ],
       ),
