@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "607459927963",
+    "project_id": "royal-event-app",
+    "storage_bucket": "royal-event-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:607459927963:android:e38dad5eb24e62621fe33e",
+        "android_client_info": {
+          "package_name": "com.example.eventsapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVX2aGUdI1POwAQT40qwVAlUVQh-tKCCc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

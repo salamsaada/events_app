@@ -1,5 +1,6 @@
 import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/auth_state.dart';
+import 'package:eventsapp/cubit/notification_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/core/theme/app_colors.dart';
@@ -48,19 +49,30 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
+            try {
+              context.read<NotificationCubit>().uploadDeviceToken();
+            } catch (e) {
+              print("⚠️ فشل تحديث التوكن الاحتياطي: $e");
+            }
+
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.successMessage), backgroundColor: Colors.green),
+              SnackBar(
+                content: Text(state.successMessage),
+                backgroundColor: Colors.green,
+              ),
             );
-            
+
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const HomePage()),
-              (route) =>
-                  false, 
+              (route) => false,
             );
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.errorMessage),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
