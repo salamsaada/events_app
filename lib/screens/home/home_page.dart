@@ -2,6 +2,8 @@ import 'package:eventsapp/core/widgets/filter_button.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/screens/filters/filter_section.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart'; // 🌟 استيراد حزمة الـ Bloc
+import 'package:eventsapp/cubit/notification_cubit.dart'; // 🌟 استيراد الـ NotificationCubit الجديد
 import '../../core/widgets/common/bottom_navigation.dart';
 import '../../core/widgets/common/hero_carousel.dart';
 import '../../core/widgets/common/newsletter_section.dart';
@@ -22,6 +24,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+
+  // 🌟 استدعاء التوكن وتحديثه بالسيرفر فور صعود شاشة الهوم بيج
+  @override
+  void initState() {
+    super.initState();
+    // استخدام الـ Inline Trigger لتنبيه الـ NotificationCubit بالخلفية
+    context.read<NotificationCubit>().uploadDeviceToken();
+  }
 
   void _openFilterSheet() {
     showModalBottomSheet(
@@ -96,19 +106,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFloatingActionButton() {
-  final colorScheme = Theme.of(context).colorScheme;
-  return Positioned(
-    left: 24, 
-    bottom: 96,
-    child: FloatingActionButton(
-      onPressed: () {
-        // منطق إضافة حدث جديد
-      },
-      backgroundColor: colorScheme.primary, 
-      child: Icon(Icons.add, color: colorScheme.onPrimary),
-    ),
-  );
-}
+    final colorScheme = Theme.of(context).colorScheme;
+    return Positioned(
+      left: 24, 
+      bottom: 96,
+      child: FloatingActionButton(
+        onPressed: () {
+          // منطق إضافة حدث جديد
+        },
+        backgroundColor: colorScheme.primary, 
+        child: Icon(Icons.add, color: colorScheme.onPrimary),
+      ),
+    );
+  }
 
   void _onItemSelected(int index) {
     setState(() => _selectedIndex = index);

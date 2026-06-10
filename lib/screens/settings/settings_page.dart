@@ -1,6 +1,9 @@
+import 'package:eventsapp/cubit/auth_cubit.dart'; // 🌟 استيراد الـ AuthCubit
+import 'package:eventsapp/cubit/auth_state.dart'; // 🌟 استيراد الـ AuthState
 import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
+import 'package:eventsapp/screens/auth/user_register_screen.dart'; // 🌟 استيراد شاشة التسجيل لطرد المستخدم إليها
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -24,142 +27,162 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: AppColors.primaryGold,
+    // 🌟 وضع الـ BlocListener لمراقبة حالة تسجيل الخروج والانتقال الآمن
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthInitial) {
+          // بمجرد مسح التوكنات بنجاح من السيرفر والهاتف، يتم توجيه المستخدم لشاشة التسجيل وتنظيف الـ Stack
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const UserRegisterScreen()),
+            (route) => false,
+          );
+        } else if (state is AuthFailure) {
+          // عرض رسالة خطأ في حال حدوث مشكلة بالشبكة
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.errorMessage), backgroundColor: Colors.red),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.primaryGold,
+                      ),
                     ),
-                  ),
-                  Text(
-                    AppLocalizations.of(context)!.settingsTitle,
-                    style: AppTextStyles.mainTitle,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              _SettingsSection(
-                title: AppLocalizations.of(context)!.account,
-                children: [
-                  _ActionTile(
-                    icon: Icons.person_outline,
-                    title: AppLocalizations.of(context)!.editProfile,
-                  ),
-                  _ActionTile(
-                    icon: Icons.credit_card_outlined,
-                    title: AppLocalizations.of(context)!.paymentMethods,
-                  ),
-                  _ActionTile(
-                    icon: Icons.shopping_bag_outlined,
-                    title: AppLocalizations.of(context)!.previousOrders,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              _SettingsSection(
-                title: AppLocalizations.of(context)!.notifications,
-                children: [
-                  _SwitchTile(
-                    icon: Icons.notifications_active_outlined,
-                    title: AppLocalizations.of(context)!.pushNotifications,
-                    value: pushNotifications,
-                    onChanged: (value) =>
-                        setState(() => pushNotifications = value),
-                  ),
-                  _SwitchTile(
-                    icon: Icons.sms_outlined,
-                    title: AppLocalizations.of(context)!.smsNotifications,
-                    value: smsNotifications,
-                    onChanged: (value) =>
-                        setState(() => smsNotifications = value),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              _SettingsSection(
-                title: AppLocalizations.of(context)!.preferences,
-                children: [
-                  _SwitchTile(
-                    icon: Icons.dark_mode_outlined,
-                    title: AppLocalizations.of(context)!.nightMode,
-                    value: context.watch<ThemeCubit>().isDark,
-                    onChanged: (value) {
-                      context.read<ThemeCubit>().toggleTheme();
-                    },
-                  ),
-                  _LanguageTile(
-                    icon: Icons.language_outlined,
-                    currentLanguage: context
-                        .watch<LanguageCubit>()
-                        .languageCode,
-                    onChanged: (language) {
-                      context.read<LanguageCubit>().setLanguage(language);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              _SettingsSection(
-                title: AppLocalizations.of(context)!.security,
-                children: [
-                  _SwitchTile(
-                    icon: Icons.fingerprint,
-                    title: AppLocalizations.of(context)!.biometric,
-                    value: biometric,
-                    onChanged: (value) => setState(() => biometric = value),
-                  ),
-                  _ActionTile(
-                    icon: Icons.lock_outline,
-                    title: AppLocalizations.of(context)!.changePassword,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.errorRed,
-                    side: const BorderSide(color: AppColors.errorDarkRed),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                    Text(
+                      AppLocalizations.of(context)!.settingsTitle,
+                      style: AppTextStyles.mainTitle,
                     ),
-                  ),
-                  icon: const Icon(Icons.logout),
-                  label: Text(AppLocalizations.of(context)!.logout),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 18),
+                _SettingsSection(
+                  title: AppLocalizations.of(context)!.account,
+                  children: [
+                    _ActionTile(
+                      icon: Icons.person_outline,
+                      title: AppLocalizations.of(context)!.editProfile,
+                    ),
+                    _ActionTile(
+                      icon: Icons.credit_card_outlined,
+                      title: AppLocalizations.of(context)!.paymentMethods,
+                    ),
+                    _ActionTile(
+                      icon: Icons.shopping_bag_outlined,
+                      title: AppLocalizations.of(context)!.previousOrders,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                _SettingsSection(
+                  title: AppLocalizations.of(context)!.notifications,
+                  children: [
+                    _SwitchTile(
+                      icon: Icons.notifications_active_outlined,
+                      title: AppLocalizations.of(context)!.pushNotifications,
+                      value: pushNotifications,
+                      onChanged: (value) =>
+                          setState(() => pushNotifications = value),
+                    ),
+                    _SwitchTile(
+                      icon: Icons.sms_outlined,
+                      title: AppLocalizations.of(context)!.smsNotifications,
+                      value: smsNotifications,
+                      onChanged: (value) =>
+                          setState(() => smsNotifications = value),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                _SettingsSection(
+                  title: AppLocalizations.of(context)!.preferences,
+                  children: [
+                    _SwitchTile(
+                      icon: Icons.dark_mode_outlined,
+                      title: AppLocalizations.of(context)!.nightMode,
+                      value: context.watch<ThemeCubit>().isDark,
+                      onChanged: (value) {
+                        context.read<ThemeCubit>().toggleTheme();
+                      },
+                    ),
+                    _LanguageTile(
+                      icon: Icons.language_outlined,
+                      currentLanguage: context
+                          .watch<LanguageCubit>()
+                          .languageCode,
+                      onChanged: (language) {
+                        context.read<LanguageCubit>().setLanguage(language);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                _SettingsSection(
+                  title: AppLocalizations.of(context)!.security,
+                  children: [
+                    _SwitchTile(
+                      icon: Icons.fingerprint,
+                      title: AppLocalizations.of(context)!.biometric,
+                      value: biometric,
+                      onChanged: (value) => setState(() => biometric = value),
+                    ),
+                    _ActionTile(
+                      icon: Icons.lock_outline,
+                      title: AppLocalizations.of(context)!.changePassword,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    // 🌟 استدعاء الدالة مباشرة عند الضغط دون أي تغيير في الواجهة والتصميم وثبات الزر
+                    onPressed: () => context.read<AuthCubit>().logOut(),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.errorRed,
+                      side: const BorderSide(color: AppColors.errorDarkRed),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    icon: const Icon(Icons.logout),
+                    label: Text(AppLocalizations.of(context)!.logout),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-      bottomNavigationBar: AppBottomNavigation(
-        selectedIndex: 3,
-        onItemSelected: (index) {
-          if (index == 0) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const HomePage()),
-              (route) => false,
-            );
-          }
-        },
+        bottomNavigationBar: AppBottomNavigation(
+          selectedIndex: 3,
+          onItemSelected: (index) {
+            if (index == 0) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const HomePage()),
+                (route) => false,
+              );
+            }
+          },
+        ),
       ),
     );
   }
 }
+
+// ==================== 🛠️ الـ Widgets الفرعية التابعة للشاشة ====================
 
 class _SettingsSection extends StatelessWidget {
   final String title;
@@ -273,7 +296,7 @@ class _LanguageTile extends StatelessWidget {
           const PopupMenuItem<String>(value: 'ar', child: Text('العربية')),
           const PopupMenuItem<String>(value: 'en', child: Text('English')),
         ],
-        child: Icon(Icons.chevron_right, color: AppColors.darkGrey),
+        child: const Icon(Icons.chevron_right, color: AppColors.darkGrey),
       ),
       title: Text(
         l10n.language,

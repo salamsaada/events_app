@@ -1,5 +1,6 @@
 import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/auth_state.dart';
+import 'package:eventsapp/cubit/notification_cubit.dart';
 import 'package:eventsapp/screens/auth/provider_web_link_page.dart';
 import 'package:eventsapp/screens/auth/verify_identity_screen.dart'; 
 import 'package:eventsapp/screens/home/home_page.dart';
@@ -56,6 +57,14 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
+            
+            // 🌟 السحر الحقيقي هنا: فور نجاح عملية الساين اب، نأمر برفع التوكن صامتاً في الخلفية للسيرفر
+            try {
+              context.read<NotificationCubit>().uploadDeviceToken();
+            } catch (e) {
+              print("⚠️ فشل استدعاء رفع التوكن: $e");
+            }
+
             bool isGoogleSignIn = state.successMessage.contains('success_google');
 
             if (isGoogleSignIn) {
@@ -73,7 +82,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
               return; 
             }
 
-            // 🌟 الفحص الذكي بناءً على خيار المستخدم في الواجهة (حسب طلبكِ الأخير)
+            // الفحص الذكي بناءً على خيار المستخدم في الواجهة
             if (_selectedRole == 'provider') {
               Navigator.pushAndRemoveUntil(
                 context,
@@ -202,7 +211,6 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                     ),
                   ),
 
-                  // 🌟 قائمة الـ Dropdown العادية والمباشرة المدمجة بالثيم الخاص بكِ
                   DropdownButtonFormField<String>(
                     value: _selectedRole, 
                     dropdownColor: const Color(0xFF1E1E1E), 

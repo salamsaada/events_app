@@ -4,8 +4,10 @@ import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
+import 'package:eventsapp/cubit/notification_cubit.dart'; 
 import 'package:eventsapp/repositories/user_repository.dart';
 import 'package:eventsapp/screens/auth/splash_screen.dart';
+import 'package:eventsapp/screens/home/home_page.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,13 +16,56 @@ import 'generated/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'cache/cache_helper.dart';
 import 'core/services/deep_link_service.dart'; 
+import 'core/api/end_ponits.dart';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart'; 
+import 'firebase_options.dart'; 
+import 'core/services/notification_service.dart';
 
 // تعريف مفتاح عام للتحكم بالتنقل من خارج شجرة الـ Widgets
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
+  // ضمان تهيئة الـ Widgets الخاصة بفلاتر أولاً
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // تهيئة كلاس الكاش محلياً ليصبح جاهزاً لحفظ البيانات والتوكنات
   await CacheHelper().init();
+  
+  // تهيئة الفايربيز بناءً على منصة التشغيل (Android / iOS)
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
+  // [إجباري لأندرويد 13 فما فوق] طلب إذن الإشعارات من المستخدم فور تشغيل التطبيق
+  try {
+    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    print('User granted notification permission: ${settings.authorizationStatus}');
+  } catch (e) {
+    print("Error requesting notification permission: $e");
+  }
+  
+  // تشغيل خدمة الإشعارات المركزية وجلب الـ Token الأصلي للجهاز
+  NotificationService notificationService = NotificationService();
+  await notificationService.initialize();
+
+  // [الـ Auto-Login الذكي] جلب التوكن المحفوظ وفحص الوجهة المناسبة
+  final String? savedToken = CacheHelper().getData(key: ApiKey.token);
+  
+  Widget initialScreen;
+  bool shouldUploadTokenImmediately = false; // 🌟 متغير سحري لفحص حالة الإرسال الفوري للسيرفر
+
+  if (savedToken != null && savedToken.isNotEmpty) {
+    initialScreen = const HomePage(); // الانتقال المباشر للهوم بيج
+    shouldUploadTokenImmediately = true; // 🌟 نعم، المستخدم مسجل مسبقاً ولديه صلاحية، نرفع التوكن فوراً
+  } else {
+    initialScreen = const SplashScreen(); // البدء من السبلش سكرين
+  }
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -30,34 +75,58 @@ Future<void> main() async {
   );
 
   // إنشاء نسخة من خدمة الديب لينك وتمرير الـ navigatorKey بداخلها
-  final deepLinkService = DeepLinkService(navigatorKey);
-  // تشغيل الاستماع للروابط العميقة فور صعود التطبيق
-  await deepLinkService.init();
+  try {
+    final deepLinkService = DeepLinkService(navigatorKey);
+    await deepLinkService.init();
+  } catch (e) {
+    print("Deep link initialization error: $e");
+  }
 
-  runApp(const RoyalEventsApp());
+  // تمرير الشاشة الابتدائية والشرط الجديد للتطبيق الرئيسي
+  runApp(RoyalEventsApp(
+    startScreen: initialScreen,
+    uploadTokenAtStart: shouldUploadTokenImmediately, // 👈 تمرير المتغير الجديد
+  ));
 }
 
 class RoyalEventsApp extends StatelessWidget {
-  const RoyalEventsApp({super.key});
+  final Widget startScreen;
+  final bool uploadTokenAtStart; // 👈 استقبال متغير حالة رفع التوكن
+
+  const RoyalEventsApp({
+    super.key, 
+    required this.startScreen,
+    required this.uploadTokenAtStart, // 👈 تهيئة المتغير
+  });
 
   @override
   Widget build(BuildContext context) {
-    // 🌐 إنشاء نسخة واحدة مركزية ومشتركة من محرك الإنترنت الخاص بزميلكِ لخدمة كل الـ Cubits
     final dioConsumer = DioConsumer(dio: Dio());
 
     return MultiBlocProvider(
       providers: [
-        // 1️⃣ الـ UserCubit يستخدم النسخة المركزية
+        // 1️⃣ الـ UserCubit يستخدم النسخة المركزية للـ API
         BlocProvider(
           create: (context) => UserCubit(UserRepository(api: dioConsumer)),
         ),
         
-        // 2️⃣ الـ AuthCubit المحدث يستقبل الآن نفس النسخة ليتوافق مع الـ Interceptor والـ Cache تلقائياً
+        // 2️⃣ الـ AuthCubit يستقبل الـ DioConsumer والـ CacheHelper الموحدين
         BlocProvider(
-          create: (context) => AuthCubit(dioConsumer),
+          create: (context) => AuthCubit(dioConsumer, CacheHelper()),
         ),
 
-        // باقي الـ Cubits الخاصة بالتطبيق كما هي دون أي تغيير
+        // 🌟 3️⃣ [إنشاء الـ NotificationCubit والتحقق من الـ Auto-Login]
+        BlocProvider(
+          create: (context) {
+            final cubit = NotificationCubit(dioConsumer);
+            // إذا كان المستخدم داخل التطبيق مسبقاً، نحدّث التوكن في الباكيند صامتاً عند الإقلاع
+            if (uploadTokenAtStart) {
+              cubit.uploadDeviceToken();
+            }
+            return cubit;
+          },
+        ),
+
         BlocProvider(create: (context) => ThemeCubit()),
         BlocProvider(create: (context) => LanguageCubit()),
       ],
@@ -69,9 +138,7 @@ class RoyalEventsApp extends StatelessWidget {
               String languageCode = context.read<LanguageCubit>().languageCode;
 
               return MaterialApp(
-                // ربط الـ navigatorKey لكي ينجح كلاس الـ Service في توجيه المستخدم
                 navigatorKey: navigatorKey, 
-                
                 onGenerateTitle: (context) =>
                     AppLocalizations.of(context)!.appTitle,
                 debugShowCheckedModeBanner: false,
@@ -86,7 +153,7 @@ class RoyalEventsApp extends StatelessWidget {
                 theme: AppTheme.lightTheme,
                 darkTheme: AppTheme.darkTheme,
                 themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-                home: const SplashScreen(),
+                home: startScreen, 
               );
             },
           );
