@@ -3,6 +3,7 @@ import 'package:eventsapp/cache/cache_helper.dart';
 import 'package:eventsapp/core/api/api_consumer.dart';
 import 'package:eventsapp/core/api/end_ponits.dart';
 import 'package:eventsapp/core/errors/exceptions.dart';
+import 'package:eventsapp/models/listing_model.dart';
 
 import 'package:eventsapp/models/sign_up_model.dart';
 
@@ -71,6 +72,20 @@ class UserRepository {
     }
   }
 
+  Future<Either<String, ListingResponse>> getlisting() async {
+    try {
+      final response = await api.get(
+        EndPoint.getlisting, // يجب إضافة هذا الـ Endpoint في كلاس EndPoint
+      );
+
+      final serviceResponse = ListingResponse.fromJson(response);
+
+      return Right(serviceResponse);
+    } on ServerException catch (e) {
+      return Left(e.errModel.errorMessage);
+    }
+  }
+
   // // Function to fetch filtered items (Services or Products) from Laravel
   // Future<Either<String, List<dynamic>>> getFilteredItems({
   //   required String type,
@@ -93,7 +108,7 @@ class UserRepository {
 
   //     // افترضنا هنا أن السيرفر يرجع قائمة من البيانات
   //     // يمكنك تحويلها لاحقاً لـ List<ItemModel>
-  //     return Right(response); 
+  //     return Right(response);
   //   } on ServerException catch (e) {
   //     return Left(e.errModel.errorMessage);
   //   }

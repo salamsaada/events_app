@@ -1,32 +1,35 @@
 //import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart'; 
+import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
-import 'package:eventsapp/cache/cache_helper.dart'; 
+import 'package:eventsapp/cache/cache_helper.dart';
 import 'package:eventsapp/core/api/end_ponits.dart';
-import 'package:eventsapp/core/api/api_consumer.dart'; 
+import 'package:eventsapp/core/api/api_consumer.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  final ApiConsumer _api; 
+  final ApiConsumer _api;
   final CacheHelper _cache;
 
   AuthCubit(this._api, this._cache) : super(AuthInitial());
 
   String _handleInlineError(dynamic error) {
     String message = "حدث خطأ غير متوقع، يرجى المحاولة لاحقاً.";
-    
+
     if (error is DioException) {
       // 1. فحص إذا كان هناك رد حقيقي قادم من لارافل بداخل الـ Data وبصيغة Map
-      if (error.response != null && error.response!.data != null && error.response!.data is Map) {
+      if (error.response != null &&
+          error.response!.data != null &&
+          error.response!.data is Map) {
         final Map<String, dynamic> responseData = error.response!.data;
 
         if (responseData['message'] != null) {
           return responseData['message'].toString();
-        } 
+        }
         // 3. إذا أرسل لارافل حقل 'errors' الخاص بالفاليديشن (مثل: الباسورد قصير)
-        else if (responseData['errors'] != null && responseData['errors'] is Map) {
+        else if (responseData['errors'] != null &&
+            responseData['errors'] is Map) {
           Map<String, dynamic> errors = responseData['errors'];
           if (errors.isNotEmpty) {
             var firstErrorList = errors.values.first;
@@ -37,23 +40,24 @@ class AuthCubit extends Cubit<AuthState> {
             }
           }
         }
-      } 
+      }
       // 4. في حال انقطع الإنترنت تماماً ولم يصل أي رد من السيرفر
       else if (error.type != DioExceptionType.badResponse) {
         return "تعذر الاتصال بالسيرفر، يرجى التحقق من شبكة الإنترنت.";
       }
     }
-    
+
     return message;
   }
 
- // تسجيل الدخول عبر جوجل للموبايل (معدلة لإرسال توكن الإشعارات)
+  // تسجيل الدخول عبر جوجل للموبايل (معدلة لإرسال توكن الإشعارات)
   Future<void> signInWithGoogleMobile() async {
     emit(AuthLoading());
     try {
       final appAuth = const FlutterAppAuth();
 
-      final AuthorizationTokenResponse? result = await appAuth.authorizeAndExchangeCode(
+      final AuthorizationTokenResponse?
+      result = await appAuth.authorizeAndExchangeCode(
         AuthorizationTokenRequest(
           '45320069047-hsglkfoe70gvltgroni6e5ggert8v72m.apps.googleusercontent.com',
           'com.example.eventsapp:/oauth2redirect',
@@ -76,13 +80,17 @@ class AuthCubit extends Cubit<AuthState> {
             "/auth/google/mobile-login",
             data: {
               "id_token": result.idToken,
-              if (fcmToken != null) "device_token": fcmToken, 
+              if (fcmToken != null) "device_token": fcmToken,
             },
           );
 
           if (responseData != null) {
             await _saveUserSession(responseData);
-            emit(AuthSuccess(successMessage: "success_google: تم تسجيل الدخول بجوجل بنجاح!"));
+            emit(
+              AuthSuccess(
+                successMessage: "success_google: تم تسجيل الدخول بجوجل بنجاح!",
+              ),
+            );
           }
         } catch (e) {
           emit(AuthFailure(errorMessage: _handleInlineError(e)));
@@ -95,7 +103,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
- // 2️⃣ إنشاء حساب مستخدم جديد (معدلة لإرسال توكن الإشعارات)
+  // 2️⃣ إنشاء حساب مستخدم جديد (معدلة لإرسال توكن الإشعارات)
   Future<void> signUpUser({
     required String firstName,
     required String lastName,
@@ -116,19 +124,20 @@ class AuthCubit extends Cubit<AuthState> {
       }
 
       final responseData = await _api.post(
-        "/auth/register", 
+        "/auth/register",
         data: {
           "first_name": firstName,
           "last_name": lastName,
           "identity": identity.trim(),
           "password": password,
-          "password_confirmation": confirmPassword, 
+          "password_confirmation": confirmPassword,
           "role": role,
-          if (fcmToken != null) "device_token": fcmToken, 
+          if (fcmToken != null) "device_token": fcmToken,
         },
       );
 
-      String serverMessage = responseData[ApiKey.message] ?? "تم إنشاء الحساب بنجاح!";
+      String serverMessage =
+          responseData[ApiKey.message] ?? "تم إنشاء الحساب بنجاح!";
       emit(AuthSuccess(successMessage: serverMessage));
     } catch (e) {
       emit(AuthFailure(errorMessage: _handleInlineError(e)));
@@ -137,7 +146,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   // 3️⃣ تسجيل دخول المستخدم التقليدي (معدلة لإرسال توكن الإشعارات)
   Future<void> signInUser({
-    required String identity, 
+    required String identity,
     required String password,
   }) async {
     emit(AuthLoading());
@@ -150,15 +159,15 @@ class AuthCubit extends Cubit<AuthState> {
       }
 
       final responseData = await _api.post(
-        "/auth/login", 
+        "/auth/login",
         data: {
-          "identity": identity, 
+          "identity": identity,
           "password": password,
           if (fcmToken != null) "device_token": fcmToken,
         },
       );
 
-      await _saveUserSession(responseData); 
+      await _saveUserSession(responseData);
 
       emit(AuthSuccess(successMessage: "تم تسجيل الدخول بنجاح!"));
     } catch (e) {
@@ -171,13 +180,12 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       final responseData = await _api.post(
-        "/forgot-password", 
-        data: {
-          "email": identity, 
-        },
+        "/forgot-password",
+        data: {"email": identity},
       );
 
-      String serverMessage = responseData[ApiKey.message] ?? "تم إرسال طلب إعادة التعيين!";
+      String serverMessage =
+          responseData[ApiKey.message] ?? "تم إرسال طلب إعادة التعيين!";
       emit(AuthSuccess(successMessage: serverMessage));
     } catch (e) {
       emit(AuthFailure(errorMessage: _handleInlineError(e)));
@@ -191,13 +199,7 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(AuthLoading());
     try {
-      await _api.post(
-        "/verify-otp",
-        data: {
-          "email": email, 
-          "otp": otp
-        },
-      );
+      await _api.post("/verify-otp", data: {"email": email, "otp": otp});
 
       emit(AuthSuccess(successMessage: "تم التحقق من الرمز بنجاح!"));
     } catch (e) {
@@ -207,14 +209,14 @@ class AuthCubit extends Cubit<AuthState> {
 
   // 6️⃣ تعيين كلمة المرور الجديدة
   Future<void> resetPassword({
-    required String identity, 
-    required String code, 
+    required String identity,
+    required String code,
     required String newPassword,
   }) async {
     emit(AuthLoading());
     try {
       final responseData = await _api.post(
-        "/reset-password", 
+        "/reset-password",
         data: {
           "email": identity,
           "otp": code,
@@ -223,7 +225,8 @@ class AuthCubit extends Cubit<AuthState> {
         },
       );
 
-      String serverMessage = responseData[ApiKey.message] ?? "تم تغيير كلمة المرور بنجاح!";
+      String serverMessage =
+          responseData[ApiKey.message] ?? "تم تغيير كلمة المرور بنجاح!";
       emit(AuthSuccess(successMessage: serverMessage));
     } catch (e) {
       emit(AuthFailure(errorMessage: _handleInlineError(e)));
@@ -232,7 +235,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   // 7️⃣ تفعيل الحساب عبر كود الإيميل
   Future<void> verifyAccountOtp({
-    required String email, 
+    required String email,
     required String code,
   }) async {
     emit(AuthLoading());
@@ -248,11 +251,13 @@ class AuthCubit extends Cubit<AuthState> {
 
       // 🌟 2. إرسال طلب التحقق مع حقل الـ device_token الجديد للسيرفر
       final responseData = await _api.post(
-        "/auth/verify-email-otp", 
+        "/auth/verify-email-otp",
         data: {
-          "email": email, 
+          "email": email,
           "otp": code,
-          if (fcmToken != null) "device_token": fcmToken, // 👈 قمنا بتغييرها هنا لـ device_token لتطابق الباكيند
+          if (fcmToken != null)
+            "device_token":
+                fcmToken, // 👈 قمنا بتغييرها هنا لـ device_token لتطابق الباكيند
         },
       );
 
@@ -266,7 +271,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   // 8️⃣ تفعيل الحساب عبر كود الواتساب
   Future<void> verifyWhatsAppOtp({
-    required String phone, 
+    required String phone,
     required String code,
   }) async {
     emit(AuthLoading());
@@ -282,11 +287,13 @@ class AuthCubit extends Cubit<AuthState> {
 
       // 🌟 2. إرسال طلب التحقق مع حقل الـ device_token الجديد للسيرفر
       final responseData = await _api.post(
-        "/auth/verify-otp", 
+        "/auth/verify-otp",
         data: {
           "identity": phone,
           "code": code,
-          if (fcmToken != null) "device_token": fcmToken, // 👈 قمنا بتمريره هنا باسم device_token ليطابق السيرفر
+          if (fcmToken != null)
+            "device_token":
+                fcmToken, // 👈 قمنا بتمريره هنا باسم device_token ليطابق السيرفر
         },
       );
 
@@ -310,14 +317,12 @@ class AuthCubit extends Cubit<AuthState> {
       }
 
       await _api.post(
-        "/auth/logout", 
-        data: {
-          if (fcmToken != null) "device_token": fcmToken,
-        },
+        "/auth/logout",
+        data: {if (fcmToken != null) "device_token": fcmToken},
       );
 
       // مسح الـ Access Token محلياً من الهاتف
-      await _cache.removeData(key: ApiKey.token); 
+      await _cache.removeData(key: ApiKey.token);
 
       emit(AuthInitial());
     } catch (e) {
@@ -334,6 +339,8 @@ class AuthCubit extends Cubit<AuthState> {
       final accessToken = dataPart['access_token'];
 
       if (accessToken != null) {
+        await CacheHelper().saveData(key: ApiKey.token, value: accessToken);
+
         await _cache.saveData(key: ApiKey.token, value: accessToken);
         await _cache.saveData(key: "is_logged_in", value: true);
       }

@@ -1,4 +1,5 @@
-﻿import 'package:eventsapp/models/user_model.dart';
+﻿import 'package:eventsapp/models/listing_model.dart';
+import 'package:eventsapp/models/user_model.dart';
 
 class UserState {}
 
@@ -42,4 +43,16 @@ final class GetUserFailure extends UserState {
   final String errMessage;
 
   GetUserFailure({required this.errMessage});
+}
+
+final class GetListingLoading extends UserState {}
+
+final class GetListingSuccess extends UserState {
+  final ListingResponse listingResponse;
+  GetListingSuccess({required this.listingResponse});
+}
+
+final class GetListingFailure extends UserState {
+  final String errMessage;
+  GetListingFailure({required this.errMessage});
 }

@@ -1,11 +1,12 @@
 class EndPoint {
-  static const String baseUrl = "http://192.168.137.179:8000/api/"; 
+  static const String baseUrl = "http://192.168.1.108:8000/api/";
   // static const String baseUrl = "http://10.0.2.2:8000/api/";
   // static const String baseUrl = "http://127.0.0.1:8000/api/";
 
   static const String signIn = "login";
   static const String signUp = "register";
-
+  static const String getlisting =
+      "listings"; // يجب إضافة هذا الـ Endpoint في كلاس EndPoint
   static const String getUserDataEndPoint = "user";
 }
 
@@ -31,4 +32,40 @@ class ApiKey {
 
   static const String location = "location";
   static const String profilePic = "profilePic";
+
+  static const String currentPage = 'current_page';
+  static const String lastPage = 'last_page';
+  static const String total = 'total';
+  static const String title = 'title';
+  static const String description = 'description';
+  static const String type = 'type';
+  static const String material_composition = 'material_composition';
+  static const String secondary_contact_number = 'secondary_contact_number';
+  static const String cancel_before_acceptance = 'cancel_before_acceptance';
+  static const String cancel_after_acceptance = 'cancel_after_acceptance';
+  static const String cancel_before_payment = 'cancel_before_payment';
+  static const String is_provider_location_based = 'is_provider_location_based';
+  static const String rejection_reason = 'rejection_reason';
+  static const String category = 'category';
+  static const String district = 'district';
+  static const String images = 'images';
+  static const String variants = 'variants';
+  static const String created_at = 'created_at';
+  static const String updated_at = 'updated_at';
+  static const String price = 'price';
+  static const String currency = 'currency';
+  static const String price_type = 'price_type';
+  static const String stock = 'stock';
+  static const String attributes = 'attributes';
+  static const String availabilities = 'availabilities';
+  static const String available_date = 'available_date';
+  static const String is_blocked = 'is_blocked';
+  static const String slots = 'slots';
+  static const String start_time = 'start_time';
+  static const String end_time = 'end_time';
+  static const String remaining_capacity = 'remaining_capacity';
+  static const String meta = 'meta';
+  static const String name = 'name';
+  static const String success = 'success';
+  static const String data = 'data';
 }

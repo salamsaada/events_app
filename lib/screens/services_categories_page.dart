@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
+import 'package:eventsapp/models/listing_model.dart';
 
 import 'service_details_page.dart';
 
@@ -79,6 +80,7 @@ class ServicesCategoriesPage extends StatelessWidget {
                     builder: (context) => ServiceDetailsPage(
                       categoryId: categoryId,
                       icon: category['icon'] as IconData,
+                      item: ServiceItem.fromJson(const {}),
                     ),
                   ),
                 );
