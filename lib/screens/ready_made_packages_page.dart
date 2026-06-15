@@ -1,106 +1,128 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:eventsapp/cubit/user_cubit.dart';
+import 'package:eventsapp/cubit/user_state.dart';
+import 'package:eventsapp/models/listing_model.dart'; // استيراد الموديل
 import '../../../core/widgets/common/result_card.dart';
-import '../../models/event_item_model.dart'; 
-import 'details_page.dart';
+import 'details_page.dart'; // استيراد صفحة التفاصيل المعدلة
 
-class ReadyMadePackagesPage extends StatelessWidget {
+class ReadyMadePackagesPage extends StatefulWidget {
   final String categoryName;
 
-  final List<EventItemModel> dummyPackages = [
-    EventItemModel(
-      title: "Royal Wedding Hall",
-      companyName: "Elite Events Co.",
-      price: "15,000 SAR",
-      imageUrl: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000",
-      rating: 4.9,
-      location: "Riyadh, Al-Nuzha",
-      capacity: "500 Guests",
-      description: "A luxurious hall equipped with the latest lighting and sound systems to make your wedding night unforgettable.",
-    ),
-    EventItemModel(
-      title: "Modern Garden Setup",
-      companyName: "Nature Party",
-      price: "8,500 SAR",
-      imageUrl: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1000",
-      rating: 4.7,
-      location: "Jeddah, Obhur",
-      capacity: "200 Guests",
-      description: "Enjoy an outdoor atmosphere with elegant modern designs suitable for small parties and graduations.",
-    ),
-    EventItemModel(
-      title: "Classic Hotel Ballroom",
-      companyName: "Grand Hyatt",
-      price: "25,000 SAR",
-      imageUrl: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000",
-      rating: 4.8,
-      location: "Riyadh, Olaya",
-      capacity: "350 Guests",
-      description: "The classic choice for high-end weddings with five-star catering services included.",
-    ),
-  ];
+  const ReadyMadePackagesPage({super.key, required this.categoryName});
 
-  ReadyMadePackagesPage({
-    super.key,
-    required this.categoryName,
-  });
+  @override
+  State<ReadyMadePackagesPage> createState() => _ReadyMadePackagesPageState();
+}
+
+class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
+  @override
+  void initState() {
+    super.initState();
+    // جلب البيانات عند فتح الصفحة
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = context.read<UserCubit>().state;
+      if (state is! GetListingLoading && state is! GetListingSuccess) {
+        context.read<UserCubit>().getListing();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-  
-    final itemsToShow = dummyPackages;
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(categoryName), 
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "Search for packages...",
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      appBar: AppBar(title: Text(widget.categoryName), centerTitle: true),
+      body: BlocBuilder<UserCubit, UserState>(
+        builder: (context, state) {
+          if (state is GetListingLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is GetListingFailure) {
+            return Center(
+              child: Text(
+                state.errMessage,
+                style: const TextStyle(color: Colors.red),
               ),
-            ),
-          ),
+            );
+          }
 
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: itemsToShow.length, 
-              itemBuilder: (context, index) {
-                final item = itemsToShow[index];
+          if (state is GetListingSuccess) {
+            final listings = state.listingResponse.data;
 
-                return ResultCard(
-                  title: item.title,
-                  companyName: item.companyName,
-                  price: item.price,
-                  imageUrl: item.imageUrl,
-                  rating: item.rating,
-                  location: item.location,
-                  capacity: item.capacity,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailsPage(
-                          title: item.title,
-                          description: item.description,
-                          price: item.price,
-                          imageUrl: item.imageUrl,
-                          isGuest: true, 
-                        ),
+            if (listings.isEmpty) {
+              return const Center(child: Text("No packages found."));
+            }
+
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: "Search for packages...",
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: listings.length,
+                    itemBuilder: (context, index) {
+                      final item = listings[index];
+
+                      // استخراج البيانات لتلائم ResultCard
+                      final String title =
+                          item.title['en'] ?? item.title['ar'] ?? 'N/A';
+                      final String companyName =
+                          item.category.name; // كبديل لاسم الشركة
+                      final String price = item.variants.isNotEmpty
+                          ? '${item.variants[0].price} ${item.variants[0].currency}'
+                          : 'N/A';
+                      final String imageUrl = item.images.isNotEmpty
+                          ? item.images[0]
+                          : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
+
+                      String capacity = 'N/A';
+                      if (item.variants.isNotEmpty &&
+                          item.variants[0].availabilities.isNotEmpty &&
+                          item.variants[0].availabilities[0].slots.isNotEmpty) {
+                        capacity =
+                            '${item.variants[0].availabilities[0].slots[0].remainingCapacity} Guests';
+                      }
+
+                      return ResultCard(
+                        title: title,
+                        companyName: companyName,
+                        price: price,
+                        imageUrl: imageUrl,
+                        rating: 4.5, // قيمة افتراضية
+                        location: item.district.name,
+                        capacity: capacity,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              // تمرير كائن ServiceItem بالكامل
+                              builder: (context) => DetailsPage(item: item),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return const SizedBox();
+        },
       ),
     );
   }
