@@ -1,7 +1,7 @@
 import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/user_state.dart';
-import 'package:eventsapp/models/listing_model.dart';
+import 'package:eventsapp/models/listing_model.dart'; // تأكد أن هذا الملف يحتوي على ServiceItem
 import 'package:eventsapp/screens/detailsListings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +17,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
   @override
   void initState() {
     super.initState();
+    // استدعاء دالة جلب البيانات عند إنشاء الصفحة لأول مرة فقط
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<UserCubit>().state;
       if (state is! GetListingSuccess && state is! GetListingLoading) {
@@ -28,7 +29,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = context.read<ThemeCubit>().isDark;
+    bool isDark = context.read<ThemeCubit>().isDark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -42,10 +43,12 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
       ),
       body: BlocBuilder<UserCubit, UserState>(
         builder: (context, state) {
+          // 1. حالة التحميل
           if (state is GetListingLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
+          // 2. حالة الخطأ
           if (state is GetListingFailure) {
             return Center(
               child: Text(
@@ -56,6 +59,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
             );
           }
 
+          // 3. حالة النجاح ووجود البيانات
           if (state is GetListingSuccess) {
             final listings = state.listingResponse.data;
 
@@ -64,7 +68,9 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
             }
 
             return RefreshIndicator(
-              onRefresh: () async => context.read<UserCubit>().getListing(),
+              onRefresh: () async {
+                context.read<UserCubit>().getListing();
+              },
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: listings.length,
@@ -75,6 +81,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
             );
           }
 
+          // 4. الحالة الافتراضية
           return const SizedBox();
         },
       ),
@@ -84,13 +91,19 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
   Widget _buildHallCard(BuildContext context, bool isDark, ServiceItem item) {
     final theme = Theme.of(context);
 
+    // 1. استخراج الاسم (إنجليزي أو عربي)
     final String hallName =
         item.title['en'] ?? item.title['ar'] ?? 'Unknown Hall';
+
+    // 2. استخراج السعر من أول باقة (variant)
     final String price = item.variants.isNotEmpty
         ? '${item.variants[0].price} ${item.variants[0].currency}'
         : 'N/A';
+
+    // 3. استخراج الموقع من district
     final String location = item.district.name;
 
+    // 4. استخراج السعة (Capacity) من داخل أول variant -> أول availability -> أول slot
     String capacityInfo = 'N/A';
     if (item.variants.isNotEmpty &&
         item.variants[0].availabilities.isNotEmpty &&
@@ -100,6 +113,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
       capacityInfo = 'Up to $capacity Guests';
     }
 
+    // 5. الصورة (مصفوفة فارغة حالياً في الـ API، لذلك نضع صورة افتراضية)
     final String imageUrl = item.images.isNotEmpty
         ? item.images[0]
         : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
@@ -120,7 +134,6 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // === قسم الصورة والتقييم ===
           Stack(
             children: [
               ClipRRect(
@@ -172,7 +185,6 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
             ],
           ),
 
-          // === قسم النصوص والتفاصيل ===
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -201,6 +213,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                   ],
                 ),
                 const SizedBox(height: 10),
+
                 Row(
                   children: [
                     Icon(
@@ -215,22 +228,28 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                       Icons.people,
                       color: isDark ? Colors.grey[500] : Colors.grey[400],
                       size: 18,
-                    ),
+                    ), // أيقونة الأشخاص
                     const SizedBox(width: 5),
-                    Text(capacityInfo, style: theme.textTheme.bodySmall),
+                    Text(
+                      capacityInfo, // عرض السعة المأخوذة من slots
+                      style: theme.textTheme.bodySmall,
+                    ),
                   ],
                 ),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Divider(
                     color: theme.colorScheme.onSurface.withOpacity(0.1),
                   ),
                 ),
+
                 SizedBox(
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
+                      // الانتقال لصفحة التفاصيل مع تمرير الـ item الكامل
                       Navigator.push(
                         context,
                         MaterialPageRoute(
