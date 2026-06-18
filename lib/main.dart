@@ -56,6 +56,7 @@ Future<void> main() async {
 
   // [الـ Auto-Login الذكي] جلب التوكن المحفوظ وفحص الوجهة المناسبة
   final String? savedToken = CacheHelper().getData(key: ApiKey.token);
+  print("🚀 هل يوجد توكن في الكاش؟: $savedToken");
   
   Widget initialScreen;
   bool shouldUploadTokenImmediately = false; // 🌟 متغير سحري لفحص حالة الإرسال الفوري للسيرفر

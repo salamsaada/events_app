@@ -7,6 +7,9 @@ class ApiInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     final token = CacheHelper().getData(key: ApiKey.token);
 
+    print("🔍 API REQUEST: ${options.path}");
+  print("🔑 TOKEN FROM CACHE: $token");
+
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
     }

@@ -54,23 +54,18 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: BlocListener<AuthCubit, AuthState>(
+      // ... داخل الـ BlocListener في UserRegisterScreen
+        body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            
-            // 🌟 السحر الحقيقي هنا: فور نجاح عملية الساين اب، نأمر برفع التوكن صامتاً في الخلفية للسيرفر
-            try {
-              context.read<NotificationCubit>().uploadDeviceToken();
-            } catch (e) {
-              print("⚠️ فشل استدعاء رفع التوكن: $e");
-            }
-
-            bool isGoogleSignIn = state.successMessage.contains('success_google');
+            bool isGoogleSignIn = state.successMessage.contains(
+              'success_google',
+            );
 
             if (isGoogleSignIn) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text("تم تسجيل الدخول بواسطة جوجل بنجاح!"), 
+                  content: Text("تم تسجيل الدخول بواسطة جوجل بنجاح!"),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -79,14 +74,16 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 MaterialPageRoute(builder: (context) => const HomePage()),
                 (route) => false,
               );
-              return; 
+              return;
             }
 
             // الفحص الذكي بناءً على خيار المستخدم في الواجهة
             if (_selectedRole == 'provider') {
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => const ProviderWebLinkPage()),
+                MaterialPageRoute(
+                  builder: (context) => const ProviderWebLinkPage(),
+                ),
                 (route) => false,
               );
             } else {
@@ -104,12 +101,13 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.errorMessage), 
+                content: Text(state.errorMessage),
                 backgroundColor: Colors.red,
               ),
             );
           }
         },
+  // ... باقي الواجهة (Build) يبقى كما هو
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
