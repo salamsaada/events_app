@@ -135,7 +135,6 @@ class AuthCubit extends Cubit<AuthState> {
           if (fcmToken != null) "device_token": fcmToken,
         },
       );
-      await _saveUserSession(responseData);
       String serverMessage =
           responseData[ApiKey.message] ?? "تم إنشاء الحساب بنجاح!";
       emit(AuthSuccess(successMessage: serverMessage));
