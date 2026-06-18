@@ -1,5 +1,6 @@
 //import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart'; 
+import 'package:dio/dio.dart';
+import 'package:eventsapp/models/user_model.dart'; 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
@@ -14,40 +15,38 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthCubit(this._api, this._cache) : super(AuthInitial());
 
-  String _handleInlineError(dynamic error) {
-    String message = "حدث خطأ غير متوقع، يرجى المحاولة لاحقاً.";
-    
-    if (error is DioException) {
-      // 1. فحص إذا كان هناك رد حقيقي قادم من لارافل بداخل الـ Data وبصيغة Map
-      if (error.response != null && error.response!.data != null && error.response!.data is Map) {
-        final Map<String, dynamic> responseData = error.response!.data;
+ String _handleInlineError(dynamic error) {
+  if (error is DioException) {
+    if (error.response?.data != null) {
+      final data = error.response!.data;
 
-        if (responseData['message'] != null) {
-          return responseData['message'].toString();
-        } 
-        // 3. إذا أرسل لارافل حقل 'errors' الخاص بالفاليديشن (مثل: الباسورد قصير)
-        else if (responseData['errors'] != null && responseData['errors'] is Map) {
-          Map<String, dynamic> errors = responseData['errors'];
-          if (errors.isNotEmpty) {
-            var firstErrorList = errors.values.first;
-            if (firstErrorList is List && firstErrorList.isNotEmpty) {
-              return firstErrorList.first.toString();
-            } else {
-              return firstErrorList.toString();
-            }
+      if (data is Map) {
+        if (data.containsKey('message')) {
+          return data['message'].toString();
+        }
+        
+        // 2. البحث عن 'errors' (أخطاء التحقق)
+        if (data.containsKey('errors')) {
+          final errors = data['errors'];
+          if (errors is Map && errors.isNotEmpty) {
+            var firstKey = errors.keys.first;
+            var firstError = errors[firstKey];
+            return firstError is List ? firstError.first.toString() : firstError.toString();
           }
         }
-      } 
-      // 4. في حال انقطع الإنترنت تماماً ولم يصل أي رد من السيرفر
-      else if (error.type != DioExceptionType.badResponse) {
-        return "تعذر الاتصال بالسيرفر، يرجى التحقق من شبكة الإنترنت.";
       }
     }
     
-    return message;
+    // فحص الإنترنت
+    if (error.type == DioExceptionType.connectionError || 
+        error.type == DioExceptionType.connectionTimeout) {
+      return "عذراً، لا يوجد اتصال بالإنترنت.";
+    }
   }
+  
+  return "حدث خطأ غير متوقع. يرجى التأكد من البيانات والمحاولة مجدداً.";
+}
 
- // تسجيل الدخول عبر جوجل للموبايل (معدلة لإرسال توكن الإشعارات)
   Future<void> signInWithGoogleMobile() async {
     emit(AuthLoading());
     try {
@@ -95,7 +94,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
- // 2️⃣ إنشاء حساب مستخدم جديد (معدلة لإرسال توكن الإشعارات)
   Future<void> signUpUser({
     required String firstName,
     required String lastName,
@@ -111,7 +109,6 @@ class AuthCubit extends Cubit<AuthState> {
         fcmToken = await FirebaseMessaging.instance.getToken();
         print("FCM Token Fetched Successfully: $fcmToken");
       } catch (e) {
-        // حماية التطبيق من الانهيار لو كانت خدمات جوجل غير مدعومة في المحاكي
         print("Error fetching FCM token during registration: $e");
       }
 
@@ -135,7 +132,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // 3️⃣ تسجيل دخول المستخدم التقليدي (معدلة لإرسال توكن الإشعارات)
   Future<void> signInUser({
     required String identity, 
     required String password,
@@ -237,7 +233,6 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(AuthLoading());
     try {
-      // 🌟 1. جلب توكن الجهاز من الفايربيز بشكل آمن محصن بـ try-catch
       String? fcmToken;
       try {
         fcmToken = await FirebaseMessaging.instance.getToken();
@@ -246,13 +241,12 @@ class AuthCubit extends Cubit<AuthState> {
         print("⚠️ [OTP] Failed to get FCM Token: $e");
       }
 
-      // 🌟 2. إرسال طلب التحقق مع حقل الـ device_token الجديد للسيرفر
       final responseData = await _api.post(
         "/auth/verify-email-otp", 
         data: {
           "email": email, 
           "otp": code,
-          if (fcmToken != null) "device_token": fcmToken, // 👈 قمنا بتغييرها هنا لـ device_token لتطابق الباكيند
+          if (fcmToken != null) "device_token": fcmToken, 
         },
       );
 
@@ -271,7 +265,6 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(AuthLoading());
     try {
-      // 🌟 1. جلب توكن الجهاز من الفايربيز بشكل آمن محصن بـ try-catch
       String? fcmToken;
       try {
         fcmToken = await FirebaseMessaging.instance.getToken();
@@ -280,13 +273,12 @@ class AuthCubit extends Cubit<AuthState> {
         print("⚠️ [WhatsApp OTP] Failed to get FCM Token: $e");
       }
 
-      // 🌟 2. إرسال طلب التحقق مع حقل الـ device_token الجديد للسيرفر
       final responseData = await _api.post(
         "/auth/verify-otp", 
         data: {
           "identity": phone,
           "code": code,
-          if (fcmToken != null) "device_token": fcmToken, // 👈 قمنا بتمريره هنا باسم device_token ليطابق السيرفر
+          if (fcmToken != null) "device_token": fcmToken, 
         },
       );
 
@@ -298,7 +290,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // 9️⃣ دالة تسجيل الخروج المتكاملة مع الفايربيز ولارافل
+ // 9️⃣ دالة تسجيل الخروج
   Future<void> logOut() async {
     emit(AuthLoading());
     try {
@@ -309,6 +301,8 @@ class AuthCubit extends Cubit<AuthState> {
         print("Firebase token fetch failed: $e");
       }
 
+      print("📢 الـ FCM Token الذي سنرسله للسيرفر للحذف هو: $fcmToken");
+
       await _api.post(
         "/auth/logout", 
         data: {
@@ -316,26 +310,60 @@ class AuthCubit extends Cubit<AuthState> {
         },
       );
 
-      // مسح الـ Access Token محلياً من الهاتف
+      try {
+        await FirebaseMessaging.instance.deleteToken();
+        print("✔️ FCM Token completely deleted from device storage.");
+      } catch (e) {
+        print("⚠️ Failed to delete FCM token: $e");
+      }
+
       await _cache.removeData(key: ApiKey.token); 
+      await _cache.removeData(key: "is_logged_in"); 
 
       emit(AuthInitial());
     } catch (e) {
-      // حزام أمان محلي: لو تعطلت الشبكة، يتم إجبار مسح الكاش لضمان طرد المستخدم بأمان
+      // حزام الأمان في حال انقطاع الشبكة: إجبار الخروج محلياً
+      try {
+        await FirebaseMessaging.instance.deleteToken();
+      } catch (_) {}
       await _cache.removeData(key: ApiKey.token);
+      await _cache.removeData(key: "is_logged_in");
       emit(AuthInitial());
+    }
+  }
+
+
+Future<void> getUserProfile() async {
+    emit(ProfileLoading());
+    try {
+      final responseData = await _api.get("/user");
+      print("DEBUG: Raw JSON: $responseData"); 
+
+      final user = UserModel.fromJson(responseData);
+      emit(ProfileLoaded(user: user));
+    } catch (e) {
+      print(
+        "DEBUG: Error in getUserProfile: $e",
+      ); 
+      emit(AuthFailure(errorMessage: e.toString()));
     }
   }
 
   // 🔟 دالة حفظ بيانات الجلسة محلياً بالـ Cache الموحد لضمان الـ Auto-Login المستقبلي
   Future<void> _saveUserSession(dynamic responseData) async {
+    print("DEBUG: ResponseData received: $responseData");
+
     if (responseData is Map) {
-      final dataPart = responseData['data'] ?? responseData;
-      final accessToken = dataPart['access_token'];
+      final accessToken =
+          responseData['access_token'] ?? 
+          responseData['data']?['access_token'] ?? 
+          responseData['token']; 
 
       if (accessToken != null) {
         await _cache.saveData(key: ApiKey.token, value: accessToken);
-        await _cache.saveData(key: "is_logged_in", value: true);
+        print("SUCCESS: Token saved successfully: $accessToken");
+      } else {
+        print("ERROR: Token not found in any of the expected locations!");
       }
     }
   }

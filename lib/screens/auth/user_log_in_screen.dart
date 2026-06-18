@@ -1,6 +1,5 @@
 import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/auth_state.dart';
-import 'package:eventsapp/cubit/notification_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/core/theme/app_colors.dart';
@@ -20,7 +19,6 @@ class UserLogInScreen extends StatefulWidget {
 
 class _UserLogInScreenState extends State<UserLogInScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -38,28 +36,17 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: AppColors.whiteText,
-            size: 20,
-          ),
+          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.whiteText, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            try {
-              context.read<NotificationCubit>().uploadDeviceToken();
-            } catch (e) {
-              print("⚠️ فشل تحديث التوكن الاحتياطي: $e");
-            }
-
+            // 🧹 تم الحذف: الاستدعاء الزائد لـ uploadDeviceToken تمت إزالته هنا
+            
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.successMessage),
-                backgroundColor: Colors.green,
-              ),
+              SnackBar(content: Text(state.successMessage), backgroundColor: Colors.green),
             );
 
             Navigator.pushAndRemoveUntil(
@@ -69,10 +56,7 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
             );
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage),
-                backgroundColor: Colors.red,
-              ),
+              SnackBar(content: Text(state.errorMessage), backgroundColor: Colors.red),
             );
           }
         },
@@ -85,10 +69,8 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-
                   Text(l10n.authSignInTitle, style: AppTextStyles.mainTitle),
                   const SizedBox(height: 10),
-
                   Text(l10n.authWelcomeBack, style: AppTextStyles.bodyGrey),
                   const SizedBox(height: 50),
                   
@@ -96,12 +78,7 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
                     controller: _emailController,
                     label: l10n.authEmailAddress,
                     icon: Icons.email_outlined,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "please enter your email";
-                      }
-                      return null;
-                    },
+                    validator: (value) => (value == null || value.isEmpty) ? "please enter your email" : null,
                   ),
                   const SizedBox(height: 25),
 
@@ -110,33 +87,14 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
                     label: l10n.authPassword,
                     icon: Icons.lock_outline,
                     isPassword: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "please enter your password";
-                      }
-                      return null;
-                    },
+                    validator: (value) => (value == null || value.isEmpty) ? "please enter your password" : null,
                   ),
 
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ForgotPasswordScreen(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        l10n.authForgotPassword,
-                        style: const TextStyle(
-                          color: AppColors.primaryGold,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPasswordScreen())),
+                      child: Text(l10n.authForgotPassword, style: const TextStyle(color: AppColors.primaryGold, fontSize: 13, fontWeight: FontWeight.bold)),
                     ),
                   ),
 
@@ -144,12 +102,11 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
 
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
-                      if (state is AuthLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+                      bool isLoading = state is AuthLoading;
                       return CustomGoldButton(
-                        text: l10n.authSignInTitle,
-                        onTap: () {
+                        text: isLoading ? "جاري تسجيل الدخول..." : l10n.authSignInTitle,
+                        // 🛡️ حماية: الزر معطل أثناء التحميل لمنع التكرار
+                        onTap: isLoading ? null : () {
                           if (_formKey.currentState!.validate()) {
                             context.read<AuthCubit>().signInUser(
                                   identity: _emailController.text.trim(),
@@ -165,22 +122,15 @@ class _UserLogInScreenState extends State<UserLogInScreen> {
 
                   Center(
                     child: TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+                      onPressed: () => Navigator.pop(context),
                       child: RichText(
                         text: TextSpan(
                           text: l10n.authDontHaveAccount,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                           children: [
                             TextSpan(
                               text: l10n.authCreateOne,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),

@@ -1,27 +1,28 @@
-﻿// import 'package:eventsapp/core/api/end_ponits.dart';
+﻿class UserModel {
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String? phone; 
+  final String role;
+  
+  UserModel({
+    required this.id, 
+    required this.firstName, 
+    required this.lastName, 
+    required this.email, 
+    this.phone, 
+    required this.role
+  });
 
-// // class UserModel {
-// //   final String profilePic;
-// //   final String email;
-// //   final String phone;
-// //   final String name;
-// //   final Map<String, dynamic> address;
-
-// //   UserModel({
-// //     required this.profilePic,
-// //     required this.email,
-// //     required this.phone,
-// //     required this.name,
-// //     required this.address,
-// //   });
-
-// //   factory UserModel.fromJson(Map<String, dynamic> jsonData) {
-// //     return UserModel(
-// //       profilePic: jsonData['user'][ApiKey.profilePic],
-// //       email: jsonData['user'][ApiKey.email],
-// //       phone: jsonData['user'][ApiKey.phone],
-// //       name: jsonData['user'][ApiKey.name],
-// //       address: jsonData['user'][ApiKey.location],
-// //     );
-// //   }
-// // }
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'],
+      firstName: json['first_name'] ?? '',
+      lastName: json['last_name'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'], 
+      role: json['role'] ?? 'organizer',
+    );
+  }
+}
