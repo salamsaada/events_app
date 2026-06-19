@@ -194,36 +194,35 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
 
                   const SizedBox(height: 20),
 
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
                       child: Text(
                         "Account Type",
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTextStyles.bodyGrey, 
                       ),
                     ),
                   ),
 
                   DropdownButtonFormField<String>(
                     value: _selectedRole, 
-                    dropdownColor: const Color(0xFF1E1E1E), 
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    icon: const Icon(
+                    dropdownColor: Theme.of(context).colorScheme.surface, 
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface, 
+                      fontSize: 16,
+                    ),
+                    icon: Icon(
                       Icons.arrow_drop_down,
-                      color: Color(0xFFE5B842),
+                      color: Theme.of(context).colorScheme.primary, 
                     ), 
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.person_outline,
-                        color: Color(0xFFE5B842),
+                        color: Theme.of(context).colorScheme.primary, 
                       ), 
                       filled: true,
-                      fillColor: const Color(0xFF1E1E1E), 
+                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest, 
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -231,7 +230,10 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE5B842), width: 1.5), 
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary, 
+                          width: 1.5,
+                        ), 
                       ),
                     ),
                     items: const [

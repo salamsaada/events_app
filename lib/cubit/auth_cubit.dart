@@ -37,7 +37,6 @@ class AuthCubit extends Cubit<AuthState> {
       }
     }
     
-    // فحص الإنترنت
     if (error.type == DioExceptionType.connectionError || 
         error.type == DioExceptionType.connectionTimeout) {
       return "عذراً، لا يوجد اتصال بالإنترنت.";
@@ -47,7 +46,6 @@ class AuthCubit extends Cubit<AuthState> {
   return "حدث خطأ غير متوقع. يرجى التأكد من البيانات والمحاولة مجدداً.";
 }
 
-  // تسجيل الدخول عبر جوجل للموبايل (معدلة لإرسال توكن الإشعارات)
   Future<void> signInWithGoogleMobile() async {
     emit(AuthLoading());
     try {
@@ -321,7 +319,6 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthInitial());
     } catch (e) {
-      // حزام الأمان في حال انقطاع الشبكة: إجبار الخروج محلياً
       try {
         await FirebaseMessaging.instance.deleteToken();
       } catch (_) {}
