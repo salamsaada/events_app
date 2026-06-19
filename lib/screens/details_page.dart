@@ -1,6 +1,6 @@
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/models/listing_model.dart'; // استيراد الموديل
-import 'package:eventsapp/screens/Booking.dart';
+import 'package:eventsapp/screens/booking.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // لتنسيق التواريخ
@@ -13,6 +13,7 @@ class DetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isGuest = true; // يمكنك ربطها لاحقاً بحالة تسجيل الدخول
 
     // استخراج البيانات الأساسية
     final String title = item.title['en'] ?? item.title['ar'] ?? 'N/A';
@@ -147,9 +148,19 @@ class DetailsPage extends StatelessWidget {
         color: Colors.transparent,
         child: CustomGoldButton(
           text: AppLocalizations.of(context)!.bookRequest,
-          onTap: () => _handleBooking(context),
+          onTap: () => _showBookingSheet(context),
         ),
       ),
+    );
+  }
+
+  void _showBookingSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true, // ضروري ليأخذ مساحة كبيرة من الشاشة
+      backgroundColor: Colors.transparent,
+      builder: (context) =>
+          BookingRequestSheet(item: item), // استدعاء ويدجت الحجز المشتركة
     );
   }
 
@@ -251,12 +262,23 @@ class DetailsPage extends StatelessWidget {
     );
   }
 
-  void _handleBooking(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => BookingRequestSheet(item: item),
-    );
+  void _handleBooking(BuildContext context, bool isGuest) {
+    if (isGuest) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text("Please log in to proceed with your booking."),
+          backgroundColor: Colors.redAccent,
+          action: SnackBarAction(
+            label: "Login",
+            textColor: Colors.white,
+            onPressed: () {
+              // التوجيه لصفحة تسجيل الدخول
+            },
+          ),
+        ),
+      );
+    } else {
+      print("Proceeding to checkout for ${item.id}...");
+    }
   }
 }

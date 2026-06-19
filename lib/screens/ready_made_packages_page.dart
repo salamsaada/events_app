@@ -3,8 +3,9 @@ import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/user_state.dart';
+import 'package:eventsapp/models/listing_model.dart';
 import '../../../core/widgets/common/result_card.dart';
-import 'details_page.dart'; // استيراد صفحة التفاصيل المعدلة
+import 'details_page.dart';
 
 class ReadyMadePackagesPage extends StatefulWidget {
   final String categoryName;

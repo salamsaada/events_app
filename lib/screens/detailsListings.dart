@@ -1,10 +1,10 @@
 import 'package:eventsapp/cubit/theme_cubit.dart';
-import 'package:eventsapp/models/listing_model.dart'; // تأكد من استيراد الموديل الصحيح
-import 'package:eventsapp/screens/Booking.dart';
+import 'package:eventsapp/models/listing_model.dart';
+import 'package:eventsapp/screens/booking.dart';
 import 'package:flutter/material.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart'; // لتنسيق التواريخ
+import 'package:intl/intl.dart';
 
 class ServiceDetailsPagelist extends StatelessWidget {
   final ServiceItem item;
@@ -14,13 +14,13 @@ class ServiceDetailsPagelist extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    bool isDark = context.read<ThemeCubit>().isDark;
+    final isDark = context.read<ThemeCubit>().isDark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
-          // 1. الصورة الرئيسية مع الـ AppBar الشفاف
+          // === 1. الصورة الرئيسية مع الـ AppBar الشفاف ===
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
@@ -41,7 +41,6 @@ class ServiceDetailsPagelist extends StatelessWidget {
                       child: const Icon(Icons.error, color: Colors.red),
                     ),
                   ),
-                  // تدرج لوني لأسفل الصورة لجعل النصوص مقروءة
                   DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -49,7 +48,7 @@ class ServiceDetailsPagelist extends StatelessWidget {
                         end: FractionalOffset.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.7),
+                          Colors.black.withValues(alpha: 0.7),
                         ],
                       ),
                     ),
@@ -59,7 +58,7 @@ class ServiceDetailsPagelist extends StatelessWidget {
             ),
           ),
 
-          // 2. محتوى التفاصيل
+          // === 2. محتوى التفاصيل ===
           SliverToBoxAdapter(
             child: Container(
               transform: Matrix4.translationValues(0, -20, 0),
@@ -85,7 +84,7 @@ class ServiceDetailsPagelist extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -157,14 +156,14 @@ class ServiceDetailsPagelist extends StatelessWidget {
         ],
       ),
 
-      // 3. زر الحجز السفلي الثابت
+      // === 3. زر الحجز السفلي الثابت ===
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.4 : 0.05),
+              color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.05),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
@@ -197,14 +196,7 @@ class ServiceDetailsPagelist extends StatelessWidget {
               width: 180,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  showModalBottomSheet<void>(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => BookingRequestSheet(item: item),
-                  );
-                },
+                onPressed: () => _showBookingSheet(context),
                 style: theme.elevatedButtonTheme.style,
                 child: Text(AppLocalizations.of(context)!.bookRequest),
               ),
@@ -215,7 +207,16 @@ class ServiceDetailsPagelist extends StatelessWidget {
     );
   }
 
-  // ويدجت مساعدة لصف المعلومات
+  void _showBookingSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => BookingRequestSheet(item: item),
+    );
+  }
+
+  // === ويدجت مساعدة لصف المعلومات ===
   Widget _buildInfoRow(
     IconData icon1,
     String text1,
@@ -241,7 +242,7 @@ class ServiceDetailsPagelist extends StatelessWidget {
     );
   }
 
-  // ويدجت مساعدة لبطاقة الباقة (Variant)
+  // === ويدجت مساعدة لبطاقة الباقة (Variant) ===
   Widget _buildVariantCard(Variant variant, ThemeData theme, bool isDark) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
@@ -249,7 +250,9 @@ class ServiceDetailsPagelist extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,18 +283,18 @@ class ServiceDetailsPagelist extends StatelessWidget {
 
           // عرض أوقات التوفر (Availabilities)
           if (variant.availabilities.isNotEmpty)
-            ...variant.availabilities
-                .map((avail) => _buildAvailabilityRow(avail, theme))
-                .toList(),
+            ...variant.availabilities.map(
+              (avail) => _buildAvailabilityRow(avail, theme),
+            ),
         ],
       ),
     );
   }
 
-  // ويدجت مساعدة لعرض التوفر
+  // === ويدجت مساعدة لعرض التوفر ===
   Widget _buildAvailabilityRow(Availability availability, ThemeData theme) {
-    final dateFormat = DateFormat('dd MMM, yyyy'); // تنسيق التاريخ
-    final timeFormat = DateFormat('hh:mm a'); // تنسيق الوقت
+    final dateFormat = DateFormat('dd MMM, yyyy');
+    final timeFormat = DateFormat('hh:mm a');
 
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
@@ -316,36 +319,30 @@ class ServiceDetailsPagelist extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           if (availability.slots.isNotEmpty)
-            ...availability.slots
-                .map(
-                  (slot) => Padding(
-                    padding: const EdgeInsets.only(left: 20.0, bottom: 4),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          size: 12,
-                          color: Colors.grey[500],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${timeFormat.format(slot.startTime.toLocal())} - ${timeFormat.format(slot.endTime.toLocal())}',
-                          style: theme.textTheme.bodySmall,
-                        ),
-                        const Spacer(),
-                        Text(
-                          'Capacity: ${slot.remainingCapacity}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: slot.remainingCapacity > 0
-                                ? Colors.green
-                                : Colors.red,
-                          ),
-                        ),
-                      ],
+            ...availability.slots.map(
+              (slot) => Padding(
+                padding: const EdgeInsets.only(left: 20.0, bottom: 4),
+                child: Row(
+                  children: [
+                    Icon(Icons.access_time, size: 12, color: Colors.grey[500]),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${timeFormat.format(slot.startTime.toLocal())} - ${timeFormat.format(slot.endTime.toLocal())}',
+                      style: theme.textTheme.bodySmall,
                     ),
-                  ),
-                )
-                .toList(),
+                    const Spacer(),
+                    Text(
+                      'Capacity: ${slot.remainingCapacity}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: slot.remainingCapacity > 0
+                            ? Colors.green
+                            : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           const Divider(),
         ],
       ),

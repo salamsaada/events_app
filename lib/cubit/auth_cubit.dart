@@ -1,4 +1,4 @@
-//import 'package:bloc/bloc.dart';
+import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -135,7 +135,6 @@ class AuthCubit extends Cubit<AuthState> {
           if (fcmToken != null) "device_token": fcmToken,
         },
       );
-      await _saveUserSession(responseData);
       String serverMessage =
           responseData[ApiKey.message] ?? "تم إنشاء الحساب بنجاح!";
       emit(AuthSuccess(successMessage: serverMessage));
@@ -339,7 +338,7 @@ class AuthCubit extends Cubit<AuthState> {
       final accessToken = dataPart['access_token'];
 
       if (accessToken != null) {
-        await CacheHelper().saveData(key: ApiKey.token, value: accessToken);
+        // await CacheHelper().saveData(key: ApiKey.token, value: accessToken);
 
         await _cache.saveData(key: ApiKey.token, value: accessToken);
         await _cache.saveData(key: "is_logged_in", value: true);
