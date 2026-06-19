@@ -2,7 +2,6 @@ import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 class BookingRequestSheet extends StatefulWidget {
@@ -79,7 +78,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              AppLocalizations.of(context)!.bookRequest,
+                              'Booking request',
                               style: theme.textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.w800,
                               ),
@@ -406,7 +405,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                         messenger.showSnackBar(
                           SnackBar(
                             content: Text(
-                              AppLocalizations.of(context)!.servicesBookingSent,
+                              'Booking request sent for $title on ${DateFormat('dd MMM, yyyy').format(_selectedDate)}.',
                             ),
                             behavior: SnackBarBehavior.floating,
                           ),
@@ -421,8 +420,8 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                       ),
                       child: Text(
                         selectedVariant == null
-                            ? AppLocalizations.of(context)!.servicesBookAction
-                            : '${AppLocalizations.of(context)!.servicesBookAction} - ${selectedVariant.price} ${selectedVariant.currency}',
+                            ? 'Send booking request'
+                            : 'Send booking request - ${selectedVariant.price} ${selectedVariant.currency}',
                       ),
                     ),
                   ),
@@ -451,31 +450,29 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
     required String label,
     bool fullWidth = false,
   }) {
-    return Flexible(
-      flex: fullWidth ? 2 : 1, // استخدام Flexible بدلاً من Expanded
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: theme.colorScheme.primary),
-            const SizedBox(width: 8),
-            // هنا Expanded مسموح به لأنه داخل Row محلي لمنع النص من الخروج
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+    return Container(
+      // إذا كان fullWidth خذ العرض كاملاً، وإلا خذ عرضاً ثابتاً مناسباً (مثلاً 140)
+      width: fullWidth ? double.infinity : 140,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: theme.colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
