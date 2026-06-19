@@ -2,8 +2,8 @@ import 'package:eventsapp/core/widgets/filter_button.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/screens/filters/filter_section.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart'; // 🌟 استيراد حزمة الـ Bloc
-import 'package:eventsapp/cubit/notification_cubit.dart'; // 🌟 استيراد الـ NotificationCubit الجديد
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:eventsapp/cubit/notification_cubit.dart';
 import '../../core/widgets/common/bottom_navigation.dart';
 import '../../core/widgets/common/hero_carousel.dart';
 import '../../core/widgets/common/newsletter_section.dart';
@@ -25,13 +25,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  // 🌟 استدعاء التوكن وتحديثه بالسيرفر فور صعود شاشة الهوم بيج
-  @override
-  void initState() {
-    super.initState();
-    // استخدام الـ Inline Trigger لتنبيه الـ NotificationCubit بالخلفية
-    context.read<NotificationCubit>().uploadDeviceToken();
-  }
+  // 🧹 تم حذف الـ initState مع استدعاء الـ uploadDeviceToken لتنظيف الكود ومنع التكرار
 
   void _openFilterSheet() {
     showModalBottomSheet(

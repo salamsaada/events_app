@@ -8,7 +8,6 @@ class NotificationCubit extends Cubit<NotificationState> {
 
   NotificationCubit(this._api) : super(NotificationInitial());
 
-  /// دالة سحب التوكن من الفايربيز وإرساله تلقائياً للباكيند
   Future<void> uploadDeviceToken() async {
     emit(NotificationSubmittingToken());
     try {

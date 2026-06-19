@@ -1,12 +1,13 @@
+import 'package:eventsapp/cubit/auth_cubit.dart';
+import 'package:eventsapp/cubit/auth_state.dart';
 import 'package:flutter/material.dart';
-
-import '../home/home_page.dart';
-import '../../core/widgets/common/bottom_navigation.dart';
-import '../chat/chat_page.dart';
-import '../settings/settings_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../generated/app_localizations.dart';
+import '../settings/settings_page.dart';
+import '../../core/widgets/common/bottom_navigation.dart';
+import '../../models/user_model.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -15,203 +16,156 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // Fetch user data automatically when the page is loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthCubit>().getUserProfile();
+    });
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 120),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const SettingsPage()),
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.settings,
-                      color: AppColors.primaryGold,
-                    ),
-                  ),
-                  Text(
-                    l10n.profileTitle,
-                    style: AppTextStyles.mainTitle.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.primaryGold.withValues(alpha: 0.1),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            l10n.sarraHarbi,
-                            style: AppTextStyles.subtitle.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l10n.premium,
-                            style: AppTextStyles.bodyMain.copyWith(
-                              color: AppColors.primaryGold,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l10n.email,
-                            style: AppTextStyles.tileCaption.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xFFD4AF37),
-                        border: Border.all(color: Colors.grey[300]!, width: 2),
-                      ),
-                      child: const Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              _ProfileInfoCard(
-                title: l10n.accountInfo,
-                rows: [
-                  _InfoRowData(l10n.phone, '+966 55 555 5555'),
-                  _InfoRowData(l10n.city, l10n.riyadh),
-                  _InfoRowData(l10n.eventTypes, l10n.weddingsCompaniesEvents),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _ProfileInfoCard(
-                title: l10n.subscription,
-                rows: [
-                  _InfoRowData(l10n.currentPlan, l10n.royalMembership),
-                  _InfoRowData(l10n.renewalDate, l10n.renewalDateValue),
-                  _InfoRowData(l10n.currentBalance, l10n.balanceAmount),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _ProfileInfoCard(
-                title: l10n.savedAddresses,
-                rows: [
-                  _InfoRowData(l10n.home, l10n.yasmineDistrict),
-                  _InfoRowData(l10n.work, l10n.kingFahdRoad),
-                ],
-              ),
-            ],
-          ),
-        ),
+      body: BlocBuilder<AuthCubit, AuthState>(
+        builder: (context, state) {
+          if (state is ProfileLoading) {
+            return const Center(child: CircularProgressIndicator(color: AppColors.primaryGold));
+          }
+          if (state is ProfileLoaded) {
+            return _buildProfileView(context, l10n, state.user);
+          }
+          if (state is AuthFailure) {
+            return Center(child: Text(state.errorMessage));
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
       bottomNavigationBar: AppBottomNavigation(
-        selectedIndex: 3,
-        onItemSelected: (index) {
-          if (index == 0) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const HomePage()),
-              (route) => false,
-            );
-            return;
-          }
-          if (index == 1) {
-            Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const ChatPage()));
-            return;
-          }
-          if (index == 2) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(l10n.pageWillBeAvailable)));
-          }
-        },
+        selectedIndex: 3, 
+        onItemSelected: (index) {},
+      ),
+    );
+  }
+
+  Widget _buildProfileView(BuildContext context, AppLocalizations l10n, UserModel user) {
+    // Logic: Display phone number if available, otherwise fallback to email
+    final String contactInfo = (user.phone != null && user.phone!.isNotEmpty) 
+        ? user.phone! 
+        : user.email;
+    final String contactLabel = (user.phone != null && user.phone!.isNotEmpty) 
+        ? "Phone Number" 
+        : "Email Address";
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 120),
+        child: Column(
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SettingsPage()),
+                  ),
+                  icon: const Icon(Icons.settings, color: AppColors.primaryGold),
+                ),
+                Text(l10n.profileTitle, style: AppTextStyles.mainTitle),
+              ],
+            ),
+            const SizedBox(height: 30),
+
+            // Profile Card
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  )
+                ],
+              ),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 35,
+                    backgroundColor: AppColors.primaryGold,
+                    child: Icon(Icons.person, size: 40, color: Colors.white),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${user.firstName} ${user.lastName}",
+                          style: AppTextStyles.mainTitle.copyWith(fontSize: 20),
+                        ),
+                        Text(
+                          contactInfo,
+                          style: AppTextStyles.tileCaption,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Account Information Card
+            _ProfileInfoCard(
+              title: "Account Details",
+              rows: [
+                _InfoRowData(contactLabel, contactInfo),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
+// Reusable card widget for profile information
 class _ProfileInfoCard extends StatelessWidget {
   final String title;
   final List<_InfoRowData> rows;
-
   const _ProfileInfoCard({required this.title, required this.rows});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.1)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: AppTextStyles.sectionTitle.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+            style: AppTextStyles.sectionTitle.copyWith(color: AppColors.primaryGold, fontSize: 16),
           ),
-          const SizedBox(height: 12),
+          const Divider(height: 24),
           ...rows.map(
             (row) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Flexible(
-                    child: Text(
-                      row.value,
-                      style: AppTextStyles.tileCaption.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.65),
-                      ),
-                    ),
+                  Text(
+                    row.value,
+                    style: AppTextStyles.tileCaption.copyWith(color: Theme.of(context).colorScheme.onSurface),
                   ),
-                  const SizedBox(width: 12),
                   Text(
                     row.label,
-                    style: AppTextStyles.tileTitle.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.85),
-                    ),
+                    style: AppTextStyles.tileTitle.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
                   ),
                 ],
               ),
@@ -226,6 +180,5 @@ class _ProfileInfoCard extends StatelessWidget {
 class _InfoRowData {
   final String label;
   final String value;
-
   const _InfoRowData(this.label, this.value);
 }

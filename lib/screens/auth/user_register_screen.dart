@@ -225,19 +225,24 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
 
                   DropdownButtonFormField<String>(
                     value: _selectedRole,
-                    dropdownColor: const Color(0xFF1E1E1E),
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    icon: const Icon(
+                    dropdownColor: Theme.of(context).colorScheme.surface,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 16,
+                    ),
+                    icon: Icon(
                       Icons.arrow_drop_down,
-                      color: Color(0xFFE5B842),
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.person_outline,
-                        color: Color(0xFFE5B842),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                       filled: true,
-                      fillColor: const Color(0xFF1E1E1E),
+                      fillColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 16,
@@ -248,8 +253,8 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE5B842),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
                           width: 1.5,
                         ),
                       ),

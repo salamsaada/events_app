@@ -75,14 +75,31 @@ class UserRepository {
   Future<Either<String, ListingResponse>> getlisting() async {
     try {
       final response = await api.get(
-        EndPoint.getlisting, // يجب إضافة هذا الـ Endpoint في كلاس EndPoint
+        EndPoint.getlisting, 
       );
+
+      // 1. التحقق مما إذا كان الرد فارغاً تماماً (null) أو لا يحتوي على بيانات
+      if (response == null || (response is List && response.isEmpty) || (response is Map && response.isEmpty)) {
+         // نُرجع هذه الرسالة ليتم عرضها في واجهة المستخدم
+         return const Left("لا يوجد صالات حالياً");
+      }
 
       final serviceResponse = ListingResponse.fromJson(response);
 
+      // 2. خطوة أمان إضافية: إذا كان السيرفر يرسل المودل ولكن مصفوفة الصالات بداخله فارغة
+      // (ملاحظة: استبدلي 'data' باسم المصفوفة الموجودة داخل ListingResponse لديكِ إذا كانت مختلفة)
+      /*
+      if (serviceResponse.data == null || serviceResponse.data!.isEmpty) {
+         return const Left("لا يوجد صالات حالياً");
+      }
+      */
+
       return Right(serviceResponse);
+
     } on ServerException catch (e) {
       return Left(e.errModel.errorMessage);
+    } catch (e) {
+      return Left("حدث خطأ غير متوقع: $e");
     }
   }
 
