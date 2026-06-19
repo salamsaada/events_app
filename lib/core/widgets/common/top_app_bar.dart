@@ -1,5 +1,6 @@
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+// flutter_bloc not needed here
 import '../../../generated/app_localizations.dart';
 import '../../../screens/notifications_page.dart';
 
@@ -74,6 +75,7 @@ class TopBar extends StatelessWidget {
                 letterSpacing: 2,
               ),
             ),
+            // Language toggle removed — use settings page toggle instead
           ],
         ),
       ),

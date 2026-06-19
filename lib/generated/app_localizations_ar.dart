@@ -523,4 +523,127 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get servicesDjPreview => 'الدي جي والترفيه';
+
+  @override
+  String get startingFrom => 'ابتداءً من';
+
+  @override
+  String get authGoogleSignInSuccess => 'تم تسجيل الدخول بواسطة جوجل بنجاح!';
+
+  @override
+  String get userRoleOrganizer => 'منظم';
+
+  @override
+  String get userRoleProvider => 'مزود';
+
+  @override
+  String get accountType => 'نوع الحساب';
+
+  @override
+  String get pleaseEnterFirstName => 'الرجاء إدخال الاسم الأول';
+
+  @override
+  String get pleaseEnterLastName => 'الرجاء إدخال اسم العائلة';
+
+  @override
+  String get pleaseEnterEmailOrPhone =>
+      'الرجاء إدخال البريد الإلكتروني أو رقم الجوال';
+
+  @override
+  String get passwordChangedSuccess => 'تم تغيير كلمة المرور بنجاح!';
+
+  @override
+  String get viewDetails => 'عرض التفاصيل';
+
+  @override
+  String get orderDetails => 'تفاصيل الطلب';
+
+  @override
+  String get applyFilters => 'تطبيق الفلاتر';
+
+  @override
+  String get location => 'الموقع';
+
+  @override
+  String get numberOfGuests => 'عدد الضيوف';
+
+  @override
+  String get eventStyle => 'طراز الفعالية';
+
+  @override
+  String get productName => 'اسم المنتج';
+
+  @override
+  String get selectCategoryPrompt => 'اختر فئة لعرض الفلاتر';
+
+  @override
+  String get maxPriceLabel => 'أقصى سعر';
+
+  @override
+  String get verifyYourIdentity => 'تحقق من هويتك';
+
+  @override
+  String codeSentEmail(Object identity) {
+    return 'تم إرسال رمز مكوّن من 6 أرقام إلى بريدك: $identity. الرجاء إدخاله أدناه للمتابعة.';
+  }
+
+  @override
+  String codeSentWhatsApp(Object identity) {
+    return 'تم إرسال رمز مكوّن من 6 أرقام إلى واتسابك: $identity. الرجاء إدخاله أدناه للمتابعة.';
+  }
+
+  @override
+  String get verifyAccess => 'تحقق من الوصول';
+
+  @override
+  String get pleaseEnterFullCode => 'الرجاء إدخال الكود كاملاً';
+
+  @override
+  String get backToEmail => '< العودة إلى الإيميل';
+
+  @override
+  String get backToPhone => '< العودة إلى الهاتف';
+
+  @override
+  String get resendCode => 'إعادة إرسال الكود';
+
+  @override
+  String get byLabel => 'بواسطة';
+
+  @override
+  String get firstNameLabel => 'الاسم الأول';
+
+  @override
+  String get firstNameError => 'يرجى إدخال اسمك الأول';
+
+  @override
+  String get lastNameLabel => 'اسم العائلة';
+
+  @override
+  String get lastNameError => 'يرجى إدخال اسم العائلة';
+
+  @override
+  String get emailOrPhoneLabel => 'البريد الإلكتروني أو رقم الهاتف';
+
+  @override
+  String get emailOrPhoneError => 'يرجى إدخال البريد الإلكتروني أو رقم الهاتف';
+
+  @override
+  String get passwordLabel => 'كلمة المرور';
+
+  @override
+  String get passwordError => 'يرجى إدخال كلمة المرور';
+
+  @override
+  String get passwordLengthError =>
+      'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل';
+
+  @override
+  String get confirmPasswordLabel => 'تأكيد كلمة المرور';
+
+  @override
+  String get confirmPasswordError => 'يرجى تأكيد كلمة المرور';
+
+  @override
+  String get passwordMismatchError => 'كلمتا المرور غير متطابقتين';
 }

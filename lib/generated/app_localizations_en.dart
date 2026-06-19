@@ -528,4 +528,127 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get servicesDjPreview => 'DJ & Entertainment';
+
+  @override
+  String get startingFrom => 'Starting from';
+
+  @override
+  String get authGoogleSignInSuccess => 'Signed in with Google successfully.';
+
+  @override
+  String get userRoleOrganizer => 'Organizer';
+
+  @override
+  String get userRoleProvider => 'Provider';
+
+  @override
+  String get accountType => 'Account Type';
+
+  @override
+  String get pleaseEnterFirstName => 'Please enter your first name';
+
+  @override
+  String get pleaseEnterLastName => 'Please enter your last name';
+
+  @override
+  String get pleaseEnterEmailOrPhone =>
+      'Please enter your email or phone number';
+
+  @override
+  String get passwordChangedSuccess =>
+      'Your password has been changed successfully.';
+
+  @override
+  String get viewDetails => 'View Details';
+
+  @override
+  String get orderDetails => 'Order details';
+
+  @override
+  String get applyFilters => 'Apply Filters';
+
+  @override
+  String get location => 'Location';
+
+  @override
+  String get numberOfGuests => 'Number of Guests';
+
+  @override
+  String get eventStyle => 'Event Style';
+
+  @override
+  String get productName => 'Product Name';
+
+  @override
+  String get selectCategoryPrompt => 'Select a category to see filters';
+
+  @override
+  String get maxPriceLabel => 'Max Price';
+
+  @override
+  String get verifyYourIdentity => 'Verify Your Identity';
+
+  @override
+  String codeSentEmail(Object identity) {
+    return 'A unique 6-digit code has been sent to your email: $identity. Please enter it below to proceed.';
+  }
+
+  @override
+  String codeSentWhatsApp(Object identity) {
+    return 'A unique 6-digit code has been sent to your WhatsApp: $identity. Please enter it below to proceed.';
+  }
+
+  @override
+  String get verifyAccess => 'VERIFY ACCESS';
+
+  @override
+  String get pleaseEnterFullCode => 'Please enter the full code';
+
+  @override
+  String get backToEmail => '< BACK TO EMAIL';
+
+  @override
+  String get backToPhone => '< BACK TO PHONE';
+
+  @override
+  String get resendCode => 'RESEND CODE';
+
+  @override
+  String get byLabel => 'By';
+
+  @override
+  String get firstNameLabel => 'First Name';
+
+  @override
+  String get firstNameError => 'Please enter your first name';
+
+  @override
+  String get lastNameLabel => 'Last Name';
+
+  @override
+  String get lastNameError => 'Please enter your last name';
+
+  @override
+  String get emailOrPhoneLabel => 'Email or phone number';
+
+  @override
+  String get emailOrPhoneError => 'Please enter your email or phone number';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get passwordError => 'Please enter your password';
+
+  @override
+  String get passwordLengthError => 'Password must be at least 8 characters';
+
+  @override
+  String get confirmPasswordLabel => 'Confirm Password';
+
+  @override
+  String get confirmPasswordError => 'Please confirm your password';
+
+  @override
+  String get passwordMismatchError => 'Passwords do not match';
 }

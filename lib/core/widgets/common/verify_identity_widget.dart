@@ -2,20 +2,21 @@ import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/custom_footer_links.dart';
 import 'package:eventsapp/cubit/auth_cubit.dart';
-import 'package:eventsapp/cubit/auth_state.dart'; 
-import 'package:eventsapp/screens/auth/reset_password_screen.dart'; 
-import 'package:eventsapp/screens/home/home_page.dart'; 
+import 'package:eventsapp/cubit/auth_state.dart';
+import 'package:eventsapp/screens/auth/reset_password_screen.dart';
+import 'package:eventsapp/screens/home/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:pinput/pinput.dart';
 
 class VerifyIdentityWidget extends StatefulWidget {
-  final String identity; 
-  final bool isForgotPassword; 
+  final String identity;
+  final bool isForgotPassword;
 
   const VerifyIdentityWidget({
     super.key,
-    required this.identity, 
+    required this.identity,
     this.isForgotPassword = false,
   });
 
@@ -24,7 +25,6 @@ class VerifyIdentityWidget extends StatefulWidget {
 }
 
 class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
-
   final TextEditingController _otpController = TextEditingController();
 
   @override
@@ -40,7 +40,7 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
       width: 48,
       height: 58,
       textStyle: TextStyle(
-        color: theme.colorScheme.onSurface, 
+        color: theme.colorScheme.onSurface,
         fontSize: 22,
         fontWeight: FontWeight.bold,
       ),
@@ -55,7 +55,10 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
       listener: (context, state) {
         if (state is AuthSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.successMessage), backgroundColor: Colors.green),
+            SnackBar(
+              content: Text(state.successMessage),
+              backgroundColor: Colors.green,
+            ),
           );
           if (!widget.isForgotPassword) {
             Navigator.pushAndRemoveUntil(
@@ -68,15 +71,18 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
               context,
               MaterialPageRoute(
                 builder: (context) => ResetPasswordScreen(
-                  identity: widget.identity, // 🌟        
-                  code: _otpController.text.trim(), 
+                  identity: widget.identity, // 🌟
+                  code: _otpController.text.trim(),
                 ),
               ),
             );
           }
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(state.errorMessage),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       },
@@ -84,15 +90,17 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "Verify Your Identity",
+            AppLocalizations.of(context)!.verifyYourIdentity,
             style: theme.textTheme.displayLarge?.copyWith(fontSize: 26),
           ),
           const SizedBox(height: 15),
-          
+
           Text(
             widget.identity.contains('@')
-                ? "A unique 6-digit code has been sent to your email: ${widget.identity}. Please enter it below to proceed."
-                : "A unique 6-digit code has been sent to your WhatsApp: ${widget.identity}. Please enter it below to proceed.",
+                ? AppLocalizations.of(context)!.codeSentEmail(widget.identity)
+                : AppLocalizations.of(
+                    context,
+                  )!.codeSentWhatsApp(widget.identity),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(height: 1.5),
           ),
@@ -103,7 +111,7 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
             controller: _otpController,
             defaultPinTheme: defaultPinTheme,
             focusedPinTheme: defaultPinTheme.copyDecorationWith(
-              border: Border.all(color: AppColors.primaryGold, width: 2), 
+              border: Border.all(color: AppColors.primaryGold, width: 2),
               color: theme.colorScheme.surface,
             ),
           ),
@@ -113,18 +121,24 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, state) {
               if (state is AuthLoading) {
-                return const Center(child: CircularProgressIndicator(color: AppColors.primaryGold));
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryGold,
+                  ),
+                );
               }
-              
+
               return CustomGoldButton(
-                text: "VERIFY ACCESS",
+                text: AppLocalizations.of(context)!.verifyAccess,
                 icon: Icons.arrow_forward,
                 onTap: () {
                   final code = _otpController.text.trim();
                   if (code.length < 6) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("الرجاء إدخال الكود كاملاً"),
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.pleaseEnterFullCode,
+                        ),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -137,15 +151,12 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
                       otp: code,
                     );
                   } else {
-   
                     if (widget.identity.contains('@')) {
-                    
                       context.read<AuthCubit>().verifyAccountOtp(
                         email: widget.identity,
                         code: code,
                       );
                     } else {
-                
                       context.read<AuthCubit>().verifyWhatsAppOtp(
                         phone: widget.identity,
                         code: code,
@@ -160,8 +171,10 @@ class _VerifyIdentityWidgetState extends State<VerifyIdentityWidget> {
           const SizedBox(height: 25),
 
           CustomFooterLinks(
-            leftText: widget.identity.contains('@') ? "< BACK TO EMAIL" : "< BACK TO PHONE",
-            rightText: "RESEND CODE",
+            leftText: widget.identity.contains('@')
+                ? AppLocalizations.of(context)!.backToEmail
+                : AppLocalizations.of(context)!.backToPhone,
+            rightText: AppLocalizations.of(context)!.resendCode,
             onLeftTap: () => Navigator.pop(context),
             // onRightTap: () => context.read<AuthCubit>().resendOtp(widget.identity),
           ),

@@ -2,6 +2,7 @@ import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
 import 'package:eventsapp/core/widgets/custom_dropdown.dart';
 import 'package:flutter/material.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
 
 class FilterSection extends StatefulWidget {
   const FilterSection({super.key});
@@ -15,13 +16,16 @@ class _FilterSectionState extends State<FilterSection> {
   String selectedCategory = 'All';
   double maxPrice = 2500.0;
 
- String? selectedLocation; // حل خطأ selectedLocation
-  String? guestsCount;      // حل خطأ guestsCount
-  String? selectedStyle;     // حل خطأ selectedStyle
-  String? searchQuery;      // لفلترة المنتجات (Products)
+  String? selectedLocation; // حل خطأ selectedLocation
+  String? guestsCount; // حل خطأ guestsCount
+  String? selectedStyle; // حل خطأ selectedStyle
+  String? searchQuery; // لفلترة المنتجات (Products)
 
   final List<String> categories = const [
-    'All', 'Event Planning', 'Products', 'Venues'
+    'All',
+    'Event Planning',
+    'Products',
+    'Venues',
   ];
 
   @override
@@ -47,17 +51,15 @@ class _FilterSectionState extends State<FilterSection> {
           const SizedBox(height: 32),
 
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-            ), 
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: CustomGoldButton(
-              text: "Apply Filters",
+              text: AppLocalizations.of(context)!.applyFilters,
               onTap: () {
-               Navigator.pop(context); 
+                Navigator.pop(context);
               },
             ),
           ),
-          const SizedBox(height: 16), 
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -82,87 +84,98 @@ class _FilterSectionState extends State<FilterSection> {
               selectedColor: colorScheme.primary,
               backgroundColor: colorScheme.surface,
               labelStyle: TextStyle(
-                color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+                color: isSelected
+                    ? colorScheme.onPrimary
+                    : colorScheme.onSurface,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         },
       ),
     );
   }
-Widget _buildConditionalFilters(ColorScheme colorScheme, TextTheme textTheme) {
-  if (selectedCategory == 'Event Planning') {
-    return Column(
-      children: [
-        CustomDropdown(
-          label: "Location",
-          items: const ['Damascus', 'Aleppo', 'Homs'],
-          onChanged: (val) => setState(() => selectedLocation = val),
+
+  Widget _buildConditionalFilters(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    if (selectedCategory == 'Event Planning') {
+      return Column(
+        children: [
+          CustomDropdown(
+            label: AppLocalizations.of(context)!.location,
+            items: const ['Damascus', 'Aleppo', 'Homs'],
+            onChanged: (val) => setState(() => selectedLocation = val),
+          ),
+
+          const SizedBox(height: 16),
+
+          CustomTextField(
+            label: AppLocalizations.of(context)!.numberOfGuests,
+            icon: Icons.people_outline,
+            onChanged: (value) => setState(() => guestsCount = value),
+          ),
+
+          const SizedBox(height: 16),
+
+          CustomDropdown(
+            label: AppLocalizations.of(context)!.eventStyle,
+            items: const ['Modern', 'Classic', 'Rustic'],
+            onChanged: (val) => setState(() => selectedStyle = val),
+          ),
+        ],
+      );
+    } else if (selectedCategory == 'Products') {
+      return Column(
+        children: [
+          CustomTextField(
+            label: AppLocalizations.of(context)!.productName,
+            icon: Icons.search,
+            onChanged: (value) => setState(() => searchQuery = value),
+          ),
+
+          const SizedBox(height: 20),
+
+          _buildPriceSlider(colorScheme, textTheme),
+        ],
+      );
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        child: Column(
+          children: [
+            Icon(Icons.category_outlined, size: 48, color: colorScheme.outline),
+            const SizedBox(height: 16),
+            Text(
+              AppLocalizations.of(context)!.selectCategoryPrompt,
+              style: textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
-        
-        const SizedBox(height: 16),
-
-        CustomTextField(
-          label: "Number of Guests",
-          icon: Icons.people_outline,
-          onChanged: (value) => setState(() => guestsCount = value),
-        ),
-
-        const SizedBox(height: 16),
-
-        CustomDropdown(
-          label: "Event Style",
-          items: const ['Modern', 'Classic', 'Rustic'],
-          onChanged: (val) => setState(() => selectedStyle = val),
-        ),
-      ],
-    );
-  } 
-
-  else if (selectedCategory == 'Products') {
-    return Column(
-      children: [
-        CustomTextField(
-          label: "Product Name",
-          icon: Icons.search,
-          onChanged: (value) => setState(() => searchQuery = value),
-        ),
-        
-        const SizedBox(height: 20),
-
-        _buildPriceSlider(colorScheme, textTheme),
-      ],
+      ),
     );
   }
 
-  return Center(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40),
-      child: Column(
-        children: [
-          Icon(Icons.category_outlined, size: 48, color: colorScheme.outline),
-          const SizedBox(height: 16),
-          Text(
-            "Select a category to see filters",
-            style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
   // --- Helper UI Components ---
-  
+
   Widget _buildPriceSlider(ColorScheme colorScheme, TextTheme textTheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Max Price: \$${maxPrice.toInt()}",
-          style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
+          '${AppLocalizations.of(context)!.maxPriceLabel}: \$${maxPrice.toInt()}',
+          style: textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
+          ),
         ),
         Slider(
           value: maxPrice,

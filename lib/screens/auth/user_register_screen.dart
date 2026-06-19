@@ -2,9 +2,10 @@ import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/auth_state.dart';
 import 'package:eventsapp/cubit/notification_cubit.dart';
 import 'package:eventsapp/screens/auth/provider_web_link_page.dart';
-import 'package:eventsapp/screens/auth/verify_identity_screen.dart'; 
+import 'package:eventsapp/screens/auth/verify_identity_screen.dart';
 import 'package:eventsapp/screens/home/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
@@ -20,7 +21,6 @@ class UserRegisterScreen extends StatefulWidget {
 }
 
 class _UserRegisterScreenState extends State<UserRegisterScreen> {
-
   final _formKey = GlobalKey<FormState>();
 
   String _selectedRole = 'organizer';
@@ -29,7 +29,8 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _identityController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -43,6 +44,8 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -57,7 +60,6 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            
             // 🌟 السحر الحقيقي هنا: فور نجاح عملية الساين اب، نأمر برفع التوكن صامتاً في الخلفية للسيرفر
             try {
               context.read<NotificationCubit>().uploadDeviceToken();
@@ -65,12 +67,14 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
               print("⚠️ فشل استدعاء رفع التوكن: $e");
             }
 
-            bool isGoogleSignIn = state.successMessage.contains('success_google');
+            bool isGoogleSignIn = state.successMessage.contains(
+              'success_google',
+            );
 
             if (isGoogleSignIn) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("تم تسجيل الدخول بواسطة جوجل بنجاح!"), 
+                SnackBar(
+                  content: Text(l10n.authGoogleSignInSuccess),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -79,14 +83,16 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 MaterialPageRoute(builder: (context) => const HomePage()),
                 (route) => false,
               );
-              return; 
+              return;
             }
 
             // الفحص الذكي بناءً على خيار المستخدم في الواجهة
             if (_selectedRole == 'provider') {
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => const ProviderWebLinkPage()),
+                MaterialPageRoute(
+                  builder: (context) => const ProviderWebLinkPage(),
+                ),
                 (route) => false,
               );
             } else {
@@ -104,7 +110,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.errorMessage), 
+                content: Text(state.errorMessage),
                 backgroundColor: Colors.red,
               ),
             );
@@ -118,77 +124,80 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("CREATE\nACCOUNT", style: AppTextStyles.mainTitle),
+                  Text(
+                    l10n.authCreateAccountTitle,
+                    style: AppTextStyles.mainTitle,
+                  ),
                   const SizedBox(height: 10),
-                  const Text(
-                    "Fill in your details to join the gala.",
+                  Text(
+                    l10n.authCreateAccountSubtitle,
                     style: AppTextStyles.bodyGrey,
                   ),
                   const SizedBox(height: 40),
-              
+
                   CustomTextField(
-                    label: "First Name",
+                    label: l10n.firstNameLabel,
                     icon: Icons.person_outline,
-                    controller: _firstNameController, 
+                    controller: _firstNameController,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "please enter your first name"; 
-                      }
-                      return null; 
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    label: "Last Name",
-                    icon: Icons.family_restroom,
-                    controller: _lastNameController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "please enter your last name"; 
+                        return l10n.firstNameError;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
-                    label: "Email or phone number",
-                    icon: Icons.email,
-                    controller: _identityController, 
+                    label: l10n.lastNameLabel,
+                    icon: Icons.family_restroom,
+                    controller: _lastNameController,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "please enter your email or phone number";
+                        return l10n.lastNameError;
                       }
-                      return null; 
+                      return null;
                     },
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
-                    label: "Password",
+                    label: l10n.emailOrPhoneLabel,
+                    icon: Icons.email,
+                    controller: _identityController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return l10n.emailOrPhoneError;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: l10n.passwordLabel,
                     icon: Icons.lock_outline,
                     isPassword: true,
                     controller: _passwordController,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "please enter your password";
+                        return l10n.passwordError;
                       }
                       if (value.length < 8) {
-                        return "password must be at least 8 characters";
+                        return l10n.passwordLengthError;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
-                    label: "Confirm Password",
+                    label: l10n.confirmPasswordLabel,
                     icon: Icons.lock_reset_outlined,
                     isPassword: true,
-                    controller: _confirmPasswordController, 
+                    controller: _confirmPasswordController,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "please confirm your password";
+                        return l10n.confirmPasswordError;
                       }
                       if (value != _passwordController.text) {
-                        return "passwords do not match";
+                        return l10n.passwordMismatchError;
                       }
                       return null;
                     },
@@ -196,13 +205,16 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
 
                   const SizedBox(height: 20),
 
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4.0,
+                        vertical: 8.0,
+                      ),
                       child: Text(
-                        "Account Type",
-                        style: TextStyle(
+                        l10n.accountType,
+                        style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -212,43 +224,49 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                   ),
 
                   DropdownButtonFormField<String>(
-                    value: _selectedRole, 
-                    dropdownColor: const Color(0xFF1E1E1E), 
+                    value: _selectedRole,
+                    dropdownColor: const Color(0xFF1E1E1E),
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     icon: const Icon(
                       Icons.arrow_drop_down,
                       color: Color(0xFFE5B842),
-                    ), 
+                    ),
                     decoration: InputDecoration(
                       prefixIcon: const Icon(
                         Icons.person_outline,
                         color: Color(0xFFE5B842),
-                      ), 
+                      ),
                       filled: true,
-                      fillColor: const Color(0xFF1E1E1E), 
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      fillColor: const Color(0xFF1E1E1E),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.transparent), 
+                        borderSide: const BorderSide(color: Colors.transparent),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE5B842), width: 1.5), 
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE5B842),
+                          width: 1.5,
+                        ),
                       ),
                     ),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'organizer',
-                        child: Text("Organizer"),
+                        child: Text(l10n.userRoleOrganizer),
                       ),
                       DropdownMenuItem(
                         value: 'provider',
-                        child: Text("Provider"),
+                        child: Text(l10n.userRoleProvider),
                       ),
                     ],
                     onChanged: (String? newValue) {
                       setState(() {
-                        _selectedRole = newValue!; 
+                        _selectedRole = newValue!;
                       });
                     },
                   ),
@@ -260,7 +278,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       return CustomGoldButton(
-                        text: "CREATE ACCOUNT",
+                        text: l10n.authCreateAccountButton,
                         onTap: () {
                           if (_formKey.currentState!.validate()) {
                             context.read<AuthCubit>().signUpUser(
@@ -269,14 +287,14 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                               identity: _identityController.text,
                               password: _passwordController.text,
                               confirmPassword: _confirmPasswordController.text,
-                              role: _selectedRole, 
+                              role: _selectedRole,
                             );
                           }
                         },
                       );
                     },
                   ),
-                  
+
                   const SizedBox(height: 20),
                   Center(
                     child: TextButton(
@@ -290,11 +308,11 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                       },
                       child: RichText(
                         text: TextSpan(
-                          text: "Already have an account? ",
+                          text: l10n.authAlreadyHaveAccount,
                           style: Theme.of(context).textTheme.bodySmall,
                           children: [
                             TextSpan(
-                              text: "Sign In",
+                              text: l10n.authSignInLink,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
@@ -318,28 +336,40 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
   }
 
   Widget _buildSocialSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant)),
+            Expanded(
+              child: Divider(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Text(
-                "OR CONTINUE WITH",
+                l10n.authOrContinueWith,
                 style: AppTextStyles.captionBold.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-            Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant)),
+            Expanded(
+              child: Divider(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 25),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _socialIcon(context, "assets/images/Screenshot 2026-05-06 014545.png"),
+            _socialIcon(
+              context,
+              "assets/images/Screenshot 2026-05-06 014545.png",
+            ),
           ],
         ),
       ],
@@ -376,7 +406,8 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                     path,
                     height: 40,
                     width: 40,
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.error),
                   ),
           ),
         );

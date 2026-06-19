@@ -1087,6 +1087,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'DJ & Entertainment'**
   String get servicesDjPreview;
+
+  /// No description provided for @startingFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting from'**
+  String get startingFrom;
+
+  /// No description provided for @authGoogleSignInSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in with Google successfully.'**
+  String get authGoogleSignInSuccess;
+
+  /// No description provided for @userRoleOrganizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer'**
+  String get userRoleOrganizer;
+
+  /// No description provided for @userRoleProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get userRoleProvider;
+
+  /// No description provided for @accountType.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Type'**
+  String get accountType;
+
+  /// No description provided for @pleaseEnterFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your first name'**
+  String get pleaseEnterFirstName;
+
+  /// No description provided for @pleaseEnterLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your last name'**
+  String get pleaseEnterLastName;
+
+  /// No description provided for @pleaseEnterEmailOrPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email or phone number'**
+  String get pleaseEnterEmailOrPhone;
+
+  /// No description provided for @passwordChangedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been changed successfully.'**
+  String get passwordChangedSuccess;
+
+  /// No description provided for @viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get viewDetails;
+
+  /// No description provided for @orderDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Order details'**
+  String get orderDetails;
+
+  /// No description provided for @applyFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Filters'**
+  String get applyFilters;
+
+  /// No description provided for @location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get location;
+
+  /// No description provided for @numberOfGuests.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Guests'**
+  String get numberOfGuests;
+
+  /// No description provided for @eventStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Style'**
+  String get eventStyle;
+
+  /// No description provided for @productName.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Name'**
+  String get productName;
+
+  /// No description provided for @selectCategoryPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a category to see filters'**
+  String get selectCategoryPrompt;
+
+  /// No description provided for @maxPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Price'**
+  String get maxPriceLabel;
+
+  /// No description provided for @verifyYourIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Your Identity'**
+  String get verifyYourIdentity;
+
+  /// No description provided for @codeSentEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'A unique 6-digit code has been sent to your email: {identity}. Please enter it below to proceed.'**
+  String codeSentEmail(Object identity);
+
+  /// No description provided for @codeSentWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'A unique 6-digit code has been sent to your WhatsApp: {identity}. Please enter it below to proceed.'**
+  String codeSentWhatsApp(Object identity);
+
+  /// No description provided for @verifyAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'VERIFY ACCESS'**
+  String get verifyAccess;
+
+  /// No description provided for @pleaseEnterFullCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the full code'**
+  String get pleaseEnterFullCode;
+
+  /// No description provided for @backToEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'< BACK TO EMAIL'**
+  String get backToEmail;
+
+  /// No description provided for @backToPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'< BACK TO PHONE'**
+  String get backToPhone;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'RESEND CODE'**
+  String get resendCode;
+
+  /// No description provided for @byLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'By'**
+  String get byLabel;
+
+  /// No description provided for @firstNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get firstNameLabel;
+
+  /// No description provided for @firstNameError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your first name'**
+  String get firstNameError;
+
+  /// No description provided for @lastNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get lastNameLabel;
+
+  /// No description provided for @lastNameError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your last name'**
+  String get lastNameError;
+
+  /// No description provided for @emailOrPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or phone number'**
+  String get emailOrPhoneLabel;
+
+  /// No description provided for @emailOrPhoneError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email or phone number'**
+  String get emailOrPhoneError;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordLabel;
+
+  /// No description provided for @passwordError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password'**
+  String get passwordError;
+
+  /// No description provided for @passwordLengthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters'**
+  String get passwordLengthError;
+
+  /// No description provided for @confirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPasswordLabel;
+
+  /// No description provided for @confirmPasswordError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get confirmPasswordError;
+
+  /// No description provided for @passwordMismatchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordMismatchError;
 }
 
 class _AppLocalizationsDelegate

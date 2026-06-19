@@ -1,6 +1,8 @@
 import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/models/listing_model.dart'; // تأكد من استيراد الموديل الصحيح
+import 'package:eventsapp/screens/Booking.dart';
 import 'package:flutter/material.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart'; // لتنسيق التواريخ
 
@@ -175,7 +177,10 @@ class ServiceDetailsPagelist extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Starting from", style: theme.textTheme.bodySmall),
+                Text(
+                  AppLocalizations.of(context)!.startingFrom,
+                  style: theme.textTheme.bodySmall,
+                ),
                 Text(
                   item.variants.isNotEmpty
                       ? '${item.variants[0].price} ${item.variants[0].currency}'
@@ -193,10 +198,15 @@ class ServiceDetailsPagelist extends StatelessWidget {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // وظيفة الحجز
+                  showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => BookingRequestSheet(item: item),
+                  );
                 },
                 style: theme.elevatedButtonTheme.style,
-                child: const Text("Book Now"),
+                child: Text(AppLocalizations.of(context)!.bookRequest),
               ),
             ),
           ],

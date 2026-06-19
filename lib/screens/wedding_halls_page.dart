@@ -2,6 +2,7 @@ import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/user_state.dart';
 import 'package:eventsapp/models/listing_model.dart'; // تأكد أن هذا الملف يحتوي على ServiceItem
+import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/screens/detailsListings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,7 +35,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Wedding Halls"),
+        title: Text(AppLocalizations.of(context)!.weddingHalls),
         centerTitle: true,
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
@@ -64,7 +65,9 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
             final listings = state.listingResponse.data;
 
             if (listings.isEmpty) {
-              return const Center(child: Text("No Wedding Halls Found"));
+              return Center(
+                child: Text(AppLocalizations.of(context)!.pageWillBeAvailable),
+              );
             }
 
             return RefreshIndicator(
@@ -258,7 +261,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                       );
                     },
                     style: theme.elevatedButtonTheme.style,
-                    child: const Text("View Details"),
+                    child: Text(AppLocalizations.of(context)!.viewDetails),
                   ),
                 ),
               ],

@@ -302,8 +302,7 @@ class _OrderCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        final isAr = Localizations.localeOf(context).languageCode == 'ar';
-        final detailLabel = isAr ? 'تفاصيل الطلب' : 'Order details';
+        final detailLabel = AppLocalizations.of(context)!.orderDetails;
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('$detailLabel: $orderNumber')));

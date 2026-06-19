@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
 
 class ResultCard extends StatelessWidget {
   final String title;
@@ -88,7 +89,7 @@ class ResultCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "By $companyName",
+                    '${AppLocalizations.of(context)!.byLabel} $companyName',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Colors.grey,
                     ),
@@ -137,9 +138,12 @@ class ResultCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text(
-                        "View Details",
-                        style: TextStyle(color: Colors.blue, fontSize: 12),
+                      Text(
+                        AppLocalizations.of(context)!.viewDetails,
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
