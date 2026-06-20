@@ -24,7 +24,6 @@ class CustomGoldButton extends StatelessWidget {
           : null, 
     );
 
-    // تجهيز تنسيق النص الموحد
     final textWidget = Text(
       text,
       style: Theme.of(context).elevatedButtonTheme.style?.textStyle?.resolve({}) ??
@@ -34,7 +33,6 @@ class CustomGoldButton extends StatelessWidget {
     return SizedBox(
       width: width,
       height: 55,
-      // 🌟 الفحص الذكي: إذا تم تمرير أيقونة نستخدم التصميم المدعوم بالأيقونات، وإلا نستخدم الزر العادي
       child: icon != null
           ? ElevatedButton.icon(
               onPressed: onTap,

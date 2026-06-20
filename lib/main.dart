@@ -23,22 +23,17 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart'; 
 import 'core/services/notification_service.dart';
 
-// تعريف مفتاح عام للتحكم بالتنقل من خارج شجرة الـ Widgets
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
-  // ضمان تهيئة الـ Widgets الخاصة بفلاتر أولاً
   WidgetsFlutterBinding.ensureInitialized();
   
-  // تهيئة كلاس الكاش محلياً ليصبح جاهزاً لحفظ البيانات والتوكنات
   await CacheHelper().init();
   
-  // تهيئة الفايربيز بناءً على منصة التشغيل (Android / iOS)
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  // [إجباري لأندرويد 13 فما فوق] طلب إذن الإشعارات من المستخدم فور تشغيل التطبيق
   try {
     NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
       alert: true,
@@ -50,22 +45,20 @@ Future<void> main() async {
     print("Error requesting notification permission: $e");
   }
   
-  // تشغيل خدمة الإشعارات المركزية وجلب الـ Token الأصلي للجهاز
   NotificationService notificationService = NotificationService();
   await notificationService.initialize();
 
-  // [الـ Auto-Login الذكي] جلب التوكن المحفوظ وفحص الوجهة المناسبة
   final String? savedToken = CacheHelper().getData(key: ApiKey.token);
   print("🚀 هل يوجد توكن في الكاش؟: $savedToken");
   
   Widget initialScreen;
-  bool shouldUploadTokenImmediately = false; // 🌟 متغير سحري لفحص حالة الإرسال الفوري للسيرفر
+  bool shouldUploadTokenImmediately = false; 
 
   if (savedToken != null && savedToken.isNotEmpty) {
-    initialScreen = const HomePage(); // الانتقال المباشر للهوم بيج
-    shouldUploadTokenImmediately = true; // 🌟 نعم، المستخدم مسجل مسبقاً ولديه صلاحية، نرفع التوكن فوراً
+    initialScreen = const HomePage(); 
+    shouldUploadTokenImmediately = true; 
   } else {
-    initialScreen = const SplashScreen(); // البدء من السبلش سكرين
+    initialScreen = const SplashScreen();
   }
 
   SystemChrome.setSystemUIOverlayStyle(
@@ -86,18 +79,18 @@ Future<void> main() async {
   // تمرير الشاشة الابتدائية والشرط الجديد للتطبيق الرئيسي
   runApp(RoyalEventsApp(
     startScreen: initialScreen,
-    uploadTokenAtStart: shouldUploadTokenImmediately, // 👈 تمرير المتغير الجديد
+    uploadTokenAtStart: shouldUploadTokenImmediately,
   ));
 }
 
 class RoyalEventsApp extends StatelessWidget {
   final Widget startScreen;
-  final bool uploadTokenAtStart; // 👈 استقبال متغير حالة رفع التوكن
+  final bool uploadTokenAtStart; 
 
   const RoyalEventsApp({
     super.key, 
     required this.startScreen,
-    required this.uploadTokenAtStart, // 👈 تهيئة المتغير
+    required this.uploadTokenAtStart,
   });
 
   @override
@@ -106,21 +99,17 @@ class RoyalEventsApp extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
-        // 1️⃣ الـ UserCubit يستخدم النسخة المركزية للـ API
         BlocProvider(
           create: (context) => UserCubit(UserRepository(api: dioConsumer)),
         ),
         
-        // 2️⃣ الـ AuthCubit يستقبل الـ DioConsumer والـ CacheHelper الموحدين
         BlocProvider(
           create: (context) => AuthCubit(dioConsumer, CacheHelper()),
         ),
 
-        // 🌟 3️⃣ [إنشاء الـ NotificationCubit والتحقق من الـ Auto-Login]
         BlocProvider(
           create: (context) {
             final cubit = NotificationCubit(dioConsumer);
-            // إذا كان المستخدم داخل التطبيق مسبقاً، نحدّث التوكن في الباكيند صامتاً عند الإقلاع
             if (uploadTokenAtStart) {
               cubit.uploadDeviceToken();
             }

@@ -16,13 +16,20 @@
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // 1. استخراج الدور (Role) بشكل صحيح من المصفوفة إذا كانت موجودة
+    String extractedRole = 'organizer';
+    if (json['roles'] != null && (json['roles'] as List).isNotEmpty) {
+      extractedRole = json['roles'][0]['name'] ?? 'organizer';
+    }
+
     return UserModel(
-      id: json['id'],
+      // 2. إضافة حماية (??) لجميع الحقول الأساسية لمنع الانهيار
+      id: json['id'] ?? '', 
       firstName: json['first_name'] ?? '',
       lastName: json['last_name'] ?? '',
       email: json['email'] ?? '',
-      phone: json['phone'], 
-      role: json['role'] ?? 'organizer',
+      phone: json['phone'], // هذا مسموح لأن المتغير معرّف كـ String?
+      role: extractedRole, 
     );
   }
 }
