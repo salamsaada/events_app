@@ -332,10 +332,12 @@ class AuthCubit extends Cubit<AuthState> {
 Future<void> getUserProfile() async {
     emit(ProfileLoading());
     try {
-      final responseData = await _api.get("/user");
+      final responseData = await _api.get("/profile");
       print("DEBUG: Raw JSON: $responseData"); 
 
-      final user = UserModel.fromJson(responseData);
+      // التعديل هنا: أضفنا ['data'] لندخل للصندوق الداخلي
+      final user = UserModel.fromJson(responseData['data']); 
+      
       emit(ProfileLoaded(user: user));
     } catch (e) {
       print(
