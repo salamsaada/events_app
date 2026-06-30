@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:eventsapp/core/api/api_consumer.dart';
 import 'package:eventsapp/core/api/dio_consumer.dart';
 import 'package:eventsapp/cubit/auth_cubit.dart';
 import 'package:eventsapp/cubit/theme_cubit.dart';
@@ -68,7 +69,6 @@ Future<void> main() async {
     ),
   );
 
-  // إنشاء نسخة من خدمة الديب لينك وتمرير الـ navigatorKey بداخلها
   try {
     final deepLinkService = DeepLinkService(navigatorKey);
     await deepLinkService.init();
@@ -76,7 +76,6 @@ Future<void> main() async {
     print("Deep link initialization error: $e");
   }
 
-  // تمرير الشاشة الابتدائية والشرط الجديد للتطبيق الرئيسي
   runApp(RoyalEventsApp(
     startScreen: initialScreen,
     uploadTokenAtStart: shouldUploadTokenImmediately,
@@ -95,59 +94,64 @@ class RoyalEventsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dioConsumer = DioConsumer(dio: Dio());
+    // 🌟 التعديل الأساسي: توفير ApiConsumer لكل التطبيق في أعلى الشجرة
+    return RepositoryProvider<ApiConsumer>(
+      create: (context) => DioConsumer(dio: Dio()),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => UserCubit(
+              UserRepository(api: context.read<ApiConsumer>())
+            ),
+          ),
+          
+          BlocProvider(
+            // نمرر الـ ApiConsumer الموجود في الـ RepositoryProvider للأعلى
+            create: (context) => AuthCubit(context.read<ApiConsumer>(), CacheHelper()),
+          ),
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => UserCubit(UserRepository(api: dioConsumer)),
-        ),
-        
-        BlocProvider(
-          create: (context) => AuthCubit(dioConsumer, CacheHelper()),
-        ),
+          BlocProvider(
+            create: (context) {
+              final cubit = NotificationCubit(context.read<ApiConsumer>());
+              if (uploadTokenAtStart) {
+                cubit.uploadDeviceToken();
+              }
+              return cubit;
+            },
+          ),
 
-        BlocProvider(
-          create: (context) {
-            final cubit = NotificationCubit(dioConsumer);
-            if (uploadTokenAtStart) {
-              cubit.uploadDeviceToken();
-            }
-            return cubit;
+          BlocProvider(create: (context) => ThemeCubit()),
+          BlocProvider(create: (context) => LanguageCubit()),
+        ],
+        child: BlocBuilder<ThemeCubit, ThemeState>(
+          builder: (context, themeState) {
+            return BlocBuilder<LanguageCubit, LanguageState>(
+              builder: (context, languageState) {
+                bool isDarkMode = context.read<ThemeCubit>().isDark;
+                String languageCode = context.read<LanguageCubit>().languageCode;
+
+                return MaterialApp(
+                  navigatorKey: navigatorKey, 
+                  onGenerateTitle: (context) =>
+                      AppLocalizations.of(context)!.appTitle,
+                  debugShowCheckedModeBanner: false,
+                  locale: Locale(languageCode),
+                  supportedLocales: const [Locale('en'), Locale('ar')],
+                  localizationsDelegates: const [
+                    AppLocalizations.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  theme: AppTheme.lightTheme,
+                  darkTheme: AppTheme.darkTheme,
+                  themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+                  home: startScreen, 
+                );
+              },
+            );
           },
         ),
-
-        BlocProvider(create: (context) => ThemeCubit()),
-        BlocProvider(create: (context) => LanguageCubit()),
-      ],
-      child: BlocBuilder<ThemeCubit, ThemeState>(
-        builder: (context, themeState) {
-          return BlocBuilder<LanguageCubit, LanguageState>(
-            builder: (context, languageState) {
-              bool isDarkMode = context.read<ThemeCubit>().isDark;
-              String languageCode = context.read<LanguageCubit>().languageCode;
-
-              return MaterialApp(
-                navigatorKey: navigatorKey, 
-                onGenerateTitle: (context) =>
-                    AppLocalizations.of(context)!.appTitle,
-                debugShowCheckedModeBanner: false,
-                locale: Locale(languageCode),
-                supportedLocales: const [Locale('en'), Locale('ar')],
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                theme: AppTheme.lightTheme,
-                darkTheme: AppTheme.darkTheme,
-                themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-                home: startScreen, 
-              );
-            },
-          );
-        },
       ),
     );
   }
