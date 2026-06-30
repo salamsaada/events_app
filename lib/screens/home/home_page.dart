@@ -1,5 +1,7 @@
 import 'package:eventsapp/core/widgets/filter_button.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
+import 'package:eventsapp/screens/chats/chat_list_screen.dart';
+import 'package:eventsapp/screens/chats/chat_screen.dart';
 import 'package:eventsapp/screens/filters/filter_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -116,24 +118,25 @@ class _HomePageState extends State<HomePage> {
 
   void _onItemSelected(int index) {
     setState(() => _selectedIndex = index);
+
     if (index == 1) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const ChatPage()));
+      // 🌟 بدلاً من الذهاب لماركوس مباشرة، نفتح قائمة المحادثات (التي تحتوي الشركات والفريلانسر)
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const ChatListScreen(), 
+        ),
+      );
       return;
     }
+
     if (index == 2) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const OrdersPage()));
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const OrdersPage()));
       return;
     }
+
     if (index == 3) {
       Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfilePage()));
-    }
-    if (index == 1 || index == 2) {
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.pageWillBeAvailable)));
+      return; 
     }
   }
-}
+  }
