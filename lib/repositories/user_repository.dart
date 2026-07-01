@@ -3,7 +3,9 @@ import 'package:eventsapp/cache/cache_helper.dart';
 import 'package:eventsapp/core/api/api_consumer.dart';
 import 'package:eventsapp/core/api/end_ponits.dart';
 import 'package:eventsapp/core/errors/exceptions.dart';
+import 'package:eventsapp/models/booking_model.dart';
 import 'package:eventsapp/models/listing_model.dart';
+import 'package:eventsapp/models/myBookings_model.dart';
 
 import 'package:eventsapp/models/sign_up_model.dart';
 
@@ -74,14 +76,14 @@ class UserRepository {
 
   Future<Either<String, ListingResponse>> getlisting() async {
     try {
-      final response = await api.get(
-        EndPoint.getlisting, 
-      );
+      final response = await api.get(EndPoint.getlisting);
 
       // 1. التحقق مما إذا كان الرد فارغاً تماماً (null) أو لا يحتوي على بيانات
-      if (response == null || (response is List && response.isEmpty) || (response is Map && response.isEmpty)) {
-         // نُرجع هذه الرسالة ليتم عرضها في واجهة المستخدم
-         return const Left("لا يوجد صالات حالياً");
+      if (response == null ||
+          (response is List && response.isEmpty) ||
+          (response is Map && response.isEmpty)) {
+        // نُرجع هذه الرسالة ليتم عرضها في واجهة المستخدم
+        return const Left("لا يوجد صالات حالياً");
       }
 
       final serviceResponse = ListingResponse.fromJson(response);
@@ -95,7 +97,75 @@ class UserRepository {
       */
 
       return Right(serviceResponse);
+    } on ServerException catch (e) {
+      return Left(e.errModel.errorMessage);
+    } catch (e) {
+      return Left("حدث خطأ غير متوقع: $e");
+    }
+  }
 
+  Future<Either<String, BookingResponse>> createBooking({
+    String? providerId,
+    required String listingId,
+    String? listingVariantId,
+    String? listingSlotId,
+    required String bookingType,
+    required int quantity,
+    String? bookedDate,
+    String? bookedStartTime,
+    String? customerNotes,
+  }) async {
+    try {
+      final response = await api.post(
+        EndPoint.createBooking,
+        data: {
+          ApiKey.provider_id: providerId,
+          ApiKey.listing_id: listingId,
+          ApiKey.listing_variant_id: listingVariantId,
+          ApiKey.listing_slot_id: listingSlotId,
+          ApiKey.booking_type: bookingType,
+          ApiKey.quantity: quantity,
+          ApiKey.booked_date: bookedDate,
+          ApiKey.booked_start_time: bookedStartTime,
+          ApiKey.customer_notes: customerNotes,
+        },
+      );
+
+      final bookingResponse = BookingResponse.fromJson(response);
+
+      // حفظ آخر حجز في التخزين المحلي
+      await CacheHelper().saveData(
+        key: ApiKey.lastBookingId,
+        value: bookingResponse.data?.id,
+      );
+
+      return Right(bookingResponse);
+    } on ServerException catch (e) {
+      return Left(e.errModel.errorMessage);
+    }
+  }
+
+  Future<Either<String, BookingResponsee>> getMyBookings() async {
+    try {
+      // تأكد من وجود EndPoint.bookings في ملف end_ponits.dart أو استبدله بالرابط مباشرة
+      final response = await api.get(EndPoint.Mybookings);
+
+      // 1. التحقق مما إذا كان الرد فارغاً تماماً (null) أو لا يحتوي على بيانات
+      if (response == null ||
+          (response is List && response.isEmpty) ||
+          (response is Map && response.isEmpty)) {
+        // نُرجع هذه الرسالة ليتم عرضها في واجهة المستخدم
+        return const Left("لا يوجد حجوزات حالياً");
+      }
+
+      final bookingResponse = BookingResponsee.fromJson(response);
+
+      // 2. خطوة أمان إضافية: إذا كان السيرفر يرسل الموديل ولكن مصفوفة الحجوزات بداخله فارغة
+      if (bookingResponse.data.isEmpty) {
+        return const Left("لا يوجد حجوزات حالياً");
+      }
+
+      return Right(bookingResponse);
     } on ServerException catch (e) {
       return Left(e.errModel.errorMessage);
     } catch (e) {

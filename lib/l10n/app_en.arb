@@ -202,5 +202,16 @@
   "passwordLengthError": "Password must be at least 8 characters",
   "confirmPasswordLabel": "Confirm Password",
   "confirmPasswordError": "Please confirm your password",
-  "passwordMismatchError": "Passwords do not match"
+  "passwordMismatchError": "Passwords do not match","startingFrom": "Starting from",
+"priceNotAvailable": "Price not available",
+"descriptionLabel": "Description",
+"noDescriptionAvailable": "No description available.",
+"availablePackages": "Available Packages",
+"package": "Package",
+"capacity": "Capacity","descriptionLabel": "Description",
+"noDescriptionAvailable": "No description available.",
+"availablePackages": "Available Packages",
+"package": "Package",
+"capacity": "Capacity",
+"notAvailable": "N/A"
 }

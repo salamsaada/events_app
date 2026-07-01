@@ -1,8 +1,11 @@
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
+import 'package:eventsapp/cubit/language_cubit.dart';
+import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/models/listing_model.dart'; // استيراد الموديل
-import 'package:eventsapp/screens/booking.dart';
+import 'package:eventsapp/screens/Booking.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart'; // لتنسيق التواريخ
 
 class DetailsPage extends StatelessWidget {
@@ -13,20 +16,24 @@ class DetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isGuest = true; // يمكنك ربطها لاحقاً بحالة تسجيل الدخول
+    final languageCode = context.watch<LanguageCubit>().languageCode;
+    final loc = AppLocalizations.of(context)!; // ✨ اختصار للوصول للترجمات
 
     // استخراج البيانات الأساسية
-    final String title = item.title['en'] ?? item.title['ar'] ?? 'N/A';
-    final String description =
-        item.description['en'] ??
-        item.description['ar'] ??
-        'No description available.';
+    final String title = localizedText(item.title, languageCode);
+    final String description = localizedText(
+      item.description,
+      languageCode,
+      fallback: loc.noDescriptionAvailable, // ✨ استخدام الترجمة
+    );
     final String imageUrl = item.images.isNotEmpty
         ? item.images[0]
         : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
+
+    // ✨ تعديل طريقة عرض السعر ليكون موحداً
     final String startingPrice = item.variants.isNotEmpty
-        ? 'Starting from ${item.variants[0].price} ${item.variants[0].currency}'
-        : 'Price not available';
+        ? '${loc.startingFrom} ${item.variants[0].price} ${item.variants[0].currency}'
+        : loc.priceNotAvailable;
 
     return Scaffold(
       body: CustomScrollView(
@@ -102,9 +109,9 @@ class DetailsPage extends StatelessWidget {
                   ),
                   const Divider(height: 40),
 
-                  // الوصف
-                  const Text(
-                    "Description",
+                  // ✨ الوصف (تم التعديل)
+                  Text(
+                    loc.descriptionLabel,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
@@ -114,10 +121,10 @@ class DetailsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
 
-                  // عرض الباقات (Variants)
+                  // ✨ عرض الباقات (تم التعديل)
                   if (item.variants.isNotEmpty) ...[
-                    const Text(
-                      "Available Packages",
+                    Text(
+                      loc.availablePackages,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -130,7 +137,12 @@ class DetailsPage extends StatelessWidget {
                       itemCount: item.variants.length,
                       itemBuilder: (context, index) {
                         final variant = item.variants[index];
-                        return _buildVariantCard(variant, theme);
+                        return _buildVariantCard(
+                          variant,
+                          theme,
+                          languageCode,
+                          loc,
+                        ); // تمرير loc
                       },
                     ),
                   ],
@@ -147,7 +159,7 @@ class DetailsPage extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         color: Colors.transparent,
         child: CustomGoldButton(
-          text: AppLocalizations.of(context)!.bookRequest,
+          text: loc.bookRequest, // ✨ كان يستخدمها بالفعل
           onTap: () => _showBookingSheet(context),
         ),
       ),
@@ -164,8 +176,13 @@ class DetailsPage extends StatelessWidget {
     );
   }
 
-  // ويدجت مساعدة لبناء كرت الباقة
-  Widget _buildVariantCard(Variant variant, ThemeData theme) {
+  // ✨ تم تمرير متغير loc للترجمة
+  Widget _buildVariantCard(
+    Variant variant,
+    ThemeData theme,
+    String languageCode,
+    AppLocalizations loc,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(15),
@@ -182,7 +199,11 @@ class DetailsPage extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  variant.name['en'] ?? variant.name['ar'] ?? 'Package',
+                  localizedText(
+                    variant.name,
+                    languageCode,
+                    fallback: loc.package, // ✨ استخدام الترجمة
+                  ),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -201,15 +222,21 @@ class DetailsPage extends StatelessWidget {
           ),
           if (variant.availabilities.isNotEmpty)
             ...variant.availabilities
-                .map((avail) => _buildAvailabilityRow(avail, theme))
+                .map(
+                  (avail) => _buildAvailabilityRow(avail, theme, loc),
+                ) // تمرير loc
                 .toList(),
         ],
       ),
     );
   }
 
-  // ويدجت مساعدة لعرض التوفر
-  Widget _buildAvailabilityRow(Availability availability, ThemeData theme) {
+  // ✨ تم تمرير متغير loc للترجمة
+  Widget _buildAvailabilityRow(
+    Availability availability,
+    ThemeData theme,
+    AppLocalizations loc,
+  ) {
     final dateFormat = DateFormat('dd MMM, yyyy');
     final timeFormat = DateFormat('hh:mm a');
 
@@ -246,7 +273,7 @@ class DetailsPage extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      'Capacity: ${slot.remainingCapacity}',
+                      '${loc.capacity}: ${slot.remainingCapacity}', // ✨ استخدام الترجمة
                       style: TextStyle(
                         color: slot.remainingCapacity > 0
                             ? Colors.green
@@ -260,25 +287,5 @@ class DetailsPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  void _handleBooking(BuildContext context, bool isGuest) {
-    if (isGuest) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("Please log in to proceed with your booking."),
-          backgroundColor: Colors.redAccent,
-          action: SnackBarAction(
-            label: "Login",
-            textColor: Colors.white,
-            onPressed: () {
-              // التوجيه لصفحة تسجيل الدخول
-            },
-          ),
-        ),
-      );
-    } else {
-      print("Proceeding to checkout for ${item.id}...");
-    }
   }
 }

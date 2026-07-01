@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
+import 'package:eventsapp/cubit/language_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/user_state.dart';
-import 'package:eventsapp/models/listing_model.dart';
+import 'package:eventsapp/core/utils/localized_value.dart';
 import '../../../core/widgets/common/result_card.dart';
 import 'details_page.dart';
 
@@ -78,10 +79,15 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                     itemCount: listings.length,
                     itemBuilder: (context, index) {
                       final item = listings[index];
+                      final languageCode = context
+                          .watch<LanguageCubit>()
+                          .languageCode;
 
                       // استخراج البيانات لتلائم ResultCard
-                      final String title =
-                          item.title['en'] ?? item.title['ar'] ?? 'N/A';
+                      final String title = localizedText(
+                        item.title,
+                        languageCode,
+                      );
                       final String companyName =
                           item.category.name; // كبديل لاسم الشركة
                       final String price = item.variants.isNotEmpty

@@ -19,6 +19,56 @@ class UserCubit extends Cubit<UserState> {
       ), // حالة النجاح
     );
   }
+
+  void createBooking({
+    String? providerId,
+    required String listingId,
+    String? listingVariantId,
+    String? listingSlotId,
+    required String bookingType,
+    required int quantity,
+    String? bookedDate,
+    String? bookedStartTime,
+    String? customerNotes,
+  }) async {
+    emit(CreateBookingLoading()); // إصدار حالة التحميل
+
+    final response = await userRepository.createBooking(
+      providerId: providerId,
+      listingId: listingId,
+      listingVariantId: listingVariantId,
+      listingSlotId: listingSlotId,
+      bookingType: bookingType,
+      quantity: quantity,
+      bookedDate: bookedDate,
+      bookedStartTime: bookedStartTime,
+      customerNotes: customerNotes,
+    );
+
+    response.fold(
+      (errMessage) =>
+          emit(CreateBookingFailure(errMessage: errMessage)), // حالة الفشل
+      (bookingResponse) => emit(
+        CreateBookingSuccess(bookingResponse: bookingResponse),
+      ), // حالة النجاح
+    );
+  }
+
+  void getMyBookings() async {
+    emit(GetBookingsLoading()); // إصدار حالة التحميل
+
+    final response = await userRepository
+        .getMyBookings(); // استدعاء الدالة من الـ Repository
+
+    response.fold(
+      (errMessage) =>
+          emit(GetBookingsFailure(errMessage: errMessage)), // حالة الفشل
+      (bookingsResponse) => emit(
+        GetBookingsSuccess(bookingsResponse: bookingsResponse),
+      ), // حالة النجاح
+    );
+  }
+
   //Sign in Form key
   // GlobalKey<FormState> signInFormKey = GlobalKey<FormState>();
   // //Sign in email

@@ -202,6 +202,17 @@
   "passwordLengthError": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
   "confirmPasswordLabel": "تأكيد كلمة المرور",
   "confirmPasswordError": "يرجى تأكيد كلمة المرور",
-  "passwordMismatchError": "كلمتا المرور غير متطابقتين"
+  "passwordMismatchError": "كلمتا المرور غير متطابقتين","startingFrom": "يبدأ من",
+"priceNotAvailable": "السعر غير متوفر",
+"descriptionLabel": "الوصف",
+"noDescriptionAvailable": "لا يوجد وصف متاح.",
+"availablePackages": "الباقات المتاحة",
+"package": "باقة",
+"capacity": "السعة","descriptionLabel": "الوصف",
+"noDescriptionAvailable": "لا يوجد وصف متاح.",
+"availablePackages": "الباقات المتاحة",
+"package": "باقة",
+"capacity": "السعة",
+"notAvailable": "غير متوفر"
 
 }

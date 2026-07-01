@@ -525,7 +525,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get servicesDjPreview => 'الدي جي والترفيه';
 
   @override
-  String get startingFrom => 'ابتداءً من';
+  String get startingFrom => 'يبدأ من';
 
   @override
   String get authGoogleSignInSuccess => 'تم تسجيل الدخول بواسطة جوجل بنجاح!';
@@ -646,4 +646,25 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get passwordMismatchError => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get priceNotAvailable => 'السعر غير متوفر';
+
+  @override
+  String get descriptionLabel => 'الوصف';
+
+  @override
+  String get noDescriptionAvailable => 'لا يوجد وصف متاح.';
+
+  @override
+  String get availablePackages => 'الباقات المتاحة';
+
+  @override
+  String get package => 'باقة';
+
+  @override
+  String get capacity => 'السعة';
+
+  @override
+  String get notAvailable => 'غير متوفر';
 }

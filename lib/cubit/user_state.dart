@@ -1,4 +1,6 @@
-﻿import 'package:eventsapp/models/listing_model.dart';
+﻿import 'package:eventsapp/models/booking_model.dart';
+import 'package:eventsapp/models/listing_model.dart';
+import 'package:eventsapp/models/myBookings_model.dart';
 import 'package:eventsapp/models/user_model.dart';
 
 class UserState {}
@@ -55,4 +57,32 @@ final class GetListingSuccess extends UserState {
 final class GetListingFailure extends UserState {
   final String errMessage;
   GetListingFailure({required this.errMessage});
+}
+
+final class CreateBookingLoading extends UserState {}
+
+final class CreateBookingSuccess extends UserState {
+  final BookingResponse bookingResponse;
+  CreateBookingSuccess({required this.bookingResponse});
+}
+
+final class CreateBookingFailure extends UserState {
+  final String errMessage;
+  CreateBookingFailure({required this.errMessage});
+}
+
+// 1. حالة التحميل (جاري جلب الحجوزات)
+final class GetBookingsLoading extends UserState {}
+
+// 2. حالة النجاح (تم جلب الحجوزات بنجاح)
+final class GetBookingsSuccess extends UserState {
+  final BookingResponsee
+  bookingsResponse; // نمرر الكلاس الذي يحتوي على List<BookingData>
+  GetBookingsSuccess({required this.bookingsResponse});
+}
+
+// 3. حالة الفشل (حدث خطأ أثناء جلب الحجوزات)
+final class GetBookingsFailure extends UserState {
+  final String errMessage;
+  GetBookingsFailure({required this.errMessage});
 }
