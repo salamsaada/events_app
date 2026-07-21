@@ -1,5 +1,12 @@
 import 'package:eventsapp/core/api/end_ponits.dart';
 
+// دالة سحرية عامة لحماية كل الكلاسات في هذا الملف من الانهيار
+Map<String, dynamic> _safeMap(dynamic value) {
+  if (value is String) return {'ar': value};
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return {'ar': value?.toString() ?? 'بدون عنوان'};
+}
+
 class Meta {
   final int currentPage;
   final int lastPage;
@@ -122,11 +129,11 @@ class Variant {
   factory Variant.fromJson(Map<String, dynamic>? json) {
     if (json == null) return Variant(id: '', name: {}, price: 0, currency: '', priceType: '', images: [], availabilities: []);
     return Variant(
-      id: json[ApiKey.id] ?? '',
-      name: json[ApiKey.name] ?? {},
-      price: json[ApiKey.price] ?? 0,
-      currency: json[ApiKey.currency] ?? '',
-      priceType: json[ApiKey.price_type] ?? '',
+      id: json[ApiKey.id]?.toString() ?? '',
+      name: _safeMap(json[ApiKey.name]), // 🚀 هنا كان الخطأ، وتم إصلاحه!
+      price: (json[ApiKey.price] is num) ? (json[ApiKey.price] as num).toInt() : int.tryParse(json[ApiKey.price]?.toString() ?? '0') ?? 0,
+      currency: json[ApiKey.currency]?.toString() ?? '',
+      priceType: json[ApiKey.price_type]?.toString() ?? '',
       stock: json[ApiKey.stock],
       attributes: json[ApiKey.attributes],
       images: json[ApiKey.images] ?? [],
@@ -178,14 +185,20 @@ class ServiceItem {
 
   factory ServiceItem.fromJson(Map<String, dynamic>? json) {
     if (json == null) throw Exception("ServiceItem json is null");
-    
+
     try {
+      var catData = json[ApiKey.category];
+      Category category = (catData is Map<String, dynamic>) ? Category.fromJson(catData) : Category(id: 0, name: catData?.toString() ?? 'N/A');
+
+      var distData = json[ApiKey.district];
+      District district = (distData is Map<String, dynamic>) ? District.fromJson(distData) : District(id: 0, name: distData?.toString() ?? 'N/A');
+
       return ServiceItem(
-        id: json[ApiKey.id] ?? '',
-        title: json[ApiKey.title] ?? {},
-        description: json[ApiKey.description] ?? {},
-        type: json[ApiKey.type] ?? '',
-        status: json[ApiKey.status] ?? '',
+        id: json[ApiKey.id]?.toString() ?? '',
+        title: _safeMap(json[ApiKey.title]),
+        description: _safeMap(json[ApiKey.description]),
+        type: json[ApiKey.type]?.toString() ?? '',
+        status: json[ApiKey.status]?.toString() ?? '',
         materialComposition: json[ApiKey.material_composition],
         secondaryContactNumber: json[ApiKey.secondary_contact_number],
         cancelBeforeAcceptance: json[ApiKey.cancel_before_acceptance] == 1 || json[ApiKey.cancel_before_acceptance] == true,
@@ -193,15 +206,16 @@ class ServiceItem {
         cancelBeforePayment: json[ApiKey.cancel_before_payment] == 1 || json[ApiKey.cancel_before_payment] == true,
         isProviderLocationBased: json[ApiKey.is_provider_location_based] == 1 || json[ApiKey.is_provider_location_based] == true,
         rejectionReason: json[ApiKey.rejection_reason],
-        category: Category.fromJson(json[ApiKey.category]),
-        district: District.fromJson(json[ApiKey.district]),
+        category: category,
+        district: district,
         images: json[ApiKey.images] ?? [],
+        // 🚀 معالجة الباقات التي كانت تسبب الانهيار
         variants: (json[ApiKey.variants] as List<dynamic>?)?.map((item) => Variant.fromJson(item)).toList() ?? [],
-        createdAt: DateTime.tryParse(json[ApiKey.created_at] ?? '') ?? DateTime.now(),
-        updatedAt: DateTime.tryParse(json[ApiKey.updated_at] ?? '') ?? DateTime.now(),
+        createdAt: DateTime.tryParse(json[ApiKey.created_at]?.toString() ?? '') ?? DateTime.now(),
+        updatedAt: DateTime.tryParse(json[ApiKey.updated_at]?.toString() ?? '') ?? DateTime.now(),
       );
     } catch (e) {
-      print("❌ ERROR in ServiceItem.fromJson for ID ${json[ApiKey.id]}: $e");
+      print("❌ CRITICAL ERROR in ServiceItem for ID ${json[ApiKey.id]}: $e");
       rethrow;
     }
   }

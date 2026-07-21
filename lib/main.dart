@@ -6,6 +6,10 @@ import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/notification_cubit.dart'; 
+// 🌟 استيرادات الـ Favorites الجديدة
+import 'package:eventsapp/cubit/favorites_cubit.dart';
+import 'package:eventsapp/features/chat/repository/favorites_repository.dart';
+
 import 'package:eventsapp/repositories/user_repository.dart';
 import 'package:eventsapp/screens/auth/splash_screen.dart';
 import 'package:eventsapp/screens/home/home_page.dart'; 
@@ -24,6 +28,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart'; 
 import 'core/services/notification_service.dart';
 
+// 🌟 دالة استقبال الإشعارات في الخلفية (حل مشكلة الكراش)
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print("Handling a background message: ${message.messageId}");
+}
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
@@ -34,6 +45,9 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  // ربط دالة الخلفية
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   
   try {
     NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
@@ -50,7 +64,6 @@ Future<void> main() async {
   await notificationService.initialize();
 
   final String? savedToken = CacheHelper().getData(key: ApiKey.token);
-  print("🚀 هل يوجد توكن في الكاش؟: $savedToken");
   
   Widget initialScreen;
   bool shouldUploadTokenImmediately = false; 
@@ -94,7 +107,6 @@ class RoyalEventsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 🌟 التعديل الأساسي: توفير ApiConsumer لكل التطبيق في أعلى الشجرة
     return RepositoryProvider<ApiConsumer>(
       create: (context) => DioConsumer(dio: Dio()),
       child: MultiBlocProvider(
@@ -106,7 +118,6 @@ class RoyalEventsApp extends StatelessWidget {
           ),
           
           BlocProvider(
-            // نمرر الـ ApiConsumer الموجود في الـ RepositoryProvider للأعلى
             create: (context) => AuthCubit(context.read<ApiConsumer>(), CacheHelper()),
           ),
 
@@ -118,6 +129,13 @@ class RoyalEventsApp extends StatelessWidget {
               }
               return cubit;
             },
+          ),
+          
+          // 🌟 إضافة الـ FavoritesCubit
+          BlocProvider(
+            create: (context) => FavoritesCubit(
+              FavoritesRepository(apiConsumer: context.read<ApiConsumer>())
+            ),
           ),
 
           BlocProvider(create: (context) => ThemeCubit()),

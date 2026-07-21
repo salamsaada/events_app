@@ -1,6 +1,6 @@
 import 'package:eventsapp/core/theme/app_colors.dart';
+import 'package:eventsapp/screens/favorites/favorites_page.dart';
 import 'package:flutter/material.dart';
-// flutter_bloc not needed here
 import '../../../generated/app_localizations.dart';
 import '../../../screens/notifications_page.dart';
 
@@ -47,8 +47,8 @@ class TopBar extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(width: 20),
-                // Make notifications icon tappable to open NotificationsPage
+                const SizedBox(width: 16), 
+
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -64,6 +64,24 @@ class TopBar extends StatelessWidget {
                     size: 20,
                   ),
                 ),
+                
+                const SizedBox(width: 16),
+
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const FavoritesPage(),
+                      ),
+                    );
+                  },
+                  child: const Icon(
+                    Icons.favorite, 
+                    color: Colors.red, 
+                    size: 20,
+                  ),
+                ),
               ],
             ),
             Text(
@@ -75,7 +93,6 @@ class TopBar extends StatelessWidget {
                 letterSpacing: 2,
               ),
             ),
-            // Language toggle removed — use settings page toggle instead
           ],
         ),
       ),
