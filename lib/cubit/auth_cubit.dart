@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
-import 'package:eventsapp/models/user_model.dart'; 
+import 'package:eventsapp/models/user_model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
@@ -15,36 +15,38 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthCubit(this._api, this._cache) : super(AuthInitial());
 
- String _handleInlineError(dynamic error) {
-  if (error is DioException) {
-    if (error.response?.data != null) {
-      final data = error.response!.data;
+  String _handleInlineError(dynamic error) {
+    if (error is DioException) {
+      if (error.response?.data != null) {
+        final data = error.response!.data;
 
-      if (data is Map) {
-        if (data.containsKey('message')) {
-          return data['message'].toString();
-        }
-        
-        // 2. البحث عن 'errors' (أخطاء التحقق)
-        if (data.containsKey('errors')) {
-          final errors = data['errors'];
-          if (errors is Map && errors.isNotEmpty) {
-            var firstKey = errors.keys.first;
-            var firstError = errors[firstKey];
-            return firstError is List ? firstError.first.toString() : firstError.toString();
+        if (data is Map) {
+          if (data.containsKey('message')) {
+            return data['message'].toString();
+          }
+
+          // 2. البحث عن 'errors' (أخطاء التحقق)
+          if (data.containsKey('errors')) {
+            final errors = data['errors'];
+            if (errors is Map && errors.isNotEmpty) {
+              var firstKey = errors.keys.first;
+              var firstError = errors[firstKey];
+              return firstError is List
+                  ? firstError.first.toString()
+                  : firstError.toString();
+            }
           }
         }
       }
+
+      if (error.type == DioExceptionType.connectionError ||
+          error.type == DioExceptionType.connectionTimeout) {
+        return "عذراً، لا يوجد اتصال بالإنترنت.";
+      }
     }
-    
-    if (error.type == DioExceptionType.connectionError || 
-        error.type == DioExceptionType.connectionTimeout) {
-      return "عذراً، لا يوجد اتصال بالإنترنت.";
-    }
+
+    return "حدث خطأ غير متوقع. يرجى التأكد من البيانات والمحاولة مجدداً.";
   }
-  
-  return "حدث خطأ غير متوقع. يرجى التأكد من البيانات والمحاولة مجدداً.";
-}
 
   Future<void> signInWithGoogleMobile() async {
     emit(AuthLoading());
@@ -245,7 +247,7 @@ class AuthCubit extends Cubit<AuthState> {
         data: {
           "email": email,
           "otp": code,
-          if (fcmToken != null) "device_token": fcmToken, 
+          if (fcmToken != null) "device_token": fcmToken,
         },
       );
 
@@ -277,7 +279,7 @@ class AuthCubit extends Cubit<AuthState> {
         data: {
           "identity": phone,
           "code": code,
-          if (fcmToken != null) "device_token": fcmToken, 
+          if (fcmToken != null) "device_token": fcmToken,
         },
       );
 
@@ -289,7 +291,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
- // 9️⃣ دالة تسجيل الخروج
+  // 9️⃣ دالة تسجيل الخروج
   Future<void> logOut() async {
     emit(AuthLoading());
     try {
@@ -314,8 +316,8 @@ class AuthCubit extends Cubit<AuthState> {
         print("⚠️ Failed to delete FCM token: $e");
       }
 
-      await _cache.removeData(key: ApiKey.token); 
-      await _cache.removeData(key: "is_logged_in"); 
+      await _cache.removeData(key: ApiKey.token);
+      await _cache.removeData(key: "is_logged_in");
 
       emit(AuthInitial());
     } catch (e) {
@@ -353,9 +355,9 @@ Future<void> getUserProfile() async {
 
     if (responseData is Map) {
       final accessToken =
-          responseData['access_token'] ?? 
-          responseData['data']?['access_token'] ?? 
-          responseData['token']; 
+          responseData['access_token'] ??
+          responseData['data']?['access_token'] ??
+          responseData['token'];
 
       if (accessToken != null) {
         // await CacheHelper().saveData(key: ApiKey.token, value: accessToken);

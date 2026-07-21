@@ -651,4 +651,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordMismatchError => 'Passwords do not match';
+
+  @override
+  String get priceNotAvailable => 'Price not available';
+
+  @override
+  String get descriptionLabel => 'Description';
+
+  @override
+  String get noDescriptionAvailable => 'No description available.';
+
+  @override
+  String get availablePackages => 'Available Packages';
+
+  @override
+  String get package => 'Package';
+
+  @override
+  String get capacity => 'Capacity';
+
+  @override
+  String get notAvailable => 'N/A';
 }

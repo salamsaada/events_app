@@ -1,6 +1,8 @@
 import 'package:eventsapp/cubit/theme_cubit.dart';
+import 'package:eventsapp/cubit/language_cubit.dart';
+import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/models/listing_model.dart';
-import 'package:eventsapp/screens/booking.dart';
+import 'package:eventsapp/screens/Booking.dart';
 import 'package:flutter/material.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +17,8 @@ class ServiceDetailsPagelist extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = context.read<ThemeCubit>().isDark;
+    final languageCode = context.watch<LanguageCubit>().languageCode;
+    final loc = AppLocalizations.of(context)!; // ✨ اختصار للترجمة
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -74,7 +78,7 @@ class ServiceDetailsPagelist extends StatelessWidget {
                 children: [
                   // الاسم والنوع
                   Text(
-                    item.title['en'] ?? item.title['ar'] ?? 'N/A',
+                    localizedText(item.title, languageCode),
                     style: theme.textTheme.displayLarge?.copyWith(fontSize: 24),
                   ),
                   const SizedBox(height: 8),
@@ -109,9 +113,9 @@ class ServiceDetailsPagelist extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // الوصف
+                  // ✨ الوصف (تم التعديل)
                   Text(
-                    "Description",
+                    loc.descriptionLabel,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
@@ -119,17 +123,19 @@ class ServiceDetailsPagelist extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    item.description['en'] ??
-                        item.description['ar'] ??
-                        'No description available.',
+                    localizedText(
+                      item.description,
+                      languageCode,
+                      fallback: loc.noDescriptionAvailable, // ✨ تم التعديل
+                    ),
                     style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                   ),
                   const SizedBox(height: 25),
 
-                  // عرض الباقات (Variants)
+                  // ✨ عرض الباقات (تم التعديل)
                   if (item.variants.isNotEmpty) ...[
                     Text(
-                      "Available Packages",
+                      loc.availablePackages,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -145,6 +151,8 @@ class ServiceDetailsPagelist extends StatelessWidget {
                           item.variants[index],
                           theme,
                           isDark,
+                          languageCode,
+                          loc, // ✨ تمرير متغير الترجمة
                         );
                       },
                     ),
@@ -177,13 +185,13 @@ class ServiceDetailsPagelist extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.startingFrom,
+                  loc.startingFrom, // ✨ كان يستخدمها بالفعل
                   style: theme.textTheme.bodySmall,
                 ),
                 Text(
                   item.variants.isNotEmpty
                       ? '${item.variants[0].price} ${item.variants[0].currency}'
-                      : 'N/A',
+                      : loc.notAvailable, // ✨ تم التعديل بدل N/A
                   style: TextStyle(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -198,7 +206,7 @@ class ServiceDetailsPagelist extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => _showBookingSheet(context),
                 style: theme.elevatedButtonTheme.style,
-                child: Text(AppLocalizations.of(context)!.bookRequest),
+                child: Text(loc.bookRequest), // ✨ كان يستخدمها بالفعل
               ),
             ),
           ],
@@ -242,8 +250,14 @@ class ServiceDetailsPagelist extends StatelessWidget {
     );
   }
 
-  // === ويدجت مساعدة لبطاقة الباقة (Variant) ===
-  Widget _buildVariantCard(Variant variant, ThemeData theme, bool isDark) {
+  // === ✨ تم تعديل الويدجت لاستقبال متغير الترجمة ===
+  Widget _buildVariantCard(
+    Variant variant,
+    ThemeData theme,
+    bool isDark,
+    String languageCode,
+    AppLocalizations loc,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(15),
@@ -262,7 +276,11 @@ class ServiceDetailsPagelist extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  variant.name['en'] ?? variant.name['ar'] ?? 'Package',
+                  localizedText(
+                    variant.name,
+                    languageCode,
+                    fallback: loc.package, // ✨ تم التعديل
+                  ),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -284,15 +302,20 @@ class ServiceDetailsPagelist extends StatelessWidget {
           // عرض أوقات التوفر (Availabilities)
           if (variant.availabilities.isNotEmpty)
             ...variant.availabilities.map(
-              (avail) => _buildAvailabilityRow(avail, theme),
+              (avail) =>
+                  _buildAvailabilityRow(avail, theme, loc), // ✨ تمرير الترجمة
             ),
         ],
       ),
     );
   }
 
-  // === ويدجت مساعدة لعرض التوفر ===
-  Widget _buildAvailabilityRow(Availability availability, ThemeData theme) {
+  // === ✨ تم تعديل الويدجت لاستقبال متغير الترجمة ===
+  Widget _buildAvailabilityRow(
+    Availability availability,
+    ThemeData theme,
+    AppLocalizations loc,
+  ) {
     final dateFormat = DateFormat('dd MMM, yyyy');
     final timeFormat = DateFormat('hh:mm a');
 
@@ -332,7 +355,7 @@ class ServiceDetailsPagelist extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      'Capacity: ${slot.remainingCapacity}',
+                      '${loc.capacity}: ${slot.remainingCapacity}', // ✨ تم التعديل
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: slot.remainingCapacity > 0
                             ? Colors.green

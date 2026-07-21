@@ -1,11 +1,13 @@
 class EndPoint {
-  static const String baseUrl = "http://192.168.1.104:8000/api/";
+  static const String baseUrl = "http://192.168.1.106:8000/api/";
 
   static const String signIn = "login";
   static const String signUp = "register";
   static const String getlisting =
       "listings"; // يجب إضافة هذا الـ Endpoint في كلاس EndPoint
   static const String getUserDataEndPoint = "user";
+  static const String Mybookings = "bookings";
+  static const String createBooking = "bookings";
 }
 
 class ApiKey {
@@ -66,4 +68,30 @@ class ApiKey {
   static const String name = 'name';
   static const String success = 'success';
   static const String data = 'data';
+
+  static const String listing = 'listing';
+  static const String user_id = 'user_id';
+  static const String provider_id = 'provider_id';
+  static const String listing_id = 'listing_id';
+  static const String listing_variant_id = 'listing_variant_id';
+  static const String listing_slot_id = 'listing_slot_id';
+  static const String booking_type = 'booking_type';
+  static const String payment_status = 'payment_status';
+  static const String quantity = 'quantity';
+  static const String total_price = 'total_price';
+  static const String booked_date = 'booked_date';
+  static const String booked_start_time = 'booked_start_time';
+  static const String booked_end_time = 'booked_end_time';
+  static const String metadata = 'metadata';
+  static const String customer_notes = 'customer_notes';
+
+  static const String variant_name = 'variant_name';
+  static const String event_type = 'event_type';
+  static const String guest_count = 'guest_count';
+  static const String setup_needs = 'setup_needs';
+  static const String is_rental = 'is_rental';
+  static const String rental_days = 'rental_days';
+  static const String delivery_address = 'delivery_address';
+
+  static const String lastBookingId = 'last_booking_id';
 }

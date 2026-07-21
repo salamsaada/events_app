@@ -2,6 +2,8 @@ import 'package:eventsapp/core/widgets/common/favorite_button.dart';
 import 'package:eventsapp/cubit/favorites_cubit.dart';
 import 'package:eventsapp/cubit/favorites_state.dart';
 import 'package:eventsapp/cubit/theme_cubit.dart';
+import 'package:eventsapp/cubit/language_cubit.dart';
+import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/user_state.dart';
 import 'package:eventsapp/models/listing_model.dart';
@@ -89,9 +91,13 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
 
   Widget _buildHallCard(BuildContext context, bool isDark, ServiceItem item) {
     final theme = Theme.of(context);
+    final languageCode = context.watch<LanguageCubit>().languageCode;
 
-    final String hallName =
-        item.title['en'] ?? item.title['ar'] ?? 'Unknown Hall';
+    final String hallName = localizedText(
+      item.title,
+      languageCode,
+      fallback: 'Unknown Hall',
+    );
     final String price = item.variants.isNotEmpty
         ? '${item.variants[0].price} ${item.variants[0].currency}'
         : 'N/A';
