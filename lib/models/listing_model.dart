@@ -54,7 +54,7 @@ class District {
 
 class Slot {
   final String id;
-  final dynamic name;
+  final dynamic name; // التعديل هنا: تغيير String? إلى dynamic
   final DateTime startTime;
   final DateTime endTime;
   final int remainingCapacity;
@@ -70,10 +70,10 @@ class Slot {
   factory Slot.fromJson(Map<String, dynamic>? json) {
     if (json == null) return Slot(id: '', startTime: DateTime.now(), endTime: DateTime.now(), remainingCapacity: 0);
     return Slot(
-      id: json[ApiKey.id]?.toString() ?? '',
-      name: json[ApiKey.name],
-      startTime: DateTime.tryParse(json[ApiKey.start_time]?.toString() ?? '') ?? DateTime.now(),
-      endTime: DateTime.tryParse(json[ApiKey.end_time]?.toString() ?? '') ?? DateTime.now(),
+      id: json[ApiKey.id] ?? '',
+      name: json[ApiKey.name], // الآن سيستقبل الكائن المترجم بدون أي انهيار
+      startTime: DateTime.tryParse(json[ApiKey.start_time] ?? '') ?? DateTime.now(),
+      endTime: DateTime.tryParse(json[ApiKey.end_time] ?? '') ?? DateTime.now(),
       remainingCapacity: json[ApiKey.remaining_capacity] ?? 0,
     );
   }
@@ -95,8 +95,8 @@ class Availability {
   factory Availability.fromJson(Map<String, dynamic>? json) {
     if (json == null) return Availability(id: '', availableDate: DateTime.now(), isBlocked: false, slots: []);
     return Availability(
-      id: json[ApiKey.id]?.toString() ?? '',
-      availableDate: DateTime.tryParse(json[ApiKey.available_date]?.toString() ?? '') ?? DateTime.now(),
+      id: json[ApiKey.id] ?? '',
+      availableDate: DateTime.tryParse(json[ApiKey.available_date] ?? '') ?? DateTime.now(),
       isBlocked: json[ApiKey.is_blocked] == 1 || json[ApiKey.is_blocked] == true,
       slots: (json[ApiKey.slots] as List<dynamic>?)?.map((item) => Slot.fromJson(item)).toList() ?? [],
     );
@@ -235,13 +235,13 @@ class ListingResponse {
   factory ListingResponse.fromJson(Map<String, dynamic> json) {
     try {
       return ListingResponse(
-        success: json[ApiKey.success] ?? true,
+        success: json[ApiKey.success] ?? true, // نفترض أنه true إذا لم يأتِ من السيرفر
         data: (json['data'] as List<dynamic>?)?.map((item) {
           try {
             return ServiceItem.fromJson(item);
           } catch (e) {
             print("⚠️ Skipped an item due to error: $e");
-            return null;
+            return null; // إذا فشل عنصر واحد، نتجاهله ولا نوقف التطبيق كله
           }
         }).whereType<ServiceItem>().toList() ?? [],
         meta: Meta.fromJson(json['meta']),
