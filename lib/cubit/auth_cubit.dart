@@ -330,22 +330,22 @@ class AuthCubit extends Cubit<AuthState> {
 
 
 Future<void> getUserProfile() async {
-    emit(ProfileLoading());
-    try {
-      final responseData = await _api.get("/profile");
-      print("DEBUG: Raw JSON: $responseData"); 
+  emit(ProfileLoading());
+  try {
+    final responseData = await _api.get("/profile");
+    print("DEBUG: Raw JSON: $responseData"); 
 
-      // التعديل هنا: أضفنا ['data'] لندخل للصندوق الداخلي
-      final user = UserModel.fromJson(responseData['data']); 
-      
-      emit(ProfileLoaded(user: user));
-    } catch (e) {
-      print(
-        "DEBUG: Error in getUserProfile: $e",
-      ); 
-      emit(AuthFailure(errorMessage: e.toString()));
-    }
+    final user = UserModel.fromJson(responseData['data']); 
+    
+    // 🌟 السطر الجديد: حفظ الـ ID في الكاش لتستخدميه في الشات
+    await _cache.saveData(key: 'my_id', value: user.id.toString());
+    
+    emit(ProfileLoaded(user: user));
+  } catch (e) {
+    print("DEBUG: Error in getUserProfile: $e"); 
+    emit(AuthFailure(errorMessage: e.toString()));
   }
+}
 
   // 🔟 دالة حفظ بيانات الجلسة محلياً بالـ Cache الموحد لضمان الـ Auto-Login المستقبلي
   Future<void> _saveUserSession(dynamic responseData) async {

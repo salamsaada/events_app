@@ -1,5 +1,12 @@
 import 'package:eventsapp/core/api/end_ponits.dart';
 
+// دالة سحرية عامة لحماية كل الكلاسات في هذا الملف من الانهيار
+Map<String, dynamic> _safeMap(dynamic value) {
+  if (value is String) return {'ar': value};
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return {'ar': value?.toString() ?? 'بدون عنوان'};
+}
+
 class Meta {
   final int currentPage;
   final int lastPage;
@@ -47,7 +54,7 @@ class District {
 
 class Slot {
   final String id;
-  final dynamic name; // التعديل هنا: تغيير String? إلى dynamic
+  final dynamic name;
   final DateTime startTime;
   final DateTime endTime;
   final int remainingCapacity;
@@ -63,10 +70,10 @@ class Slot {
   factory Slot.fromJson(Map<String, dynamic>? json) {
     if (json == null) return Slot(id: '', startTime: DateTime.now(), endTime: DateTime.now(), remainingCapacity: 0);
     return Slot(
-      id: json[ApiKey.id] ?? '',
-      name: json[ApiKey.name], // الآن سيستقبل الكائن المترجم بدون أي انهيار
-      startTime: DateTime.tryParse(json[ApiKey.start_time] ?? '') ?? DateTime.now(),
-      endTime: DateTime.tryParse(json[ApiKey.end_time] ?? '') ?? DateTime.now(),
+      id: json[ApiKey.id]?.toString() ?? '',
+      name: json[ApiKey.name],
+      startTime: DateTime.tryParse(json[ApiKey.start_time]?.toString() ?? '') ?? DateTime.now(),
+      endTime: DateTime.tryParse(json[ApiKey.end_time]?.toString() ?? '') ?? DateTime.now(),
       remainingCapacity: json[ApiKey.remaining_capacity] ?? 0,
     );
   }
@@ -88,8 +95,8 @@ class Availability {
   factory Availability.fromJson(Map<String, dynamic>? json) {
     if (json == null) return Availability(id: '', availableDate: DateTime.now(), isBlocked: false, slots: []);
     return Availability(
-      id: json[ApiKey.id] ?? '',
-      availableDate: DateTime.tryParse(json[ApiKey.available_date] ?? '') ?? DateTime.now(),
+      id: json[ApiKey.id]?.toString() ?? '',
+      availableDate: DateTime.tryParse(json[ApiKey.available_date]?.toString() ?? '') ?? DateTime.now(),
       isBlocked: json[ApiKey.is_blocked] == 1 || json[ApiKey.is_blocked] == true,
       slots: (json[ApiKey.slots] as List<dynamic>?)?.map((item) => Slot.fromJson(item)).toList() ?? [],
     );
@@ -122,11 +129,11 @@ class Variant {
   factory Variant.fromJson(Map<String, dynamic>? json) {
     if (json == null) return Variant(id: '', name: {}, price: 0, currency: '', priceType: '', images: [], availabilities: []);
     return Variant(
-      id: json[ApiKey.id] ?? '',
-      name: json[ApiKey.name] ?? {},
-      price: json[ApiKey.price] ?? 0,
-      currency: json[ApiKey.currency] ?? '',
-      priceType: json[ApiKey.price_type] ?? '',
+      id: json[ApiKey.id]?.toString() ?? '',
+      name: _safeMap(json[ApiKey.name]), // 🚀 هنا كان الخطأ، وتم إصلاحه!
+      price: (json[ApiKey.price] is num) ? (json[ApiKey.price] as num).toInt() : int.tryParse(json[ApiKey.price]?.toString() ?? '0') ?? 0,
+      currency: json[ApiKey.currency]?.toString() ?? '',
+      priceType: json[ApiKey.price_type]?.toString() ?? '',
       stock: json[ApiKey.stock],
       attributes: json[ApiKey.attributes],
       images: json[ApiKey.images] ?? [],
@@ -178,14 +185,20 @@ class ServiceItem {
 
   factory ServiceItem.fromJson(Map<String, dynamic>? json) {
     if (json == null) throw Exception("ServiceItem json is null");
-    
+
     try {
+      var catData = json[ApiKey.category];
+      Category category = (catData is Map<String, dynamic>) ? Category.fromJson(catData) : Category(id: 0, name: catData?.toString() ?? 'N/A');
+
+      var distData = json[ApiKey.district];
+      District district = (distData is Map<String, dynamic>) ? District.fromJson(distData) : District(id: 0, name: distData?.toString() ?? 'N/A');
+
       return ServiceItem(
-        id: json[ApiKey.id] ?? '',
-        title: json[ApiKey.title] ?? {},
-        description: json[ApiKey.description] ?? {},
-        type: json[ApiKey.type] ?? '',
-        status: json[ApiKey.status] ?? '',
+        id: json[ApiKey.id]?.toString() ?? '',
+        title: _safeMap(json[ApiKey.title]),
+        description: _safeMap(json[ApiKey.description]),
+        type: json[ApiKey.type]?.toString() ?? '',
+        status: json[ApiKey.status]?.toString() ?? '',
         materialComposition: json[ApiKey.material_composition],
         secondaryContactNumber: json[ApiKey.secondary_contact_number],
         cancelBeforeAcceptance: json[ApiKey.cancel_before_acceptance] == 1 || json[ApiKey.cancel_before_acceptance] == true,
@@ -193,15 +206,16 @@ class ServiceItem {
         cancelBeforePayment: json[ApiKey.cancel_before_payment] == 1 || json[ApiKey.cancel_before_payment] == true,
         isProviderLocationBased: json[ApiKey.is_provider_location_based] == 1 || json[ApiKey.is_provider_location_based] == true,
         rejectionReason: json[ApiKey.rejection_reason],
-        category: Category.fromJson(json[ApiKey.category]),
-        district: District.fromJson(json[ApiKey.district]),
+        category: category,
+        district: district,
         images: json[ApiKey.images] ?? [],
+        // 🚀 معالجة الباقات التي كانت تسبب الانهيار
         variants: (json[ApiKey.variants] as List<dynamic>?)?.map((item) => Variant.fromJson(item)).toList() ?? [],
-        createdAt: DateTime.tryParse(json[ApiKey.created_at] ?? '') ?? DateTime.now(),
-        updatedAt: DateTime.tryParse(json[ApiKey.updated_at] ?? '') ?? DateTime.now(),
+        createdAt: DateTime.tryParse(json[ApiKey.created_at]?.toString() ?? '') ?? DateTime.now(),
+        updatedAt: DateTime.tryParse(json[ApiKey.updated_at]?.toString() ?? '') ?? DateTime.now(),
       );
     } catch (e) {
-      print("❌ ERROR in ServiceItem.fromJson for ID ${json[ApiKey.id]}: $e");
+      print("❌ CRITICAL ERROR in ServiceItem for ID ${json[ApiKey.id]}: $e");
       rethrow;
     }
   }
@@ -221,13 +235,13 @@ class ListingResponse {
   factory ListingResponse.fromJson(Map<String, dynamic> json) {
     try {
       return ListingResponse(
-        success: json[ApiKey.success] ?? true, // نفترض أنه true إذا لم يأتِ من السيرفر
+        success: json[ApiKey.success] ?? true,
         data: (json['data'] as List<dynamic>?)?.map((item) {
           try {
             return ServiceItem.fromJson(item);
           } catch (e) {
             print("⚠️ Skipped an item due to error: $e");
-            return null; // إذا فشل عنصر واحد، نتجاهله ولا نوقف التطبيق كله
+            return null;
           }
         }).whereType<ServiceItem>().toList() ?? [],
         meta: Meta.fromJson(json['meta']),

@@ -1,3 +1,4 @@
+import 'package:eventsapp/cache/cache_helper.dart';
 import 'package:eventsapp/core/api/api_consumer.dart';
 import 'package:eventsapp/cubit/chat_cubit.dart';
 import 'package:eventsapp/core/theme/app_colors.dart';
@@ -58,6 +59,12 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
     final theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
 
+    // 🌟 الحل الجذري: نحدد الـ ID الفعلي هنا. 
+    // إذا كان الـ ID القادم من الـ Navigator فارغاً، نسحبه من الكاش فوراً.
+    final String effectiveMyId = widget.myId.isNotEmpty 
+        ? widget.myId 
+        : (CacheHelper().getData(key: 'my_id') ?? "").toString();
+
     return Scaffold(
       backgroundColor: isDark ? AppColors.background : AppColors.lightBackground,
       appBar: AppBar(
@@ -74,14 +81,17 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
               builder: (context, state) {
                 if (state is ChatLoading) return const Center(child: CircularProgressIndicator());
                 if (state is ChatError) return Center(child: Text(state.message));
+                
                 if (state is ChatMessagesLoaded) {
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     itemCount: state.messages.length,
                     itemBuilder: (context, index) {
                       final msg = state.messages[index];
-                      final isMe = msg.senderId == widget.myId;
-                      // استبدلي السطر القديم بهذا السطر:
+
+                      // 🌟 استخدمنا effectiveMyId للمقارنة لضمان الثبات
+                      final isMe = msg.senderId.toString().trim() == effectiveMyId.trim();
+                      
                       final time = msg.timestamp != null
                           ? "${msg.timestamp!.hour}:${msg.timestamp!.minute.toString().padLeft(2, '0')}"
                           : "";
@@ -116,50 +126,42 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
               },
             ),
           ),
-          _buildInputBar(context),
+          _buildInputBar(context, effectiveMyId), // مررنا الـ ID الفعلي هنا أيضاً
         ],
       ),
     );
   }
 
-  Widget _buildInputBar(BuildContext context) {
-  final theme = Theme.of(context);
-  final bool isDark = theme.brightness == Brightness.dark;
-
-  return Container(
-    padding: const EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      // تغيير اللون هنا ليناسب الثيم
-      color: isDark ? AppColors.background : Colors.white, 
-      border: Border(top: BorderSide(color: AppColors.primaryGold.withOpacity(0.3))),
-    ),
-    child: Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _messageController,
-            style: TextStyle(color: isDark ? Colors.white : Colors.black),
-            decoration: InputDecoration(
-              hintText: "اكتب رسالتك...",
-              hintStyle: TextStyle(color: Colors.grey),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(25), borderSide: BorderSide(color: AppColors.primaryGold)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(25), borderSide: BorderSide(color: AppColors.primaryGold.withOpacity(0.5))),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(25), borderSide: BorderSide(color: AppColors.primaryGold, width: 2)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+  Widget _buildInputBar(BuildContext context, String currentMyId) {
+    final theme = Theme.of(context);
+    final bool isDark = theme.brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.background : Colors.white, 
+        border: Border(top: BorderSide(color: AppColors.primaryGold.withOpacity(0.3))),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              style: TextStyle(color: isDark ? Colors.white : Colors.black),
+              decoration: InputDecoration(
+                hintText: "اكتب رسالتك...",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Container(
-          decoration: const BoxDecoration(color: AppColors.primaryGold, shape: BoxShape.circle),
-          child: IconButton(
-            icon: const Icon(Icons.send, color: Colors.white),
+          IconButton(
+            icon: const Icon(Icons.send, color: AppColors.primaryGold),
             onPressed: () {
               final text = _messageController.text.trim();
               if (text.isNotEmpty) {
+                // 🌟 نستخدم currentMyId هنا لضمان إرسال الرسالة بالـ ID الصحيح دائماً
                 context.read<ChatCubit>().sendMessage(
                   chatId: context.read<ChatCubit>().activeChatId!,
-                  senderId: widget.myId,
+                  senderId: currentMyId, 
                   receiverId: widget.receiverId,
                   text: text,
                 );
@@ -167,9 +169,8 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
               }
             },
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 }

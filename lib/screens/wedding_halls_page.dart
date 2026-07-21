@@ -1,3 +1,6 @@
+import 'package:eventsapp/core/widgets/common/favorite_button.dart';
+import 'package:eventsapp/cubit/favorites_cubit.dart';
+import 'package:eventsapp/cubit/favorites_state.dart';
 import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/user_state.dart';
@@ -104,7 +107,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
     }
 
     final String imageUrl = item.images.isNotEmpty
-        ? item.images[0]
+        ? item.images[0]['url'] ?? item.images[0].toString() // 💡 تعديل أمان صغير للصورة
         : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
 
     return Container(
@@ -123,9 +126,10 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // === قسم الصورة والتقييم ===
+          // === قسم الصورة والتقييم والمفضلة ===
           Stack(
             children: [
+              // 1. الصورة
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20),
@@ -142,6 +146,8 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                   ),
                 ),
               ),
+              
+              // 2. التقييم (على اليمين)
               Positioned(
                 top: 15,
                 right: 15,
@@ -169,6 +175,43 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ),
+
+              // 3. زر المفضلة الجديد 💖 (على اليسار)
+             // 3. زر المفضلة (تم ربطه بالكيوبيت ليعرف حالته الحقيقية)
+Positioned(
+                top: 15,
+                left: 15,
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundColor: isDark
+                      ? Colors.black.withOpacity(0.6)
+                      : Colors.white.withOpacity(0.9),
+                  child: Center(
+                    // 💡 استخدمنا BlocBuilder ليستمع لقائمة المفضلة
+                    child: BlocBuilder<FavoritesCubit, FavoritesState>(
+                      builder: (context, favState) {
+                        bool isFav = false;
+
+                        // نتحقق إذا كانت القائمة محملة بنجاح
+                        if (favState is FavoritesLoaded) {
+                          // نبحث داخل قائمة المفضلة: هل يوجد صالة بنفس الـ id الخاص بهذه الصالة؟
+                          isFav = favState.favorites.any(
+                            (favItem) => favItem.id == item.id,
+                          );
+                        }
+
+                        return FavoriteButton(
+                          // 🚀 السطر السحري: ValueKey يجبر الزر على إعادة رسم نفسه إذا تغيرت حالته
+                          key: ValueKey('${item.id}_$isFav'),
+                          listingId: item.id,
+                          initialIsFavorite:
+                              isFav, // الآن يأخذ حالته الحقيقية بدلاً من false الدائمة!
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),

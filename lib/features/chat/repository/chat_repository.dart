@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eventsapp/features/chat/models/message_model.dart'; 
+import 'package:eventsapp/features/chat/models/chat_user_model.dart'; 
 
 class ChatRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -44,5 +45,25 @@ class ChatRepository {
         return MessageModel.fromJson(doc.data());
       }).toList();
     });
+  }
+
+  // 🌟 الدالة المعدلة: تقرأ البيانات وتحولها إلى كائن (Object) باستخدام المودل
+  Future<bool> isUserOnline(String userId) async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      
+      // نتأكد أن المستند موجود ويحتوي على بيانات فعلياً
+      if (doc.exists && doc.data() != null) {
+        // 1. تحويل JSON القادم من الفايربيس إلى كائن ChatUserModel
+        final chatUser = ChatUserModel.fromJson(doc.data()!);
+        
+        // 2. إرجاع حالة الأونلاين بأمان
+        return chatUser.isOnline;
+      }
+      return false; 
+    } catch (e) {
+      print("❌ خطأ في قراءة حالة المستخدم من الفايربيس: $e");
+      return false;
+    }
   }
 }

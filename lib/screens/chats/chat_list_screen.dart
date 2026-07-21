@@ -1,3 +1,4 @@
+import 'package:eventsapp/cache/cache_helper.dart';
 import 'package:eventsapp/core/api/api_consumer.dart';
 import 'package:eventsapp/features/chat/repository/chat_api_repository.dart';
 import 'package:eventsapp/features/chat/repository/chat_repository.dart';
@@ -7,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/cubit/chat_cubit.dart';
 import 'package:eventsapp/screens/chats/chat_screen.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
-// تأكدي من استيراد الموديل الصحيح
 import 'package:eventsapp/models/planner_model.dart'; 
 
 class ChatListScreen extends StatelessWidget {
@@ -17,17 +17,15 @@ class ChatListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ChatCubit(
-        // تأكدي أنكِ عاملة import لهذين الـ Repositories في الأعلى
         ChatRepository(), 
         ChatApiRepository(context.read<ApiConsumer>()),
         PlannersRepository(apiConsumer: context.read<ApiConsumer>()),
-      )..getProviders(), // 👈 هنا نطلب البيانات مرة واحدة فقط عند فتح الشاشة!
+      )..getProviders(), 
       
-      child: const ChatListContent(), // هنا نستدعي التصميم تبعك
+      child: const ChatListContent(), 
     );
   }
 }
-
 
 class ChatListContent extends StatelessWidget {
   const ChatListContent({super.key});
@@ -56,49 +54,65 @@ class ChatListContent extends StatelessWidget {
           ),
         ),
         
-        // هنا أضفنا BlocBuilder للاستماع لحالة الـ API
         body: BlocBuilder<ChatCubit, ChatState>(
           builder: (context, state) {
             
-            // 1. حالة التحميل
             if (state is ChatLoading) {
               return const Center(child: CircularProgressIndicator());
             }
             
-            // 2. حالة الخطأ
             if (state is ChatError) {
               return Center(child: Text(state.message));
             }
 
-            // 3. حالة النجاح (البيانات وصلت)
             if (state is ChatLoaded) {
               final List<PlannerModel> allProviders = state.providers;
 
-              // الفرز الذكي محلياً
               final companies = allProviders.where((p) => p.type == 'company').toList();
               final freelancers = allProviders.where((p) => p.type == 'freelancer').toList();
 
               return TabBarView(
                 children: [
-                  _buildChatList(context, companies),
-                  _buildChatList(context, freelancers),
+                  // 🌟 هنا استخدمنا الكلاس الجديد الذي يحفظ الحالة
+                  KeepAliveChatList(items: companies),
+                  KeepAliveChatList(items: freelancers),
                 ],
               );
             }
 
-            // حالة ابتدائية أو غير معروفة
             return const Center(child: Text("ابدأ جلب المحادثات..."));
           },
         ),
       ),
     );
   }
+}
 
-  // تم تعديل الدالة لتستقبل List<PlannerModel> بدلاً من Map
-  Widget _buildChatList(BuildContext context, List<PlannerModel> items) {
+// 🌟 الكلاس الجديد: StatefulWidget لمنع الشاشة من التدمير
+class KeepAliveChatList extends StatefulWidget {
+  final List<PlannerModel> items;
+  
+  const KeepAliveChatList({super.key, required this.items});
+
+  @override
+  State<KeepAliveChatList> createState() => _KeepAliveChatListState();
+}
+
+// 🌟 هنا ندمج AutomaticKeepAliveClientMixin
+class _KeepAliveChatListState extends State<KeepAliveChatList> with AutomaticKeepAliveClientMixin {
+  
+  // 🌟 تفعيل خاصية الاحتفاظ بالحالة
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    // 🌟 هذا السطر ضروري جداً لكي يعمل الـ Mixin
+    super.build(context);
+
+    final items = widget.items;
     final theme = Theme.of(context);
     
-    // معالجة حالة القائمة الفارغة بشكل أنيق
     if (items.isEmpty) {
       return Center(
         child: Text(
@@ -114,7 +128,7 @@ class ChatListContent extends StatelessWidget {
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final item = items[index];
-        final isCompany = item.type == 'company'; // نعتمد على حقل type الآن
+        final isCompany = item.type == 'company'; 
 
         return Container(
           decoration: BoxDecoration(
@@ -134,7 +148,6 @@ class ChatListContent extends StatelessWidget {
               backgroundColor: isCompany 
                   ? theme.primaryColor.withOpacity(0.2) 
                   : Colors.blue.withOpacity(0.2),
-              // أخذ الحرف الأول من الاسم بأمان
               child: Text(
                 item.name.isNotEmpty ? item.name[0].toUpperCase() : '?', 
                 style: TextStyle(
@@ -173,18 +186,33 @@ class ChatListContent extends StatelessWidget {
             ),
             subtitle: Text(item.role, style: AppTextStyles.bodyGrey.copyWith(color: theme.hintColor)),
             onTap: () {
-              // 1. نبدأ المحادثة في الخلفية
-              context.read<ChatCubit>().startChat(item.id);
-              
-              // 2. ننتقل لشاشة المحادثة
+              // 1. سحب الـ ID الخاص بالمستخدم من الكاش
+              final String currentUserId =
+                  CacheHelper().getData(key: 'my_id') ?? "";
+
+              // 2. الانتقال لشاشة المحادثة مع إعطائها "كيوبيت جديد" خاص بها!
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChatScreen(
-                    myId: "01kw52txy4g70cfrakre683ptp", 
-                    receiverId: item.id,
-                    receiverName: item.name,
-                    receiverRole: item.role,
+                  builder: (context) => BlocProvider(
+                    // 🌟 إنشاء نسخة جديدة تماماً من الكيوبيت لهذه المحادثة فقط
+                    create: (context) =>
+                        ChatCubit(
+                          ChatRepository(),
+                          ChatApiRepository(context.read<ApiConsumer>()),
+                          PlannersRepository(
+                            apiConsumer: context.read<ApiConsumer>(),
+                          ),
+                        )..startChat(
+                          item.id.toString(),
+                        ), // 🌟 نستدعي startChat هنا للنسخة الجديدة
+
+                    child: ChatScreen(
+                      myId: currentUserId,
+                      receiverId: item.id.toString(),
+                      receiverName: item.name,
+                      receiverRole: item.role,
+                    ),
                   ),
                 ),
               );
