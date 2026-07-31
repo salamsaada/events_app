@@ -7,9 +7,11 @@ class ResultCard extends StatelessWidget {
   final String price;
   final String imageUrl;
   final double rating;
-  final String? location;
-  final String? capacity;
+  final String location;
+  final String capacity;
   final VoidCallback onTap;
+  final bool isFavorite; 
+  final VoidCallback? onFavoriteToggle; 
 
   const ResultCard({
     super.key,
@@ -18,9 +20,11 @@ class ResultCard extends StatelessWidget {
     required this.price,
     required this.imageUrl,
     required this.rating,
-    this.location,
-    this.capacity,
+    required this.location,
+    required this.capacity,
     required this.onTap,
+    this.isFavorite = false, 
+    this.onFavoriteToggle,
   });
 
   @override
@@ -45,21 +49,51 @@ class ResultCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(15),
-              ),
-              child: Image.network(
-                imageUrl,
-                height: 180,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: 180,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.image_not_supported),
+            // استخدام Stack لوضع زر القلب فوق الصورة
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(15),
+                  ),
+                  child: Image.network(
+                    imageUrl,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 180,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported),
+                    ),
+                  ),
                 ),
-              ),
+                
+                // زر المفضلة (القلب) المعدل
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.cardColor.withValues(alpha: 0.85),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      onPressed: onFavoriteToggle, 
+                      padding: EdgeInsets.zero, 
+                      constraints: const BoxConstraints(
+                        minWidth: 38,
+                        minHeight: 38,
+                      ), 
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.grey,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -69,12 +103,18 @@ class ResultCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                      // 👇 الحل هنا: تغليف العنوان بـ Expanded لتجنب الانهيار
+                      Expanded(
+                        child: Text(
+                          title,
+                          maxLines: 1, // إجبار النص على البقاء في سطر واحد
+                          overflow: TextOverflow.ellipsis, // وضع ثلاث نقاط في حال كان النص طويلاً
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8), // مسافة أمان صغيرة
                       Row(
                         children: [
                           const Icon(
@@ -96,12 +136,12 @@ class ResultCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  if (location != null || capacity != null)
+                  if (location.isNotEmpty || capacity.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Row(
                         children: [
-                          if (location != null) ...[
+                          if (location.isNotEmpty) ...[
                             const Icon(
                               Icons.location_on,
                               size: 14,
@@ -112,7 +152,7 @@ class ResultCard extends StatelessWidget {
                               style: theme.textTheme.bodySmall,
                             ),
                           ],
-                          if (capacity != null) ...[
+                          if (capacity.isNotEmpty) ...[
                             const Icon(
                               Icons.people,
                               size: 14,

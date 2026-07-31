@@ -6,17 +6,18 @@ class UserCubit extends Cubit<UserState> {
   UserCubit(this.userRepository) : super(UserInitial());
   final UserRepository userRepository;
 
-  void getListing({int? page}) async {
-    emit(GetListingLoading()); // إصدار حالة التحميل
+  // 🚀 أضفنا Future هنا لكي يستطيع الـ RefreshIndicator انتظارها
+  Future<void> getListing({int? page, String? type, String? categoryId}) async {
+    emit(GetListingLoading()); 
 
-    final response = await userRepository.getlisting();
+    final response = await userRepository.getlisting(
+      type: type,
+      categoryId: categoryId,
+    );
 
     response.fold(
-      (errMessage) =>
-          emit(GetListingFailure(errMessage: errMessage)), // حالة الفشل
-      (listingResponse) => emit(
-        GetListingSuccess(listingResponse: listingResponse),
-      ), // حالة النجاح
+      (errMessage) => emit(GetListingFailure(errMessage: errMessage)), 
+      (listingResponse) => emit(GetListingSuccess(listingResponse: listingResponse)), 
     );
   }
 

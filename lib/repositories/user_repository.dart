@@ -74,29 +74,28 @@ class UserRepository {
     }
   }
 
-  Future<Either<String, ListingResponse>> getlisting() async {
+  Future<Either<String, ListingResponse>> getlisting({
+    String? type,
+    String? categoryId,
+  }) async {
     try {
-      final response = await api.get(EndPoint.getlisting);
+      final response = await api.get(
+        EndPoint.getlisting,
+        queryParameters: {
+          if (type != null) 'type': type, // 🚀 لإرسال نوع physical_product
+          if (categoryId != null) 'category_id': categoryId, // 🚀 للفلترة حسب القسم لاحقاً
+        },
+      );
 
-      // 1. التحقق مما إذا كان الرد فارغاً تماماً (null) أو لا يحتوي على بيانات
       if (response == null ||
           (response is List && response.isEmpty) ||
           (response is Map && response.isEmpty)) {
-        // نُرجع هذه الرسالة ليتم عرضها في واجهة المستخدم
-        return const Left("لا يوجد صالات حالياً");
+        return const Left("لا توجد بيانات حالياً");
       }
 
       final serviceResponse = ListingResponse.fromJson(response);
-
-      // 2. خطوة أمان إضافية: إذا كان السيرفر يرسل المودل ولكن مصفوفة الصالات بداخله فارغة
-      // (ملاحظة: استبدلي 'data' باسم المصفوفة الموجودة داخل ListingResponse لديكِ إذا كانت مختلفة)
-      /*
-      if (serviceResponse.data == null || serviceResponse.data!.isEmpty) {
-         return const Left("لا يوجد صالات حالياً");
-      }
-      */
-
       return Right(serviceResponse);
+
     } on ServerException catch (e) {
       return Left(e.errModel.errorMessage);
     } catch (e) {

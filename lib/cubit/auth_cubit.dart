@@ -334,7 +334,7 @@ class AuthCubit extends Cubit<AuthState> {
 Future<void> getUserProfile() async {
   emit(ProfileLoading());
   try {
-    final responseData = await _api.get("/profile");
+    final responseData = await _api.get("auth/profile");
     print("DEBUG: Raw JSON: $responseData"); 
 
     final user = UserModel.fromJson(responseData['data']); 

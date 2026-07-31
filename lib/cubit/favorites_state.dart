@@ -7,7 +7,7 @@ class FavoritesInitial extends FavoritesState {}
 class FavoritesLoading extends FavoritesState {}
 
 class FavoritesLoaded extends FavoritesState {
-  final List<ServiceItem> favorites; // 🚀 يجب أن يكون ServiceItem
+  final List<ServiceItem> favorites; 
   
   FavoritesLoaded(this.favorites);
 }

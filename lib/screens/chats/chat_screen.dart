@@ -83,6 +83,33 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
                 if (state is ChatError) return Center(child: Text(state.message));
                 
                 if (state is ChatMessagesLoaded) {
+                  // 🌟 إضافة الحالة هنا: إذا كانت القائمة فارغة نعرض أيقونة
+                  if (state.messages.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 80,
+                            color: isDark ? Colors.grey[700] : Colors.grey[300],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            "لا توجد رسائل بعد\nابدأ المحادثة الآن!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: isDark ? Colors.grey[500] : Colors.grey[600],
+                              fontSize: 16,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // في حال وجود رسائل نعرضها بشكل طبيعي
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     itemCount: state.messages.length,
@@ -160,7 +187,7 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
               if (text.isNotEmpty) {
                 // 🌟 نستخدم currentMyId هنا لضمان إرسال الرسالة بالـ ID الصحيح دائماً
                 context.read<ChatCubit>().sendMessage(
-                  chatId: context.read<ChatCubit>().activeChatId!,
+                  chatId: context.read<ChatCubit>().activeChatId ?? "", // تجنب خطأ الـ Null
                   senderId: currentMyId, 
                   receiverId: widget.receiverId,
                   text: text,

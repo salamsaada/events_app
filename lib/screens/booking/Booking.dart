@@ -24,7 +24,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
   int _guestCount = 50;
   int _selectedPackageIndex = 0;
 
-  final List<String> _timeSlots = const ['4:00 PM', '7:00 PM', '9:00 PM'];
+  final List<String> _timeSlots = const ['16:00', '19:00', '21:00'];
 
   // ✨ دالة الترجمة المضافة لتوحيد اللغة في هذه الصفحة
   String _tr(String en, String ar) {

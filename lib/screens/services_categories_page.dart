@@ -1,54 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
-import 'package:eventsapp/models/listing_model.dart';
-
+import 'package:eventsapp/cubit/language_cubit.dart';
+import 'package:eventsapp/cubit/user_cubit.dart';
+import 'package:eventsapp/cubit/user_state.dart';
+import 'package:eventsapp/cubit/favorites_cubit.dart';
+import 'package:eventsapp/cubit/favorites_state.dart';
+import 'package:eventsapp/core/utils/localized_value.dart';
+import 'package:eventsapp/core/widgets/common/result_card.dart'; // تأكدي من مسار الـ ResultCard لديك
 import 'service_details_page.dart';
 
-class ServicesCategoriesPage extends StatelessWidget {
-  ServicesCategoriesPage({super.key});
+class ServicesCategoriesPage extends StatefulWidget {
+  const ServicesCategoriesPage({super.key});
 
-  final List<Map<String, dynamic>> categories = [
-    {
-      "id": "floral",
-      "icon": Icons.local_florist,
-      "image": "assets/flowers.jpg",
-    },
-    {
-      "id": "photography",
-      "icon": Icons.camera_alt,
-      "image": "assets/camera.jpg",
-    },
-    {
-      "id": "catering",
-      "icon": Icons.restaurant,
-      "image": "assets/catering.jpg",
-    },
-    {
-      "id": "soundLight",
-      "icon": Icons.surround_sound,
-      "image": "assets/sound.jpg",
-    },
-    {"id": "cakesSweets", "icon": Icons.cake, "image": "assets/cake.jpg"},
-    {"id": "djMusic", "icon": Icons.music_note, "image": "assets/music.jpg"},
-  ];
+  @override
+  State<ServicesCategoriesPage> createState() => _ServicesCategoriesPageState();
+}
 
-  String _categoryName(AppLocalizations l10n, String categoryId) {
-    switch (categoryId) {
-      case 'floral':
-        return l10n.servicesCategoryFloralDesign;
-      case 'photography':
-        return l10n.servicesCategoryPhotography;
-      case 'catering':
-        return l10n.servicesCategoryCatering;
-      case 'soundLight':
-        return l10n.servicesCategorySoundLight;
-      case 'cakesSweets':
-        return l10n.servicesCategoryCakesSweets;
-      case 'djMusic':
-        return l10n.servicesCategoryDjMusic;
-      default:
-        return l10n.individualServices;
-    }
+class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
+  @override
+  void initState() {
+    super.initState();
+    // 🚀 جلب المنتجات الملموسة فور فتح الصفحة
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserCubit>().getListing(type: 'physical_product');
+    });
   }
 
   @override
@@ -56,74 +32,104 @@ class ServicesCategoriesPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.individualServices), centerTitle: true),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.9,
-          ),
-          itemCount: categories.length,
-          itemBuilder: (context, index) {
-            final category = categories[index];
-            final categoryId = category['id'] as String;
-            final categoryName = _categoryName(l10n, categoryId);
+      appBar: AppBar(
+        // يمكنك وضع l10n.products إذا كانت موجودة بملف الترجمة
+        title: Text(l10n.individualServices), 
+        centerTitle: true,
+      ),
+      body: BlocBuilder<UserCubit, UserState>(
+        builder: (context, state) {
+          if (state is GetListingLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ServiceDetailsPage(
-                      categoryId: categoryId,
-                      icon: category['icon'] as IconData,
-                      item: ServiceItem.fromJson(const {}),
-                    ),
-                  ),
-                );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.3),
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 35,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).colorScheme.primary.withOpacity(0.1),
-                      child: Icon(
-                        category['icon'],
-                        size: 35,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Text(
-                      categoryName,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
+          if (state is GetListingFailure) {
+            return Center(
+              child: Text(
+                state.errMessage,
+                style: const TextStyle(color: Colors.red),
               ),
             );
-          },
-        ),
+          }
+
+          if (state is GetListingSuccess) {
+            // 🚀 فلترة إضافية للتأكد من عرض المنتجات فقط
+            final products = state.listingResponse.data
+                .where((item) => item.type == 'physical_product')
+                .toList();
+
+            if (products.isEmpty) {
+              return Center(child: Text(l10n.pageWillBeAvailable));
+            }
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                await context.read<UserCubit>().getListing(type: 'physical_product');
+              },
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final item = products[index];
+                  final languageCode = context.watch<LanguageCubit>().languageCode;
+
+                  final String title = localizedText(item.title, languageCode);
+                  // قراءة اسم الشركة المزودة إن وجدت، وإلا نعرض التصنيف
+                  // 🚀 نكتفي بعرض اسم التصنيف (Category) لعدم وجود provider في المودل حالياً
+                  final String providerName = item.category.name; 
+                  final String price = item.variants.isNotEmpty
+                      ? '${item.variants[0].price} ${item.variants[0].currency}'
+                      : 'غير متوفر';
+                  
+                  final String imageUrl = item.images.isNotEmpty
+                      ? (item.images[0]['url'] ?? item.images[0].toString())
+                      : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
+
+                  // 🚀 استخراج الكمية المتاحة (Stock)
+                  String stockInfo = 'نفدت الكمية';
+                  if (item.variants.isNotEmpty && item.variants[0].stock != null) {
+                    stockInfo = 'الكمية المتوفرة: ${item.variants[0].stock}';
+                  }
+
+                  return BlocBuilder<FavoritesCubit, FavoritesState>(
+                    builder: (context, favState) {
+                      bool isFavorite = false;
+                      if (favState is FavoritesLoaded) {
+                        isFavorite = favState.favorites.any((fav) => fav.id == item.id);
+                      }
+
+                      return ResultCard(
+                        key: ValueKey('${item.id}_$isFavorite'),
+                        title: title,
+                        companyName: providerName,
+                        price: price,
+                        imageUrl: imageUrl,
+                        rating: 4.5,
+                        location: item.district.name,
+                        capacity: stockInfo, // إرسال المخزون بدلاً من السعة
+                        isFavorite: isFavorite,
+                        onFavoriteToggle: () {
+                          context.read<FavoritesCubit>().toggleHeart(item.id);
+                        },
+                        onTap: () {
+                          // التوجيه لصفحة التفاصيل وإرسال المنتج الحقيقي
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ServiceDetailsPage(item: item), 
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          }
+
+          return const SizedBox();
+        },
       ),
     );
   }
