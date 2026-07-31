@@ -21,10 +21,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   // دالة للضغط على القلب (Toggle)
   Future<void> toggleHeart(String listingId) async {
     try {
-      // نستدعي الـ API، وسيرجع لنا هل أصبحت مفضلة أم لا
       final isNowFavorited = await repository.toggleFavorite(listingId);
-      
-      // إذا كنا داخل شاشة قائمة المفضلة، نقوم بتحديث القائمة فوراً
       if (state is FavoritesLoaded) {
           fetchFavorites(); 
       }

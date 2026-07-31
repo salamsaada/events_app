@@ -1,3 +1,5 @@
+import 'package:eventsapp/cubit/favorites_cubit.dart';
+import 'package:eventsapp/cubit/favorites_state.dart';
 import 'package:flutter/material.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
@@ -72,16 +74,14 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                     ),
                   ),
                 ),
-
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: listings.length,
                     itemBuilder: (context, index) {
                       final item = listings[index];
-                      final languageCode = context
-                          .watch<LanguageCubit>()
-                          .languageCode;
+                      final languageCode =
+                          context.watch<LanguageCubit>().languageCode;
 
                       // استخراج البيانات لتلائم ResultCard
                       final String title = localizedText(
@@ -105,21 +105,39 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                             '${item.variants[0].availabilities[0].slots[0].remainingCapacity} Guests';
                       }
 
-                      return ResultCard(
-                        title: title,
-                        companyName: companyName,
-                        price: price,
-                        imageUrl: imageUrl,
-                        rating: 4.5, // قيمة افتراضية
-                        location: item.district.name,
-                        capacity: capacity,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              // تمرير كائن ServiceItem بالكامل
-                              builder: (context) => DetailsPage(item: item),
-                            ),
+                      // 💡 استخدام BlocBuilder الخاص بالمفضلة لفحص حالة الكرت
+                      return BlocBuilder<FavoritesCubit, FavoritesState>(
+                        builder: (context, favState) {
+                          bool isFavorite = false;
+                          if (favState is FavoritesLoaded) {
+                            // 🚀 التعديل الجذري 1: تم مسح فحص القسم لتجنب الانهيار المخفي، ونكتفي بـ ID فقط
+                            isFavorite = favState.favorites.any((fav) => fav.id == item.id);
+                          }
+
+                          return ResultCard(
+                            // 🚀 التعديل الجذري 2: إضافة المفتاح لكي يتم تحديث لون القلب فوراً عند الضغط
+                            key: ValueKey('${item.id}_$isFavorite'),
+                            title: title,
+                            companyName: companyName,
+                            price: price,
+                            imageUrl: imageUrl,
+                            rating: 4.5, // قيمة افتراضية
+                            location: item.district.name,
+                            capacity: capacity,
+                            isFavorite: isFavorite,
+                            onFavoriteToggle: () {
+                              context
+                                  .read<FavoritesCubit>()
+                                  .toggleHeart(item.id);
+                            },
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DetailsPage(item: item),
+                                ),
+                              );
+                            },
                           );
                         },
                       );

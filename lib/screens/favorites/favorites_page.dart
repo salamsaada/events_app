@@ -1,7 +1,7 @@
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/cubit/favorites_cubit.dart';
 import 'package:eventsapp/cubit/favorites_state.dart';
-import 'package:eventsapp/models/listing_model.dart'; // 🚀 الاعتماد على ServiceItem الشامل
+import 'package:eventsapp/models/listing_model.dart'; 
 import 'package:eventsapp/screens/detailsListings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +17,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
   @override
   void initState() {
     super.initState();
-    // استدعاء البيانات الحقيقية فور فتح الشاشة
     context.read<FavoritesCubit>().fetchFavorites();
   }
 
@@ -49,7 +48,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           } else if (state is FavoritesError) {
             return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
           } else if (state is FavoritesLoaded) {
-            final favorites = state.favorites; // هذه أصبحت قائمة من نوع ServiceItem
+            final favorites = state.favorites; 
 
             if (favorites.isEmpty) {
               return Center(
@@ -75,7 +74,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  // تصميم الكارت المتكامل المطابق لصفحة الصالات
   Widget _buildHallCard(BuildContext context, bool isDark, ServiceItem item) {
     final theme = Theme.of(context);
 
@@ -187,7 +185,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
-                      // 🚀 الانتقال لشاشة التفاصيل وإرسال كائن الـ item بالكامل
                       Navigator.push(
                         context,
                         MaterialPageRoute(

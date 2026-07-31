@@ -9,6 +9,7 @@ import 'package:eventsapp/cubit/notification_cubit.dart';
 // 🌟 استيرادات الـ Favorites الجديدة
 import 'package:eventsapp/cubit/favorites_cubit.dart';
 import 'package:eventsapp/features/chat/repository/favorites_repository.dart';
+import 'package:eventsapp/repositories/notification_repository.dart';
 
 import 'package:eventsapp/repositories/user_repository.dart';
 import 'package:eventsapp/screens/auth/splash_screen.dart';
@@ -123,7 +124,12 @@ class RoyalEventsApp extends StatelessWidget {
 
           BlocProvider(
             create: (context) {
-              final cubit = NotificationCubit(context.read<ApiConsumer>());
+              final cubit = NotificationCubit(
+                context.read<ApiConsumer>(),
+                NotificationRepository(
+                  apiConsumer: context.read<ApiConsumer>(),
+                ),
+              );
               if (uploadTokenAtStart) {
                 cubit.uploadDeviceToken();
               }

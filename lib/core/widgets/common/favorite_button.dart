@@ -25,6 +25,17 @@ class _FavoriteButtonState extends State<FavoriteButton> {
     isFavorite = widget.initialIsFavorite;
   }
 
+  // 🚀 التعديل السحري: إجبار الزر على استماع التحديثات القادمة من الكيوبيت عند الرجوع للصفحة
+  @override
+  void didUpdateWidget(covariant FavoriteButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialIsFavorite != widget.initialIsFavorite) {
+      setState(() {
+        isFavorite = widget.initialIsFavorite;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return IconButton(

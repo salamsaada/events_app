@@ -2,7 +2,7 @@ import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
 import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/models/listing_model.dart'; // استيراد الموديل
-import 'package:eventsapp/screens/Booking.dart';
+import 'package:eventsapp/screens/booking/Booking.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
