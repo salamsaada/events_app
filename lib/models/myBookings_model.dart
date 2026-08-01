@@ -9,9 +9,20 @@ class ListingTitle {
 
   const ListingTitle({this.en, this.ar});
 
-  factory ListingTitle.fromJson(Map<String, dynamic>? json) {
+  factory ListingTitle.fromJson(dynamic json) {
     if (json == null) return const ListingTitle();
-    return ListingTitle(en: json['en'] as String?, ar: json['ar'] as String?);
+
+    // ✨ إذا أرسل لارافيل النص كـ String مباشرة (بسبب إعدادات الترجمة)
+    if (json is String) {
+      return ListingTitle(en: json, ar: json);
+    }
+
+    // ✨ إذا أرسل لارافيل النص ككائن ترجمة صحيح { "ar": "...", "en": "..." }
+    if (json is Map<String, dynamic>) {
+      return ListingTitle(en: json['en'] as String?, ar: json['ar'] as String?);
+    }
+
+    return const ListingTitle();
   }
 }
 
@@ -44,7 +55,7 @@ class BookingVariant {
     if (json == null) return const BookingVariant();
     return BookingVariant(
       id: json[ApiKey.id] as String?,
-      name: ListingTitle.fromJson(json['name'] as Map<String, dynamic>?),
+      name: ListingTitle.fromJson(json['name']),
     );
   }
 }
@@ -60,7 +71,7 @@ class BookingListing {
     if (json == null) return const BookingListing();
     return BookingListing(
       id: json[ApiKey.id] as String?,
-      title: ListingTitle.fromJson(json[ApiKey.title] as Map<String, dynamic>?),
+      title: ListingTitle.fromJson(json[ApiKey.title]),
       listingType: json['listing_type'] as String?,
     );
   }

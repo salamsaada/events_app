@@ -20,7 +20,7 @@ class BookingRequestSheet extends StatefulWidget {
 class _BookingRequestSheetState extends State<BookingRequestSheet> {
   final TextEditingController _notesController = TextEditingController();
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 7));
-  String _selectedTime = '7:00 PM';
+  String _selectedTime = '16:00';
   int _guestCount = 50;
   int _selectedPackageIndex = 0;
 
@@ -28,7 +28,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
 
   // ✨ دالة الترجمة المضافة لتوحيد اللغة في هذه الصفحة
   String _tr(String en, String ar) {
-    final languageCode = context.watch<LanguageCubit>().languageCode;
+    final languageCode = context.read<LanguageCubit>().languageCode;
     return languageCode == 'ar' ? ar : en;
   }
 

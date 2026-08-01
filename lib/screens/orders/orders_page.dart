@@ -351,8 +351,7 @@ class _OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isAr =
-        Localizations.localeOf(context).languageCode == 'ar'; // ✨ توحيد اللغة
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     Color statusColor;
     IconData statusIcon;
@@ -403,31 +402,38 @@ class _OrderCard extends StatelessWidget {
         ),
         child: Column(
           children: [
+            // الجزء العلوي (رقم الطلب، الاسم، الحالة)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        orderNumber,
-                        style: AppTextStyles.subtitle.copyWith(
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        hallName,
-                        style: AppTextStyles.bodyGrey.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.6,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          orderNumber,
+                          style: AppTextStyles.subtitle.copyWith(
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          hallName,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.bodyGrey.copyWith(
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
+                  // كود حالة الحاجة (مكتوب مرة واحدة فقط)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -454,12 +460,14 @@ class _OrderCard extends StatelessWidget {
                 ],
               ),
             ),
+            // الخط الفاصل
             Divider(
               color: AppColors.primaryGold.withValues(alpha: 0.1),
               height: 1,
               indent: 16,
               endIndent: 16,
             ),
+            // الجزء السفلي (التاريخ، المبلغ، الأزرار)
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -492,7 +500,7 @@ class _OrderCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        isAr ? 'المبلغ الكلي' : 'Total Amount', // ✨ توحيد اللغة
+                        isAr ? 'المبلغ الكلي' : 'Total Amount',
                         style: AppTextStyles.bodyGrey.copyWith(
                           color: theme.colorScheme.onSurface.withValues(
                             alpha: 0.6,
@@ -515,7 +523,7 @@ class _OrderCard extends StatelessWidget {
                         child: OutlinedButton.icon(
                           onPressed: () {},
                           icon: const Icon(Icons.message, size: 18),
-                          label: Text(isAr ? 'اتصل' : 'Call'), // ✨ توحيد اللغة
+                          label: Text(isAr ? 'اتصل' : 'Call'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.primaryGold,
                             side: const BorderSide(
@@ -532,9 +540,7 @@ class _OrderCard extends StatelessWidget {
                         child: ElevatedButton.icon(
                           onPressed: () {},
                           icon: const Icon(Icons.visibility, size: 18),
-                          label: Text(
-                            isAr ? 'عرض التفاصيل' : 'View Details',
-                          ), // ✨ توحيد اللغة
+                          label: Text(isAr ? 'عرض التفاصيل' : 'View Details'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryGold,
                             foregroundColor: Colors.black,
