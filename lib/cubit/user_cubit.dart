@@ -7,12 +7,33 @@ class UserCubit extends Cubit<UserState> {
   final UserRepository userRepository;
 
   // 🚀 أضفنا Future هنا لكي يستطيع الـ RefreshIndicator انتظارها
-  Future<void> getListing({int? page, String? type, String? categoryId}) async {
+  // 🚀 أضفنا Future هنا لكي يستطيع الـ RefreshIndicator انتظارها
+  Future<void> getListing({
+    int? page, 
+    String? type, 
+    String? categoryId,
+    // 🚀 استقبال الفلاتر الجديدة من الواجهة
+    String? search,
+    String? minPrice,
+    String? maxPrice,
+    String? capacity,
+    String? rating,
+    String? date,
+    String? location,
+  }) async {
     emit(GetListingLoading()); 
 
     final response = await userRepository.getlisting(
       type: type,
       categoryId: categoryId,
+      // 🚀 تمرير الفلاتر للـ Repository
+      search: search,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      capacity: capacity,
+      rating: rating,
+      date: date,
+      location: location,
     );
 
     response.fold(

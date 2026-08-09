@@ -473,10 +473,31 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                           onPressed: isLoading
                               ? null
                               : () {
+                                  // 🚀 التعديل الجذري هنا: استخراج الـ ID الخاص بالفترة الزمنية
+                                  String? selectedSlotId;
+
+                                  if (selectedVariant != null &&
+                                      selectedVariant
+                                          .availabilities
+                                          .isNotEmpty) {
+                                    // للتبسيط: نجلب أول فترة متاحة (Slot) من قائمة التوافر
+                                    // (في المستقبل، يمكنك تعديل هذا الشرط ليطابق التاريخ والوقت الذي اختاره المستخدم بدقة)
+                                    if (selectedVariant
+                                        .availabilities[0]
+                                        .slots
+                                        .isNotEmpty) {
+                                      selectedSlotId = selectedVariant
+                                          .availabilities[0]
+                                          .slots[0]
+                                          .id;
+                                    }
+                                  }
+
                                   context.read<UserCubit>().createBooking(
                                     listingId: widget.item.id,
                                     listingVariantId: selectedVariant?.id,
-                                    listingSlotId: null,
+                                    // 🚀 وضعنا المتغير الجديد بدلاً من null
+                                    listingSlotId: selectedSlotId,
                                     bookingType: 'request',
                                     quantity: _guestCount,
                                     bookedDate: DateFormat(
@@ -504,18 +525,16 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                                 )
                               : Text(
                                   selectedVariant == null
-                                      // تم التعديل
                                       ? _tr(
                                           'Send booking request',
                                           'إرسال طلب الحجز',
                                         )
-                                      // تم التعديل
                                       : _tr(
                                           'Send booking request - ${selectedVariant.price} ${selectedVariant.currency}',
                                           'إرسال طلب حجز - ${selectedVariant.price} ${selectedVariant.currency}',
                                         ),
                                 ),
-                        ),
+                        )
                       ),
                       const SizedBox(height: 10),
                       Center(

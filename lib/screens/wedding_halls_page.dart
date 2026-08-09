@@ -25,8 +25,9 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<UserCubit>().state;
-      if (state is! GetListingSuccess && state is! GetListingLoading) {
-        context.read<UserCubit>().getListing();
+      // 🚀 شلنا شرط الـ Success عشان يجبره يحمل الداتا الجديدة الخاصة بالصالات
+      if (state is! GetListingLoading) {
+        context.read<UserCubit>().getListing(type: 'hall');
       }
     });
   }
@@ -63,7 +64,10 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
           }
 
           if (state is GetListingSuccess) {
-            final listings = state.listingResponse.data;
+            // 🚀 التعديل هنا: نفلتر القائمة لعرض الصالات (hall) فقط
+            final listings = state.listingResponse.data
+                .where((item) => item.type == 'hall')
+                .toList();
 
             if (listings.isEmpty) {
               return Center(
@@ -72,7 +76,8 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
             }
 
             return RefreshIndicator(
-              onRefresh: () async => context.read<UserCubit>().getListing(),
+              // 🚀 التعديل هنا: تحديث نوع الجلب عند السحب لأسفل ليكون 'hall'
+              onRefresh: () async => context.read<UserCubit>().getListing(type: 'hall'),
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: listings.length,
@@ -200,14 +205,12 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                         bool isFav = false;
 
                         if (favState is FavoritesLoaded) {
-                          // 🚀 مسحنا فحص القسم لتجنب الانهيار (الـ id كافي وممتاز)
                           isFav = favState.favorites.any(
                             (favItem) => favItem.id == item.id,
                           );
                         }
 
                         return FavoriteButton(
-                          // 🚀 مفتاح نظيف يربط الـ ID بحالة المفضلة فقط
                           key: ValueKey('${item.id}_$isFav'),
                           listingId: item.id,
                           initialIsFavorite: isFav,

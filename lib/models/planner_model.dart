@@ -4,7 +4,11 @@ class PlannerModel {
   final String type;
   final String role; 
 
-  PlannerModel({required this.id, required this.name, required this.type, required this.role});
+  PlannerModel({
+    required this.id, 
+    required this.name, 
+    required this.type, 
+    required this.role});
 
   factory PlannerModel.fromJson(Map<String, dynamic> json) {
     return PlannerModel(

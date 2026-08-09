@@ -1,189 +1,308 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
 import 'package:eventsapp/core/widgets/custom_dropdown.dart';
-import 'package:flutter/material.dart';
-import 'package:eventsapp/generated/app_localizations.dart';
+import 'package:intl/intl.dart'; 
+import 'search_results_page.dart'; 
 
-class FilterSection extends StatefulWidget {
-  const FilterSection({super.key});
+class FilterDialogWidget extends StatefulWidget {
+  const FilterDialogWidget({super.key});
 
   @override
-  State<FilterSection> createState() => _FilterSectionState();
+  State<FilterDialogWidget> createState() => _FilterDialogWidgetState();
 }
 
-class _FilterSectionState extends State<FilterSection> {
-  // Local state for UI testing
-  String selectedCategory = 'All';
-  double maxPrice = 2500.0;
+class _FilterDialogWidgetState extends State<FilterDialogWidget> {
+  // القسم الرئيسي
+  String? selectedMainCategory;
 
-  String? selectedLocation; // حل خطأ selectedLocation
-  String? guestsCount; // حل خطأ guestsCount
-  String? selectedStyle; // حل خطأ selectedStyle
-  String? searchQuery; // لفلترة المنتجات (Products)
+  // متغيرات الفلاتر
+  final TextEditingController searchController = TextEditingController();
+  final TextEditingController maxPriceController = TextEditingController();
+  final TextEditingController capacityController = TextEditingController();
+  
+  String? selectedLocation;
+  String? selectedRating; 
+  DateTime? selectedDate; 
 
-  final List<String> categories = const [
-    'All',
-    'Event Planning',
-    'Products',
-    'Venues',
-  ];
+  @override
+  void dispose() {
+    searchController.dispose();
+    maxPriceController.dispose();
+    capacityController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      insetPadding: const EdgeInsets.all(20),
+      child: SingleChildScrollView(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: selectedMainCategory == null
+              ? _buildCategorySelection(context)
+              : _buildFiltersForm(context),
+        ),
+      ),
+    );
+  }
 
-    return Container(
-      color: theme.scaffoldBackgroundColor,
+  // ==========================================
+  // الشاشة الأولى: اختيار القسم
+  // ==========================================
+  Widget _buildCategorySelection(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      key: const ValueKey('Categories'),
+      padding: const EdgeInsets.all(24.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildChipsRow(colorScheme),
-
+          Text(
+            "What are you looking for?",
+            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 24),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: _buildConditionalFilters(colorScheme, textTheme),
-          ),
-
-          const SizedBox(height: 32),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: CustomGoldButton(
-              text: AppLocalizations.of(context)!.applyFilters,
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ),
-          const SizedBox(height: 16),
+          _buildCategoryButton('Venues (Halls)', Icons.store, 'hall'),
+          const SizedBox(height: 12),
+          _buildCategoryButton('Ready Packages', Icons.card_giftcard, 'package'),
+          const SizedBox(height: 12),
+          // 🚀 هنا تم دمج الخدمات والمنتجات معاً في زر واحد
+          _buildCategoryButton('Services & Products', Icons.room_service, 'service'),
+          const SizedBox(height: 12),
+          _buildCategoryButton('Providers', Icons.business_center, 'provider'),
         ],
       ),
     );
   }
 
-  Widget _buildChipsRow(ColorScheme colorScheme) {
+  Widget _buildCategoryButton(String title, IconData icon, String type) {
     return SizedBox(
-      height: 40,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          final bool isSelected = selectedCategory == category;
-          return Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: ChoiceChip(
-              label: Text(category),
-              selected: isSelected,
-              onSelected: (val) => setState(() => selectedCategory = category),
-              selectedColor: colorScheme.primary,
-              backgroundColor: colorScheme.surface,
-              labelStyle: TextStyle(
-                color: isSelected
-                    ? colorScheme.onPrimary
-                    : colorScheme.onSurface,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          );
+      width: double.infinity,
+      height: 55,
+      child: ElevatedButton.icon(
+        icon: Icon(icon, color: Colors.white),
+        label: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFD6B237),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+        ),
+        onPressed: () {
+          setState(() {
+            selectedMainCategory = type;
+          });
         },
       ),
     );
   }
 
-  Widget _buildConditionalFilters(
-    ColorScheme colorScheme,
-    TextTheme textTheme,
-  ) {
-    if (selectedCategory == 'Event Planning') {
-      return Column(
+  // ==========================================
+  // الشاشة الثانية: عرض فلاتر القسم المختار
+  // ==========================================
+  Widget _buildFiltersForm(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    // 🚀 تغيير عنوان النافذة ليعكس الدمج
+    String title = "";
+    if (selectedMainCategory == 'hall') title = "Filter Halls";
+    if (selectedMainCategory == 'package') title = "Filter Packages";
+    if (selectedMainCategory == 'service') title = "Filter Services & Products";
+    if (selectedMainCategory == 'provider') title = "Filter Providers";
+
+    return Padding(
+      key: const ValueKey('Filters'),
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios, size: 18),
+                onPressed: () {
+                  setState(() {
+                    selectedMainCategory = null;
+                    _clearFilters(); 
+                  });
+                },
+              ),
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 20),
+
+          // استدعاء الحقول بناءً على القسم
+          _buildDynamicFields(),
+
+          const SizedBox(height: 32),
+
+          CustomGoldButton(
+            text: "Apply Filters",
+            onTap: () {
+              String? formattedDate;
+              if (selectedDate != null) {
+                formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate!);
+              }
+
+              context.read<UserCubit>().getListing(
+                type: selectedMainCategory, // سيرسل كلمة 'service' للباك إند للبحث عنهما معاً
+                search: searchController.text.isNotEmpty ? searchController.text : null,
+                location: selectedLocation,
+                capacity: capacityController.text.isNotEmpty ? capacityController.text : null,
+                minPrice: null, 
+                maxPrice: maxPriceController.text.isNotEmpty ? maxPriceController.text : null,
+                rating: selectedRating,
+                date: formattedDate,
+              );
+
+              Navigator.pop(context);
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SearchResultsPage(categoryName: title),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _clearFilters() {
+    searchController.clear();
+    maxPriceController.clear();
+    capacityController.clear();
+    selectedLocation = null;
+    selectedRating = null;
+    selectedDate = null;
+  }
+
+  // ==========================================
+  // بناء الحقول بشكل ديناميكي حسب القسم
+  // ==========================================
+  // ==========================================
+  // بناء الحقول بشكل ديناميكي حسب القسم
+  // ==========================================
+  Widget _buildDynamicFields() {
+    return Column(
+      children: [
+        CustomTextField(
+          label: "Search Name...",
+          icon: Icons.search,
+          controller: searchController,
+        ),
+        const SizedBox(height: 12),
+
+        // يظهر حقل المدينة للجميع عدا مزودي الخدمة (Providers)
+        if (selectedMainCategory != 'provider') ...[
           CustomDropdown(
-            label: AppLocalizations.of(context)!.location,
-            items: const ['Damascus', 'Aleppo', 'Homs'],
+            label: "Location",
+            items: const ['Damascus', 'Aleppo', 'Homs', 'Mazzeh'], 
+            value: selectedLocation,
             onChanged: (val) => setState(() => selectedLocation = val),
           ),
+          const SizedBox(height: 12),
+        ],
 
-          const SizedBox(height: 16),
+        // 🚀 التعديل هنا: حقل التاريخ صار يظهر فقط للصالات والباكجات
+        if (selectedMainCategory == 'hall' || selectedMainCategory == 'package') ...[
+          _buildDatePicker(),
+          const SizedBox(height: 12),
+        ],
 
+        // حقل السعة يظهر للصالات والباكجات
+        if (selectedMainCategory == 'hall' || selectedMainCategory == 'package') ...[
           CustomTextField(
-            label: AppLocalizations.of(context)!.numberOfGuests,
+            label: "Capacity (Guests)",
             icon: Icons.people_outline,
-            onChanged: (value) => setState(() => guestsCount = value),
+            controller: capacityController,
+            keyboardType: TextInputType.number,
           ),
-
-          const SizedBox(height: 16),
-
-          CustomDropdown(
-            label: AppLocalizations.of(context)!.eventStyle,
-            items: const ['Modern', 'Classic', 'Rustic'],
-            onChanged: (val) => setState(() => selectedStyle = val),
-          ),
+          const SizedBox(height: 12),
         ],
-      );
-    } else if (selectedCategory == 'Products') {
-      return Column(
-        children: [
+
+        if (selectedMainCategory != 'provider') ...[
           CustomTextField(
-            label: AppLocalizations.of(context)!.productName,
-            icon: Icons.search,
-            onChanged: (value) => setState(() => searchQuery = value),
+            label: "Max Price (Budget)", 
+            icon: Icons.attach_money,
+            controller: maxPriceController,
+            keyboardType: TextInputType.number,
           ),
-
-          const SizedBox(height: 20),
-
-          _buildPriceSlider(colorScheme, textTheme),
+          const SizedBox(height: 12),
         ],
-      );
-    }
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: Column(
+        CustomDropdown(
+          label: "Minimum Rating",
+          items: const ['1', '2', '3', '4', '5'],
+          value: selectedRating,
+          onChanged: (val) => setState(() => selectedRating = val),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDatePicker() {
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime.now(),
+          lastDate: DateTime(2030),
+          builder: (context, child) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: ColorScheme.light(
+                  primary: colorScheme.primary, 
+                ),
+              ),
+              child: child!,
+            );
+          },
+        );
+        if (date != null) {
+          setState(() {
+            selectedDate = date;
+          });
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
           children: [
-            Icon(Icons.category_outlined, size: 48, color: colorScheme.outline),
-            const SizedBox(height: 16),
+            Icon(Icons.calendar_today, color: Colors.grey.shade600),
+            const SizedBox(width: 12),
             Text(
-              AppLocalizations.of(context)!.selectCategoryPrompt,
-              style: textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+              selectedDate == null 
+                  ? 'Select Available Date' 
+                  : DateFormat('yyyy-MM-dd').format(selectedDate!),
+              style: TextStyle(
+                fontSize: 16,
+                color: selectedDate == null ? Colors.grey.shade600 : Colors.black,
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  // --- Helper UI Components ---
-
-  Widget _buildPriceSlider(ColorScheme colorScheme, TextTheme textTheme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '${AppLocalizations.of(context)!.maxPriceLabel}: \$${maxPrice.toInt()}',
-          style: textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        Slider(
-          value: maxPrice,
-          max: 5000,
-          activeColor: colorScheme.primary,
-          onChanged: (val) => setState(() => maxPrice = val),
-        ),
-      ],
     );
   }
 }
