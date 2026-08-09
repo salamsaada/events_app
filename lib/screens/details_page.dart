@@ -81,7 +81,7 @@ class DetailsPage extends StatelessWidget {
                   ),
                   const Divider(height: 40),
 
-                  // الموقع والنوع
+                  // الموقع والنوع (تم حل مشكلة الـ Overflow هنا باستخدام Expanded)
                   Row(
                     children: [
                       Icon(
@@ -90,29 +90,35 @@ class DetailsPage extends StatelessWidget {
                         size: 20,
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        item.district.name,
-                        style: theme.textTheme.bodyMedium,
+                      Expanded(
+                        child: Text(
+                          item.district.name,
+                          style: theme.textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      const SizedBox(width: 20),
+                      const SizedBox(width: 10),
                       Icon(
                         Icons.category,
                         color: theme.colorScheme.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        item.category.name,
-                        style: theme.textTheme.bodyMedium,
+                      Expanded(
+                        child: Text(
+                          item.category.name,
+                          style: theme.textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
                   const Divider(height: 40),
 
-                  // ✨ الوصف (تم التعديل)
+                  // ✨ الوصف
                   Text(
                     loc.descriptionLabel,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -121,11 +127,11 @@ class DetailsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
 
-                  // ✨ عرض الباقات (تم التعديل)
+                  // ✨ عرض الباقات
                   if (item.variants.isNotEmpty) ...[
                     Text(
                       loc.availablePackages,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -142,7 +148,7 @@ class DetailsPage extends StatelessWidget {
                           theme,
                           languageCode,
                           loc,
-                        ); // تمرير loc
+                        );
                       },
                     ),
                   ],
@@ -154,12 +160,11 @@ class DetailsPage extends StatelessWidget {
           ),
         ],
       ),
-
       bottomSheet: Container(
         padding: const EdgeInsets.all(20),
         color: Colors.transparent,
         child: CustomGoldButton(
-          text: loc.bookRequest, // ✨ كان يستخدمها بالفعل
+          text: loc.bookRequest,
           onTap: () => _showBookingSheet(context),
         ),
       ),
@@ -169,14 +174,12 @@ class DetailsPage extends StatelessWidget {
   void _showBookingSheet(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      isScrollControlled: true, // ضروري ليأخذ مساحة كبيرة من الشاشة
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) =>
-          BookingRequestSheet(item: item), // استدعاء ويدجت الحجز المشتركة
+      builder: (context) => BookingRequestSheet(item: item),
     );
   }
 
-  // ✨ تم تمرير متغير loc للترجمة
   Widget _buildVariantCard(
     Variant variant,
     ThemeData theme,
@@ -202,7 +205,7 @@ class DetailsPage extends StatelessWidget {
                   localizedText(
                     variant.name,
                     languageCode,
-                    fallback: loc.package, // ✨ استخدام الترجمة
+                    fallback: loc.package,
                   ),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -224,14 +227,13 @@ class DetailsPage extends StatelessWidget {
             ...variant.availabilities
                 .map(
                   (avail) => _buildAvailabilityRow(avail, theme, loc),
-                ) // تمرير loc
+                )
                 .toList(),
         ],
       ),
     );
   }
 
-  // ✨ تم تمرير متغير loc للترجمة
   Widget _buildAvailabilityRow(
     Availability availability,
     ThemeData theme,
@@ -273,7 +275,7 @@ class DetailsPage extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      '${loc.capacity}: ${slot.remainingCapacity}', // ✨ استخدام الترجمة
+                      '${loc.capacity}: ${slot.remainingCapacity}',
                       style: TextStyle(
                         color: slot.remainingCapacity > 0
                             ? Colors.green

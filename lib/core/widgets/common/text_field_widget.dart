@@ -10,6 +10,10 @@ class CustomTextField extends StatelessWidget {
   TextEditingController? controller;
   String? Function(String?)? validator;
   void Function(String)? onChanged;
+  
+  // 🚀 1. تعريف المتغير الخاص بنوع الكيبورد
+  TextInputType? keyboardType; 
+
   CustomTextField({
     super.key,
     this.onChanged,
@@ -19,6 +23,8 @@ class CustomTextField extends StatelessWidget {
     required this.icon,
     this.isPassword = false,
     this.maxLines = 1,
+    // 🚀 2. إضافته هنا ليتم استقباله
+    this.keyboardType, 
   });
 
   @override
@@ -30,6 +36,9 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       obscureText: isPassword,
       maxLines: maxLines,
+      
+      // 🚀 3. تمريره للويدجت الأساسي
+      keyboardType: keyboardType, 
 
       style: TextStyle(
         color: theme.brightness == Brightness.dark 

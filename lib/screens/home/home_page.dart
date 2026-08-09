@@ -2,7 +2,8 @@ import 'package:eventsapp/core/widgets/filter_button.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/screens/chats/chat_list_screen.dart';
 import 'package:eventsapp/screens/chats/chat_screen.dart';
-import 'package:eventsapp/screens/filters/filter_section.dart';
+// استدعاء ملف الفلتر الخاص بك
+import 'package:eventsapp/screens/filters/filter_section.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/cubit/notification_cubit.dart';
@@ -27,31 +28,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  // 🧹 تم حذف الـ initState مع استدعاء الـ uploadDeviceToken لتنظيف الكود ومنع التكرار
-
   void _openFilterSheet() {
-    showModalBottomSheet(
+    // 🚀 التعديل الجذري: استخدام showDialog لفتح النافذة المنبثقة
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.95,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) {
-          return Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: const FilterSection(),
-            ),
-          );
-        },
-      ),
+      builder: (context) {
+        // 💡 ملاحظة: إذا قمتِ بتغيير اسم الكلاس داخل ملف filter_section.dart 
+        // إلى FilterSection، فاكتبي هنا FilterSection() بدلاً من FilterDialogWidget()
+        return const FilterDialogWidget(); 
+      },
     );
   }
 
@@ -76,6 +61,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             const SizedBox(height: 30),
+            // 💡 تلميح: داخل الـ SearchSection تأكدي أن الـ TextField يرسل قيمة البحث أيضاً للـ Cubit
             const SearchSection(),
             FilterButton(onTap: _openFilterSheet), 
             const HeroCarousel(),
@@ -120,7 +106,6 @@ class _HomePageState extends State<HomePage> {
     setState(() => _selectedIndex = index);
 
     if (index == 1) {
-      // 🌟 بدلاً من الذهاب لماركوس مباشرة، نفتح قائمة المحادثات (التي تحتوي الشركات والفريلانسر)
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => const ChatListScreen(), 
@@ -139,4 +124,4 @@ class _HomePageState extends State<HomePage> {
       return; 
     }
   }
-  }
+}

@@ -77,13 +77,29 @@ class UserRepository {
   Future<Either<String, ListingResponse>> getlisting({
     String? type,
     String? categoryId,
+    // 🚀 الفلاتر الجديدة اللي ضفناها
+    String? search,       // للبحث بالاسم
+    String? minPrice,     // أقل سعر
+    String? maxPrice,     // أعلى سعر
+    String? capacity,     // سعة الصالة
+    String? rating,       // التقييم
+    String? date,         // اليوم المتاح
+    String? location,     // المحافظة/المنطقة
   }) async {
     try {
       final response = await api.get(
         EndPoint.getlisting,
         queryParameters: {
-          if (type != null) 'type': type, // 🚀 لإرسال نوع physical_product
-          if (categoryId != null) 'category_id': categoryId, // 🚀 للفلترة حسب القسم لاحقاً
+          if (type != null) 'type': type, 
+          if (categoryId != null) 'category_id': categoryId,
+          // 🚀 ربط الفلاتر الجديدة بالـ API
+          if (search != null && search.isNotEmpty) 'search': search,
+          if (minPrice != null && minPrice.isNotEmpty) 'min_price': minPrice,
+          if (maxPrice != null && maxPrice.isNotEmpty) 'max_price': maxPrice,
+          if (capacity != null && capacity.isNotEmpty) 'capacity': capacity,
+          if (rating != null && rating.isNotEmpty) 'rating': rating,
+          if (date != null && date.isNotEmpty) 'date': date,
+          if (location != null && location.isNotEmpty) 'location': location,
         },
       );
 

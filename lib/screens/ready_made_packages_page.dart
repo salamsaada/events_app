@@ -23,11 +23,13 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
   @override
   void initState() {
     super.initState();
-    // جلب البيانات عند فتح الصفحة
+    // جلب البيانات عند فتح الصفحة فوراً
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<UserCubit>().state;
-      if (state is! GetListingLoading && state is! GetListingSuccess) {
-        context.read<UserCubit>().getListing();
+      // 🚀 شلنا شرط الـ Success عشان يجبره يحمل الداتا الجديدة الخاصة بالباكجات
+      if (state is! GetListingLoading) {
+        // 🚀 ولا تنسي تمرري نوع package هنا
+        context.read<UserCubit>().getListing(type: 'package');
       }
     });
   }
