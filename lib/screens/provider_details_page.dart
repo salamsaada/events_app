@@ -1,0 +1,231 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:eventsapp/cubit/user_cubit.dart';
+
+class ProviderDetailsPage extends StatefulWidget {
+  final String providerId;
+
+  const ProviderDetailsPage({super.key, required this.providerId});
+
+  @override
+  State<ProviderDetailsPage> createState() => _ProviderDetailsPageState();
+}
+
+class _ProviderDetailsPageState extends State<ProviderDetailsPage> {
+  bool isLoading = true;
+  String? errorMessage;
+  dynamic providerDetails;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDetails();
+  }
+
+  // 🚀 جلب البيانات هنا بشكل مستقل بدون تغيير حالة الـ Cubit
+  Future<void> _fetchDetails() async {
+    final response = await context.read<UserCubit>().userRepository.getProviderDetails(widget.providerId);
+    
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+        response.fold(
+          (error) => errorMessage = error,
+          (data) => providerDetails = data,
+        );
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: const Text('التفاصيل'),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      extendBodyBehindAppBar: true, 
+      body: _buildBody(theme),
+    );
+  }
+
+  Widget _buildBody(ThemeData theme) {
+    // 1. حالة التحميل
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator(color: Color(0xFFD6B237)));
+    } 
+    
+    // 2. حالة الفشل
+    if (errorMessage != null) {
+      return Center(child: Text(errorMessage!, style: const TextStyle(color: Colors.red)));
+    } 
+    
+    // 3. حالة النجاح (البيانات موجودة)
+    if (providerDetails != null) {
+      final userObj = providerDetails['user'] ?? {};
+      final providerObj = providerDetails['provider'] ?? {};
+      final extraDetailsObj = providerDetails['provider_details'] ?? {};
+      
+      final categories = providerObj['categories'] as List? ?? [];
+      
+      final name = providerObj['brand_name'] ?? userObj['full_name'] ?? 'بدون اسم';
+      final email = userObj['email'] ?? 'بدون إيميل';
+      final type = providerObj['provider_type'] ?? 'غير محدد';
+      final experience = extraDetailsObj['experience_years']?.toString() ?? '0';
+
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            // 🎨 الهيدر
+            Container(
+              width: double.infinity,
+              height: 280,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withOpacity(0.15),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 60), 
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: theme.colorScheme.primary,
+                    child: Icon(Icons.person, size: 50, color: theme.colorScheme.onPrimary),
+                  ),
+                  const SizedBox(height: 15),
+                  Text(
+                    name,
+                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      type.toUpperCase(),
+                      style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // 🎨 كروت المعلومات
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                children: [
+                  _buildInfoCard(context, Icons.email_outlined, "البريد الإلكتروني", email),
+                  const SizedBox(height: 15),
+                  _buildInfoCard(context, Icons.work_outline, "سنوات الخبرة", "$experience سنوات"),
+                  
+                  // 🎨 قسم التصنيفات
+                  if (categories.isNotEmpty) ...[
+                    const SizedBox(height: 15),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.category_outlined, color: theme.colorScheme.primary),
+                              const SizedBox(width: 10),
+                              Text("التصنيفات", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          const Divider(height: 20),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: categories.map((cat) {
+                              return Chip(
+                                label: Text(cat['name_ar'] ?? ''),
+                                backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                                side: BorderSide.none,
+                                labelStyle: TextStyle(color: theme.colorScheme.primary),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ]
+                ],
+              ),
+            ),
+            const SizedBox(height: 30),
+          ],
+        ),
+      );
+    }
+    return const SizedBox();
+  }
+
+  Widget _buildInfoCard(BuildContext context, IconData icon, String title, String value) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: theme.colorScheme.primary),
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                const SizedBox(height: 4),
+                Text(value, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -25,7 +25,6 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<UserCubit>().state;
-      // 🚀 شلنا شرط الـ Success عشان يجبره يحمل الداتا الجديدة الخاصة بالصالات
       if (state is! GetListingLoading) {
         context.read<UserCubit>().getListing(type: 'hall');
       }
@@ -64,7 +63,6 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
           }
 
           if (state is GetListingSuccess) {
-            // 🚀 التعديل هنا: نفلتر القائمة لعرض الصالات (hall) فقط
             final listings = state.listingResponse.data
                 .where((item) => item.type == 'hall')
                 .toList();

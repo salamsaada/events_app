@@ -86,3 +86,23 @@ final class GetBookingsFailure extends UserState {
   final String errMessage;
   GetBookingsFailure({required this.errMessage});
 }
+//حالات البروفايدر 
+class GetProvidersLoading extends UserState {}
+class GetProvidersSuccess extends UserState {
+  final List<dynamic> providers;
+  GetProvidersSuccess({required this.providers});
+}
+class GetProvidersFailure extends UserState {
+  final String errMessage;
+  GetProvidersFailure({required this.errMessage});
+}
+
+class GetProviderDetailsLoading extends UserState {}
+class GetProviderDetailsSuccess extends UserState {
+  final dynamic providerDetails; 
+  GetProviderDetailsSuccess({required this.providerDetails});
+}
+class GetProviderDetailsFailure extends UserState {
+  final String errMessage;
+  GetProviderDetailsFailure({required this.errMessage});
+}
