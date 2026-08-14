@@ -91,6 +91,32 @@ class UserCubit extends Cubit<UserState> {
     );
   }
 
+  Future<void> getProviders() async {
+    emit(GetProvidersLoading());
+    
+    try {
+      final response = await userRepository.getAllProviders(); 
+      // 3. تغيير الحالة لنجاح أو فشل بناءً على الرد
+      response.fold(
+        (errMessage) => emit(GetProvidersFailure(errMessage: errMessage)), 
+        (providersData) => emit(GetProvidersSuccess(providers: providersData)), 
+      );
+    } catch (e) {
+      emit(GetProvidersFailure(errMessage: e.toString()));
+    }
+  }
+
+  Future<void> getProviderDetails(String id) async {
+    emit(GetProviderDetailsLoading());
+    
+    final response = await userRepository.getProviderDetails(id);
+    
+    response.fold(
+      (errMessage) => emit(GetProviderDetailsFailure(errMessage: errMessage)), 
+      (details) => emit(GetProviderDetailsSuccess(providerDetails: details)), 
+    );
+  }
+
   //Sign in Form key
   // GlobalKey<FormState> signInFormKey = GlobalKey<FormState>();
   // //Sign in email

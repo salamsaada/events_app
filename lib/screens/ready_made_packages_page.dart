@@ -23,12 +23,10 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
   @override
   void initState() {
     super.initState();
-    // جلب البيانات عند فتح الصفحة فوراً
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<UserCubit>().state;
       // 🚀 شلنا شرط الـ Success عشان يجبره يحمل الداتا الجديدة الخاصة بالباكجات
       if (state is! GetListingLoading) {
-        // 🚀 ولا تنسي تمرري نوع package هنا
         context.read<UserCubit>().getListing(type: 'package');
       }
     });
@@ -112,12 +110,10 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                         builder: (context, favState) {
                           bool isFavorite = false;
                           if (favState is FavoritesLoaded) {
-                            // 🚀 التعديل الجذري 1: تم مسح فحص القسم لتجنب الانهيار المخفي، ونكتفي بـ ID فقط
                             isFavorite = favState.favorites.any((fav) => fav.id == item.id);
                           }
 
                           return ResultCard(
-                            // 🚀 التعديل الجذري 2: إضافة المفتاح لكي يتم تحديث لون القلب فوراً عند الضغط
                             key: ValueKey('${item.id}_$isFavorite'),
                             title: title,
                             companyName: companyName,

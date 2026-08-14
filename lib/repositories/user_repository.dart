@@ -188,6 +188,65 @@ class UserRepository {
     }
   }
 
+  // 🚀 دالة جلب مزودي الخدمة (Providers) 
+  Future<Either<String, List<dynamic>>> getAllProviders() async {
+    try {
+
+      final response = await api.get('providers');
+
+      if (response == null) {
+        return const Left("لا توجد بيانات حالياً");
+      }
+
+      List<dynamic> providersData = [];
+
+      // التحقق من هيكلية الرد (هل لارافيل يرسل البيانات داخل مصفوفة data أم مباشرة؟)
+      if (response is Map<String, dynamic> && response.containsKey('data')) {
+        providersData = response['data'];
+      } else if (response is List) {
+        providersData = response;
+      }
+
+      if (providersData.isEmpty) {
+        return const Left("لا يوجد مزودين خدمة حالياً");
+      }
+
+      // 💡 تلميح: إذا حبيتي لاحقاً تربطيها بموديل ProviderModel:
+      // final List<ProviderModel> providersList = providersData.map((e) => ProviderModel.fromJson(e)).toList();
+      // return Right(providersList);
+
+      return Right(providersData); // إرجاع البيانات بنجاح
+
+    } on ServerException catch (e) {
+      return Left(e.errModel.errorMessage);
+    } catch (e) {
+      return Left("حدث خطأ غير متوقع: $e");
+    }
+  }
+
+  // 🚀 دالة جلب تفاصيل بروفايدر معين
+  Future<Either<String, dynamic>> getProviderDetails(String id) async {
+    try {
+      
+      final response = await api.get('providers/$id');
+
+      if (response == null) {
+        return const Left("لا توجد بيانات حالياً");
+      }
+
+      // التحقق إذا كانت البيانات بداخل 'data'
+      final detailsData = (response is Map<String, dynamic> && response.containsKey('data')) 
+          ? response['data'] 
+          : response;
+
+      return Right(detailsData);
+    } on ServerException catch (e) {
+      return Left(e.errModel.errorMessage);
+    } catch (e) {
+      return Left("حدث خطأ غير متوقع: $e");
+    }
+  }
+
   // // Function to fetch filtered items (Services or Products) from Laravel
   // Future<Either<String, List<dynamic>>> getFilteredItems({
   //   required String type,

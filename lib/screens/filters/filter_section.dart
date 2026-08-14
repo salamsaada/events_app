@@ -71,7 +71,6 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
           const SizedBox(height: 12),
           _buildCategoryButton('Ready Packages', Icons.card_giftcard, 'package'),
           const SizedBox(height: 12),
-          // 🚀 هنا تم دمج الخدمات والمنتجات معاً في زر واحد
           _buildCategoryButton('Services & Products', Icons.room_service, 'service'),
           const SizedBox(height: 12),
           _buildCategoryButton('Providers', Icons.business_center, 'provider'),
