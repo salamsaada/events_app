@@ -21,19 +21,24 @@ class SearchResultsPage extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocBuilder<UserCubit, UserState>(
         builder: (context, state) {
-          // حالة التحميل
+          
+          // ==========================================
+          // 1. حالات الـ Listings (الصالات والباكجات والخدمات)
+          // ==========================================
+          
+          // حالة التحميل للـ Listings
           if (state is GetListingLoading) {
             return const Center(child: CircularProgressIndicator(color: Color(0xFFD6B237)));
           }
 
-          // حالة الخطأ
+          // حالة الخطأ للـ Listings
           if (state is GetListingFailure) {
             return Center(
               child: Text(state.errMessage, style: const TextStyle(color: Colors.red)),
             );
           }
 
-          // حالة النجاح
+          // حالة النجاح للـ Listings
           if (state is GetListingSuccess) {
             final listings = state.listingResponse.data;
 
@@ -53,26 +58,22 @@ class SearchResultsPage extends StatelessWidget {
               );
             }
 
-            // 🚀 عرض النتائج كروت احترافية قابلة للضغط
             return ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: listings.length,
               itemBuilder: (context, index) {
                 final item = listings[index];
                 
-                // جلب الصورة أو وضع صورة افتراضية
                 final String imageUrl = item.images.isNotEmpty
                     ? item.images[0]
                     : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
 
-                // استخراج السعر المبدئي إن وُجد
                 final String price = item.variants.isNotEmpty 
                     ? '${item.variants[0].price} ${item.variants[0].currency}' 
                     : 'Price not specified';
 
                 return GestureDetector(
                   onTap: () {
-                    // 🚀 الانتقال لصفحة التفاصيل عند الضغط على الكرت
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -96,7 +97,6 @@ class SearchResultsPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 1. صورة العنصر
                         ClipRRect(
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                           child: Image.network(
@@ -111,14 +111,11 @@ class SearchResultsPage extends StatelessWidget {
                             ),
                           ),
                         ),
-                        
-                        // 2. تفاصيل العنصر
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // العنوان ونوع العنصر
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -151,8 +148,6 @@ class SearchResultsPage extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 8),
-                              
-                              // الموقع
                               Row(
                                 children: [
                                   Icon(Icons.location_on, size: 16, color: Colors.grey.shade600),
@@ -164,8 +159,6 @@ class SearchResultsPage extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 12),
-                              
-                              // السعر
                               Row(
                                 children: [
                                   const Text(
@@ -193,6 +186,85 @@ class SearchResultsPage extends StatelessWidget {
             );
           }
 
+
+          // ==========================================
+          // 2. حالات الـ Providers (مزودي الخدمة) 🚀
+          // ==========================================
+
+          // حالة التحميل للمزودين
+          if (state is GetProvidersLoading) {
+            return const Center(child: CircularProgressIndicator(color: Color(0xFFD6B237)));
+          }
+
+          // حالة الخطأ للمزودين
+          if (state is GetProvidersFailure) {
+            return Center(
+              child: Text(state.errMessage, style: const TextStyle(color: Colors.red)),
+            );
+          }
+
+          // حالة النجاح للمزودين
+          if (state is GetProvidersSuccess) {
+            final providers = state.providers; 
+            
+            if (providers.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.group_off, size: 80, color: Colors.grey.shade400),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No providers found.',
+                      style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: providers.length,
+              itemBuilder: (context, index) {
+                final provider = providers[index];
+                
+                return Card(
+                  elevation: 2,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFFD6B237),
+                      radius: 25,
+                      child: Icon(Icons.business_center, color: Colors.white),
+                    ),
+                    title: Text(
+                      provider['name'] ?? 'بدون اسم',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        provider['type'] == 'company' ? 'Company (شركة)' : 'Freelancer (مستقل)',
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFFD6B237)),
+                    onTap: () {
+                      // هنا يمكنك لاحقاً إضافة الكود للانتقال إلى تفاصيل المزود
+                      // Navigator.push(...);
+                    },
+                  ),
+                );
+              },
+            );
+          }
+
+          // الحالة الافتراضية
           return const SizedBox();
         },
       ),

@@ -188,7 +188,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ServiceDetailsPagelist(item: item),
+                          builder: (_) => ServiceDetailsPage(item: item),
                         ),
                       );
                     },

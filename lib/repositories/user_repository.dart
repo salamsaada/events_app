@@ -6,7 +6,7 @@ import 'package:eventsapp/core/errors/exceptions.dart';
 import 'package:eventsapp/models/booking_model.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/models/myBookings_model.dart';
-
+import 'package:eventsapp/models/planner_model.dart';
 import 'package:eventsapp/models/sign_up_model.dart';
 
 class UserRepository {
@@ -30,14 +30,11 @@ class UserRepository {
           ApiKey.email: email,
           ApiKey.password: password,
           ApiKey.confirmPassword: confirmPassword,
-          // ApiKey.phone: phone,
-          // ApiKey.profilePic: await uploadImageToAPI(profilePic),
         },
       );
 
       final authModel = AuthResponseModel.fromJson(response);
 
-      // حفظ التوكن في التخزين المحلي
       await CacheHelper().saveData(
         key: ApiKey.token,
         value: authModel.accessToken,
@@ -49,7 +46,6 @@ class UserRepository {
     }
   }
 
-  // 2. فانكشن تسجيل الدخول (Sign In)
   Future<Either<String, AuthResponseModel>> signIn({
     required String email,
     required String password,
@@ -62,7 +58,6 @@ class UserRepository {
 
       final authModel = AuthResponseModel.fromJson(response);
 
-      // حفظ التوكن
       await CacheHelper().saveData(
         key: ApiKey.token,
         value: authModel.accessToken,
@@ -74,17 +69,18 @@ class UserRepository {
     }
   }
 
-  Future<Either<String, ListingResponse>> getlisting({
+ Future<Either<String, ListingResponse>> getlisting({
     String? type,
     String? categoryId,
-    // 🚀 الفلاتر الجديدة اللي ضفناها
-    String? search,       // للبحث بالاسم
-    String? minPrice,     // أقل سعر
-    String? maxPrice,     // أعلى سعر
-    String? capacity,     // سعة الصالة
-    String? rating,       // التقييم
-    String? date,         // اليوم المتاح
-    String? location,     // المحافظة/المنطقة
+    // ✨ التعديل هنا: غيرنا الاسم من search إلى title
+    String? title, 
+    String? minPrice,    
+    String? maxPrice,    
+    String? capacityMin, 
+    String? capacityMax, 
+    String? rating,
+    String? date,
+    String? location,
   }) async {
     try {
       final response = await api.get(
@@ -92,11 +88,14 @@ class UserRepository {
         queryParameters: {
           if (type != null) 'type': type, 
           if (categoryId != null) 'category_id': categoryId,
-          // 🚀 ربط الفلاتر الجديدة بالـ API
-          if (search != null && search.isNotEmpty) 'search': search,
-          if (minPrice != null && minPrice.isNotEmpty) 'min_price': minPrice,
-          if (maxPrice != null && maxPrice.isNotEmpty) 'max_price': maxPrice,
-          if (capacity != null && capacity.isNotEmpty) 'capacity': capacity,
+          // ✨ التعديل هنا: تمرير title بدلاً من search ليتطابق مع الباك إند
+          if (title != null && title.isNotEmpty) 'title': title,
+
+          if (minPrice != null && minPrice.isNotEmpty) 'price_min': minPrice,
+          if (maxPrice != null && maxPrice.isNotEmpty) 'price_max': maxPrice,
+          if (capacityMin != null && capacityMin.isNotEmpty) 'capacity_min': capacityMin,
+          if (capacityMax != null && capacityMax.isNotEmpty) 'capacity_max': capacityMax,
+
           if (rating != null && rating.isNotEmpty) 'rating': rating,
           if (date != null && date.isNotEmpty) 'date': date,
           if (location != null && location.isNotEmpty) 'location': location,
@@ -148,7 +147,6 @@ class UserRepository {
 
       final bookingResponse = BookingResponse.fromJson(response);
 
-      // حفظ آخر حجز في التخزين المحلي
       await CacheHelper().saveData(
         key: ApiKey.lastBookingId,
         value: bookingResponse.data?.id,
@@ -162,20 +160,16 @@ class UserRepository {
 
   Future<Either<String, BookingResponsee>> getMyBookings() async {
     try {
-      // تأكد من وجود EndPoint.bookings في ملف end_ponits.dart أو استبدله بالرابط مباشرة
       final response = await api.get(EndPoint.Mybookings);
 
-      // 1. التحقق مما إذا كان الرد فارغاً تماماً (null) أو لا يحتوي على بيانات
       if (response == null ||
           (response is List && response.isEmpty) ||
           (response is Map && response.isEmpty)) {
-        // نُرجع هذه الرسالة ليتم عرضها في واجهة المستخدم
         return const Left("لا يوجد حجوزات حالياً");
       }
 
       final bookingResponse = BookingResponsee.fromJson(response);
 
-      // 2. خطوة أمان إضافية: إذا كان السيرفر يرسل الموديل ولكن مصفوفة الحجوزات بداخله فارغة
       if (bookingResponse.data.isEmpty) {
         return const Left("لا يوجد حجوزات حالياً");
       }
@@ -188,11 +182,16 @@ class UserRepository {
     }
   }
 
-  // 🚀 دالة جلب مزودي الخدمة (Providers) 
-  Future<Either<String, List<dynamic>>> getAllProviders() async {
+  // 🚀 تعديل الدالة لتستقبل اسم المزود للبحث
+  Future<Either<String, List<dynamic>>> getAllProviders({String? name}) async {
     try {
-
-      final response = await api.get('providers');
+      final response = await api.get(
+        'providers',
+        // ✨ إضافة المتغير للرابط
+        queryParameters: {
+          if (name != null && name.isNotEmpty) 'name': name,
+        },
+      );
 
       if (response == null) {
         return const Left("لا توجد بيانات حالياً");
@@ -200,7 +199,6 @@ class UserRepository {
 
       List<dynamic> providersData = [];
 
-      // التحقق من هيكلية الرد (هل لارافيل يرسل البيانات داخل مصفوفة data أم مباشرة؟)
       if (response is Map<String, dynamic> && response.containsKey('data')) {
         providersData = response['data'];
       } else if (response is List) {
@@ -211,11 +209,7 @@ class UserRepository {
         return const Left("لا يوجد مزودين خدمة حالياً");
       }
 
-      // 💡 تلميح: إذا حبيتي لاحقاً تربطيها بموديل ProviderModel:
-      // final List<ProviderModel> providersList = providersData.map((e) => ProviderModel.fromJson(e)).toList();
-      // return Right(providersList);
-
-      return Right(providersData); // إرجاع البيانات بنجاح
+      return Right(providersData); 
 
     } on ServerException catch (e) {
       return Left(e.errModel.errorMessage);
@@ -223,55 +217,27 @@ class UserRepository {
       return Left("حدث خطأ غير متوقع: $e");
     }
   }
-
-  // 🚀 دالة جلب تفاصيل بروفايدر معين
-  Future<Either<String, dynamic>> getProviderDetails(String id) async {
+  // 🚀 التعديل: تغيير نوع الإرجاع لـ PlannerModel بدل dynamic
+  Future<Either<String, PlannerModel>> getProviderDetails(String id) async {
     try {
-      
       final response = await api.get('providers/$id');
 
       if (response == null) {
         return const Left("لا توجد بيانات حالياً");
       }
 
-      // التحقق إذا كانت البيانات بداخل 'data'
       final detailsData = (response is Map<String, dynamic> && response.containsKey('data')) 
           ? response['data'] 
           : response;
 
-      return Right(detailsData);
+      // ✨ هون سحر الموديل: تمرير البيانات للموديل ليقوم بتنظيفها وترتيبها
+      final planner = PlannerModel.fromJson(detailsData);
+
+      return Right(planner);
     } on ServerException catch (e) {
       return Left(e.errModel.errorMessage);
     } catch (e) {
       return Left("حدث خطأ غير متوقع: $e");
     }
   }
-
-  // // Function to fetch filtered items (Services or Products) from Laravel
-  // Future<Either<String, List<dynamic>>> getFilteredItems({
-  //   required String type,
-  //   String? city,
-  //   int? capacity,
-  //   required double maxPrice,
-  //   String? style,
-  // }) async {
-  //   try {
-  //     final response = await api.get(
-  //       EndPoint.getUserDataEndPoint, // استبدليه بالـ Endpoint الصحيح للفلترة مثلاً "items/filter"
-  //       queryParameters: {
-  //         'type': type,
-  //         if (city != null) 'city': city,
-  //         if (capacity != null) 'capacity': capacity,
-  //         'max_price': maxPrice,
-  //         if (style != null) 'style': style,
-  //       },
-  //     );
-
-  //     // افترضنا هنا أن السيرفر يرجع قائمة من البيانات
-  //     // يمكنك تحويلها لاحقاً لـ List<ItemModel>
-  //     return Right(response);
-  //   } on ServerException catch (e) {
-  //     return Left(e.errModel.errorMessage);
-  //   }
-  // }
 }

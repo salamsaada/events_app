@@ -4,7 +4,6 @@ import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
 import 'package:eventsapp/core/widgets/custom_dropdown.dart';
-import 'package:intl/intl.dart'; 
 import 'search_results_page.dart'; 
 
 class FilterDialogWidget extends StatefulWidget {
@@ -20,18 +19,23 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
 
   // متغيرات الفلاتر
   final TextEditingController searchController = TextEditingController();
-  final TextEditingController maxPriceController = TextEditingController();
-  final TextEditingController capacityController = TextEditingController();
   
-  String? selectedLocation;
+  final TextEditingController minPriceController = TextEditingController();
+  final TextEditingController maxPriceController = TextEditingController();
+
+  final TextEditingController minCapacityController = TextEditingController();
+  final TextEditingController maxCapacityController = TextEditingController();
+
   String? selectedRating; 
-  DateTime? selectedDate; 
+  
 
   @override
   void dispose() {
     searchController.dispose();
+    minPriceController.dispose(); 
     maxPriceController.dispose();
-    capacityController.dispose();
+    minCapacityController.dispose(); 
+    maxCapacityController.dispose();
     super.dispose();
   }
 
@@ -106,8 +110,7 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
   // ==========================================
   Widget _buildFiltersForm(BuildContext context) {
     final theme = Theme.of(context);
-    
-    // 🚀 تغيير عنوان النافذة ليعكس الدمج
+
     String title = "";
     if (selectedMainCategory == 'hall') title = "Filter Halls";
     if (selectedMainCategory == 'package') title = "Filter Packages";
@@ -142,7 +145,6 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
           ),
           const Divider(height: 20),
 
-          // استدعاء الحقول بناءً على القسم
           _buildDynamicFields(),
 
           const SizedBox(height: 32),
@@ -150,21 +152,23 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
           CustomGoldButton(
             text: "Apply Filters",
             onTap: () {
-              String? formattedDate;
-              if (selectedDate != null) {
-                formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate!);
+              if (selectedMainCategory == 'provider') {
+                // ✨ التعديل هنا: إرسال النص المكتوب بحقل البحث
+                context.read<UserCubit>().getProviders(
+                  name: searchController.text.isNotEmpty ? searchController.text : null,
+                );
+              } else {
+                // باقي الكود كما هو ...
+                context.read<UserCubit>().getListing(
+                  type: selectedMainCategory, 
+                  title: searchController.text.isNotEmpty ? searchController.text : null,
+                  capacityMin: minCapacityController.text.isNotEmpty ? minCapacityController.text : null,
+                  capacityMax: maxCapacityController.text.isNotEmpty ? maxCapacityController.text : null,
+                  minPrice: minPriceController.text.isNotEmpty ? minPriceController.text : null,
+                  maxPrice: maxPriceController.text.isNotEmpty ? maxPriceController.text : null,
+                  rating: selectedRating,
+                );
               }
-
-              context.read<UserCubit>().getListing(
-                type: selectedMainCategory, // سيرسل كلمة 'service' للباك إند للبحث عنهما معاً
-                search: searchController.text.isNotEmpty ? searchController.text : null,
-                location: selectedLocation,
-                capacity: capacityController.text.isNotEmpty ? capacityController.text : null,
-                minPrice: null, 
-                maxPrice: maxPriceController.text.isNotEmpty ? maxPriceController.text : null,
-                rating: selectedRating,
-                date: formattedDate,
-              );
 
               Navigator.pop(context);
 
@@ -183,16 +187,13 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
 
   void _clearFilters() {
     searchController.clear();
+    minPriceController.clear(); 
     maxPriceController.clear();
-    capacityController.clear();
-    selectedLocation = null;
+    minCapacityController.clear(); 
+    maxCapacityController.clear();
     selectedRating = null;
-    selectedDate = null;
   }
 
-  // ==========================================
-  // بناء الحقول بشكل ديناميكي حسب القسم
-  // ==========================================
   // ==========================================
   // بناء الحقول بشكل ديناميكي حسب القسم
   // ==========================================
@@ -206,40 +207,52 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
         ),
         const SizedBox(height: 12),
 
-        // يظهر حقل المدينة للجميع عدا مزودي الخدمة (Providers)
-        if (selectedMainCategory != 'provider') ...[
-          CustomDropdown(
-            label: "Location",
-            items: const ['Damascus', 'Aleppo', 'Homs', 'Mazzeh'], 
-            value: selectedLocation,
-            onChanged: (val) => setState(() => selectedLocation = val),
-          ),
-          const SizedBox(height: 12),
-        ],
-
-        // 🚀 التعديل هنا: حقل التاريخ صار يظهر فقط للصالات والباكجات
         if (selectedMainCategory == 'hall' || selectedMainCategory == 'package') ...[
-          _buildDatePicker(),
-          const SizedBox(height: 12),
-        ],
-
-        // حقل السعة يظهر للصالات والباكجات
-        if (selectedMainCategory == 'hall' || selectedMainCategory == 'package') ...[
-          CustomTextField(
-            label: "Capacity (Guests)",
-            icon: Icons.people_outline,
-            controller: capacityController,
-            keyboardType: TextInputType.number,
+          Row(
+            children: [
+              Expanded(
+                child: CustomTextField(
+                  label: "Min Capacity",
+                  icon: Icons.people_outline,
+                  controller: minCapacityController,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: CustomTextField(
+                  label: "Max Capacity",
+                  icon: Icons.people_alt_outlined,
+                  controller: maxCapacityController,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
         ],
 
         if (selectedMainCategory != 'provider') ...[
-          CustomTextField(
-            label: "Max Price (Budget)", 
-            icon: Icons.attach_money,
-            controller: maxPriceController,
-            keyboardType: TextInputType.number,
+          Row(
+            children: [
+              Expanded(
+                child: CustomTextField(
+                  label: "Min Price", 
+                  icon: Icons.attach_money,
+                  controller: minPriceController,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: CustomTextField(
+                  label: "Max Price", 
+                  icon: Icons.money_off,
+                  controller: maxPriceController,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
         ],
@@ -251,57 +264,6 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
           onChanged: (val) => setState(() => selectedRating = val),
         ),
       ],
-    );
-  }
-
-  Widget _buildDatePicker() {
-    final colorScheme = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: () async {
-        final date = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime.now(),
-          lastDate: DateTime(2030),
-          builder: (context, child) {
-            return Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: ColorScheme.light(
-                  primary: colorScheme.primary, 
-                ),
-              ),
-              child: child!,
-            );
-          },
-        );
-        if (date != null) {
-          setState(() {
-            selectedDate = date;
-          });
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade400),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.calendar_today, color: Colors.grey.shade600),
-            const SizedBox(width: 12),
-            Text(
-              selectedDate == null 
-                  ? 'Select Available Date' 
-                  : DateFormat('yyyy-MM-dd').format(selectedDate!),
-              style: TextStyle(
-                fontSize: 16,
-                color: selectedDate == null ? Colors.grey.shade600 : Colors.black,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

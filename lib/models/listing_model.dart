@@ -123,6 +123,7 @@ class Variant {
   final int price;
   final String currency;
   final String priceType;
+  final int capacity; // 🚀 ضفنا هاد السطر
   final dynamic stock;
   final dynamic attributes;
   final List<dynamic> images;
@@ -134,6 +135,7 @@ class Variant {
     required this.price,
     required this.currency,
     required this.priceType,
+    required this.capacity, // 🚀 ضفنا هاد السطر
     this.stock,
     this.attributes,
     required this.images,
@@ -141,13 +143,14 @@ class Variant {
   });
 
   factory Variant.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Variant(id: '', name: {}, price: 0, currency: '', priceType: '', images: [], availabilities: []);
+    if (json == null) return Variant(id: '', name: {}, price: 0, currency: '', priceType: '', capacity: 0, images: [], availabilities: []);
     return Variant(
       id: json[ApiKey.id]?.toString() ?? '',
       name: _safeMap(json[ApiKey.name]),
       price: _safeInt(json[ApiKey.price]),
       currency: json[ApiKey.currency]?.toString() ?? '',
       priceType: json[ApiKey.price_type]?.toString() ?? '',
+      capacity: json['capacity'] ?? (json['attributes'] != null ? json['attributes']['capacity'] : 0) ?? 0,
       stock: json[ApiKey.stock],
       attributes: json[ApiKey.attributes],
       images: json[ApiKey.images] ?? [],

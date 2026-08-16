@@ -1,14 +1,16 @@
-import 'package:eventsapp/cubit/favorites_cubit.dart';
-import 'package:eventsapp/cubit/favorites_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/user_state.dart';
+import 'package:eventsapp/cubit/theme_cubit.dart';
+import 'package:eventsapp/cubit/favorites_cubit.dart';
+import 'package:eventsapp/cubit/favorites_state.dart';
 import 'package:eventsapp/core/utils/localized_value.dart';
-import '../../../core/widgets/common/result_card.dart';
-import 'details_page.dart';
+import 'package:eventsapp/core/widgets/common/favorite_button.dart';
+import 'package:eventsapp/models/listing_model.dart'; // تأكدي من مسار الموديل عندك
+import 'details_page.dart'; // أو مسار صفحة التفاصيل الخاصة بالباكجات
 
 class ReadyMadePackagesPage extends StatefulWidget {
   final String categoryName;
@@ -25,7 +27,7 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<UserCubit>().state;
-      // 🚀 شلنا شرط الـ Success عشان يجبره يحمل الداتا الجديدة الخاصة بالباكجات
+      // تحميل الداتا الخاصة بالباكجات
       if (state is! GetListingLoading) {
         context.read<UserCubit>().getListing(type: 'package');
       }
@@ -34,8 +36,19 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = context.read<ThemeCubit>().isDark;
+
     return Scaffold(
-      appBar: AppBar(title: Text(widget.categoryName), centerTitle: true),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: Text(widget.categoryName),
+        centerTitle: true,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        elevation: 0,
+        iconTheme: theme.appBarTheme.iconTheme,
+        titleTextStyle: theme.appBarTheme.titleTextStyle,
+      ),
       body: BlocBuilder<UserCubit, UserState>(
         builder: (context, state) {
           if (state is GetListingLoading) {
@@ -46,13 +59,15 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
             return Center(
               child: Text(
                 state.errMessage,
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: theme.colorScheme.error),
               ),
             );
           }
 
           if (state is GetListingSuccess) {
-            final listings = state.listingResponse.data;
+            final listings = state.listingResponse.data
+                .where((item) => item.type == 'package') // فلترة للباكجات
+                .toList();
 
             if (listings.isEmpty) {
               return Center(
@@ -60,94 +75,247 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
               );
             }
 
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context)!.searchHint,
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+            return RefreshIndicator(
+              onRefresh: () async => context.read<UserCubit>().getListing(type: 'package'),
+              child: Column(
+                children: [
+                  // شريط البحث
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.searchHint,
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: listings.length,
-                    itemBuilder: (context, index) {
-                      final item = listings[index];
-                      final languageCode =
-                          context.watch<LanguageCubit>().languageCode;
-
-                      // استخراج البيانات لتلائم ResultCard
-                      final String title = localizedText(
-                        item.title,
-                        languageCode,
-                      );
-                      final String companyName =
-                          item.category.name; // كبديل لاسم الشركة
-                      final String price = item.variants.isNotEmpty
-                          ? '${item.variants[0].price} ${item.variants[0].currency}'
-                          : 'N/A';
-                      final String imageUrl = item.images.isNotEmpty
-                          ? item.images[0]
-                          : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
-
-                      String capacity = 'N/A';
-                      if (item.variants.isNotEmpty &&
-                          item.variants[0].availabilities.isNotEmpty &&
-                          item.variants[0].availabilities[0].slots.isNotEmpty) {
-                        capacity =
-                            '${item.variants[0].availabilities[0].slots[0].remainingCapacity} Guests';
-                      }
-
-                      // 💡 استخدام BlocBuilder الخاص بالمفضلة لفحص حالة الكرت
-                      return BlocBuilder<FavoritesCubit, FavoritesState>(
-                        builder: (context, favState) {
-                          bool isFavorite = false;
-                          if (favState is FavoritesLoaded) {
-                            isFavorite = favState.favorites.any((fav) => fav.id == item.id);
-                          }
-
-                          return ResultCard(
-                            key: ValueKey('${item.id}_$isFavorite'),
-                            title: title,
-                            companyName: companyName,
-                            price: price,
-                            imageUrl: imageUrl,
-                            rating: 4.5, // قيمة افتراضية
-                            location: item.district.name,
-                            capacity: capacity,
-                            isFavorite: isFavorite,
-                            onFavoriteToggle: () {
-                              context
-                                  .read<FavoritesCubit>()
-                                  .toggleHeart(item.id);
-                            },
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DetailsPage(item: item),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
+                  // قائمة الكروت بنفس تصميم الصالات
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: listings.length,
+                      itemBuilder: (context, index) {
+                        return _buildPackageCard(context, isDark, listings[index]);
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           }
 
           return const SizedBox();
         },
+      ),
+    );
+  }
+
+  // 🚀 نفس تصميم الكرت تبع الصالات بحذافيره
+  Widget _buildPackageCard(BuildContext context, bool isDark, dynamic item) {
+    final theme = Theme.of(context);
+    final languageCode = context.watch<LanguageCubit>().languageCode;
+
+    final String packageName = localizedText(
+      item.title,
+      languageCode,
+      fallback: 'Unknown Package',
+    );
+    final String price = item.variants.isNotEmpty
+        ? '${item.variants[0].price} ${item.variants[0].currency}'
+        : 'N/A';
+    final String location = item.district.name;
+
+    String capacityInfo = 'N/A';
+    if (item.variants.isNotEmpty) {
+      final capacity = item.variants[0].capacity ?? 0;
+      if (capacity > 0) {
+        capacityInfo = 'Up to $capacity Guests';
+      }
+    }
+
+    final String imageUrl = item.images.isNotEmpty
+        ? (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString())
+        : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.4 : 0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // === قسم الصورة والتقييم والمفضلة ===
+          Stack(
+            children: [
+              // 1. الصورة
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                child: Image.network(
+                  imageUrl,
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: 200,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.error, color: Colors.red),
+                  ),
+                ),
+              ),
+
+              // 2. التقييم (على اليمين)
+              Positioned(
+                top: 15,
+                right: 15,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.star,
+                        color: theme.colorScheme.primary,
+                        size: 16,
+                      ),
+                      const Text(
+                        " 4.9", // يمكنك استبدالها بتقييم حقيقي إن وجد
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // 3. زر المفضلة (على اليسار) بنفس طريقة الصالات تماماً 🚀
+              Positioned(
+                top: 15,
+                left: 15,
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundColor: isDark
+                      ? Colors.black.withOpacity(0.6)
+                      : Colors.white.withOpacity(0.9),
+                  child: Center(
+                    child: BlocBuilder<FavoritesCubit, FavoritesState>(
+                      builder: (context, favState) {
+                        bool isFav = false;
+
+                        if (favState is FavoritesLoaded) {
+                          isFav = favState.favorites.any(
+                            (favItem) => favItem.id == item.id,
+                          );
+                        }
+
+                        return FavoriteButton(
+                          key: ValueKey('${item.id}_$isFav'),
+                          listingId: item.id,
+                          initialIsFavorite: isFav,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // === قسم النصوص والتفاصيل ===
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        packageName,
+                        style: theme.textTheme.displayLarge?.copyWith(
+                          fontSize: 18,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Text(
+                      price,
+                      style: TextStyle(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      color: isDark ? Colors.grey[500] : Colors.grey[400],
+                      size: 18,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(location, style: theme.textTheme.bodySmall),
+                    const SizedBox(width: 20),
+                    Icon(
+                      Icons.line_weight_sharp,
+                      color: isDark ? Colors.grey[500] : Colors.grey[400],
+                      size: 18,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(capacityInfo, style: theme.textTheme.bodySmall),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(
+                    color: theme.colorScheme.onSurface.withOpacity(0.1),
+                  ),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DetailsPage(item: item), // توجيه لصفحة التفاصيل
+                        ),
+                      );
+                    },
+                    style: theme.elevatedButtonTheme.style,
+                    child: Text(AppLocalizations.of(context)!.viewDetails),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

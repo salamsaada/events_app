@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
+// تأكدي من استيراد مسار الموديل تبعك
+import 'package:eventsapp/models/planner_model.dart'; 
 
 class ProviderDetailsPage extends StatefulWidget {
   final String providerId;
@@ -14,7 +16,9 @@ class ProviderDetailsPage extends StatefulWidget {
 class _ProviderDetailsPageState extends State<ProviderDetailsPage> {
   bool isLoading = true;
   String? errorMessage;
-  dynamic providerDetails;
+  
+  // 🚀 التعديل: المتغير صار من نوع PlannerModel
+  PlannerModel? providerDetails; 
 
   @override
   void initState() {
@@ -22,7 +26,6 @@ class _ProviderDetailsPageState extends State<ProviderDetailsPage> {
     _fetchDetails();
   }
 
-  // 🚀 جلب البيانات هنا بشكل مستقل بدون تغيير حالة الـ Cubit
   Future<void> _fetchDetails() async {
     final response = await context.read<UserCubit>().userRepository.getProviderDetails(widget.providerId);
     
@@ -31,7 +34,7 @@ class _ProviderDetailsPageState extends State<ProviderDetailsPage> {
         isLoading = false;
         response.fold(
           (error) => errorMessage = error,
-          (data) => providerDetails = data,
+          (data) => providerDetails = data, // data هنا هي PlannerModel
         );
       });
     }
@@ -55,28 +58,23 @@ class _ProviderDetailsPageState extends State<ProviderDetailsPage> {
   }
 
   Widget _buildBody(ThemeData theme) {
-    // 1. حالة التحميل
     if (isLoading) {
       return const Center(child: CircularProgressIndicator(color: Color(0xFFD6B237)));
     } 
     
-    // 2. حالة الفشل
     if (errorMessage != null) {
       return Center(child: Text(errorMessage!, style: const TextStyle(color: Colors.red)));
     } 
     
-    // 3. حالة النجاح (البيانات موجودة)
     if (providerDetails != null) {
-      final userObj = providerDetails['user'] ?? {};
-      final providerObj = providerDetails['provider'] ?? {};
-      final extraDetailsObj = providerDetails['provider_details'] ?? {};
+      // ✨ شوفي ما أنظف الكود صار! صرنا نقرأ من الموديل مباشرة
+      final name = providerDetails!.name;
+      final email = providerDetails!.email;
+      final phone = providerDetails!.phone;
+      final rating = providerDetails!.rating;
       
-      final categories = providerObj['categories'] as List? ?? [];
-      
-      final name = providerObj['brand_name'] ?? userObj['full_name'] ?? 'بدون اسم';
-      final email = userObj['email'] ?? 'بدون إيميل';
-      final type = providerObj['provider_type'] ?? 'غير محدد';
-      final experience = extraDetailsObj['experience_years']?.toString() ?? '0';
+      // تنسيق نوع المزود للعرض
+      String displayType = providerDetails!.type == 'freelancer' ? 'مستقل (Freelancer)' : 'شركة (Company)';
 
       return SingleChildScrollView(
         child: Column(
@@ -114,7 +112,7 @@ class _ProviderDetailsPageState extends State<ProviderDetailsPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      type.toUpperCase(),
+                      displayType, 
                       style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 12),
                     ),
                   ),
@@ -131,52 +129,9 @@ class _ProviderDetailsPageState extends State<ProviderDetailsPage> {
                 children: [
                   _buildInfoCard(context, Icons.email_outlined, "البريد الإلكتروني", email),
                   const SizedBox(height: 15),
-                  _buildInfoCard(context, Icons.work_outline, "سنوات الخبرة", "$experience سنوات"),
-                  
-                  // 🎨 قسم التصنيفات
-                  if (categories.isNotEmpty) ...[
-                    const SizedBox(height: 15),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.category_outlined, color: theme.colorScheme.primary),
-                              const SizedBox(width: 10),
-                              Text("التصنيفات", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          const Divider(height: 20),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: categories.map((cat) {
-                              return Chip(
-                                label: Text(cat['name_ar'] ?? ''),
-                                backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-                                side: BorderSide.none,
-                                labelStyle: TextStyle(color: theme.colorScheme.primary),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ]
+                  _buildInfoCard(context, Icons.phone_outlined, "رقم الهاتف", phone),
+                  const SizedBox(height: 15),
+                  _buildInfoCard(context, Icons.star_outline, "التقييم العام", "$rating نجوم"),
                 ],
               ),
             ),

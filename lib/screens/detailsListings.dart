@@ -8,23 +8,23 @@ import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-class ServiceDetailsPagelist extends StatelessWidget {
+// 🚀 تم تغيير اسم الكلاس ليكون منطقي وأكثر احترافية
+class ServiceDetailsPage extends StatelessWidget {
   final ServiceItem item;
 
-  const ServiceDetailsPagelist({super.key, required this.item});
+  const ServiceDetailsPage({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = context.read<ThemeCubit>().isDark;
     final languageCode = context.watch<LanguageCubit>().languageCode;
-    final loc = AppLocalizations.of(context)!; // ✨ اختصار للترجمة
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
-          // === 1. الصورة الرئيسية مع الـ AppBar الشفاف ===
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
@@ -61,8 +61,6 @@ class ServiceDetailsPagelist extends StatelessWidget {
               ),
             ),
           ),
-
-          // === 2. محتوى التفاصيل ===
           SliverToBoxAdapter(
             child: Container(
               transform: Matrix4.translationValues(0, -20, 0),
@@ -76,7 +74,6 @@ class ServiceDetailsPagelist extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // الاسم والنوع
                   Text(
                     localizedText(item.title, languageCode),
                     style: theme.textTheme.displayLarge?.copyWith(fontSize: 24),
@@ -101,8 +98,6 @@ class ServiceDetailsPagelist extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // الموقع والحالة
                   _buildInfoRow(
                     Icons.location_on,
                     item.district.name,
@@ -112,8 +107,6 @@ class ServiceDetailsPagelist extends StatelessWidget {
                     isDark,
                   ),
                   const SizedBox(height: 20),
-
-                  // ✨ الوصف (تم التعديل)
                   Text(
                     loc.descriptionLabel,
                     style: theme.textTheme.bodyLarge?.copyWith(
@@ -126,13 +119,11 @@ class ServiceDetailsPagelist extends StatelessWidget {
                     localizedText(
                       item.description,
                       languageCode,
-                      fallback: loc.noDescriptionAvailable, // ✨ تم التعديل
+                      fallback: loc.noDescriptionAvailable,
                     ),
                     style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                   ),
                   const SizedBox(height: 25),
-
-                  // ✨ عرض الباقات (تم التعديل)
                   if (item.variants.isNotEmpty) ...[
                     Text(
                       loc.availablePackages,
@@ -152,7 +143,7 @@ class ServiceDetailsPagelist extends StatelessWidget {
                           theme,
                           isDark,
                           languageCode,
-                          loc, // ✨ تمرير متغير الترجمة
+                          loc, 
                         );
                       },
                     ),
@@ -163,8 +154,6 @@ class ServiceDetailsPagelist extends StatelessWidget {
           ),
         ],
       ),
-
-      // === 3. زر الحجز السفلي الثابت ===
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -185,13 +174,13 @@ class ServiceDetailsPagelist extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  loc.startingFrom, // ✨ كان يستخدمها بالفعل
+                  loc.startingFrom,
                   style: theme.textTheme.bodySmall,
                 ),
                 Text(
                   item.variants.isNotEmpty
                       ? '${item.variants[0].price} ${item.variants[0].currency}'
-                      : loc.notAvailable, // ✨ تم التعديل بدل N/A
+                      : loc.notAvailable, 
                   style: TextStyle(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -206,7 +195,7 @@ class ServiceDetailsPagelist extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => _showBookingSheet(context),
                 style: theme.elevatedButtonTheme.style,
-                child: Text(loc.bookRequest), // ✨ كان يستخدمها بالفعل
+                child: Text(loc.bookRequest), 
               ),
             ),
           ],
@@ -224,7 +213,6 @@ class ServiceDetailsPagelist extends StatelessWidget {
     );
   }
 
-  // === ويدجت مساعدة لصف المعلومات ===
   Widget _buildInfoRow(
     IconData icon1,
     String text1,
@@ -250,7 +238,6 @@ class ServiceDetailsPagelist extends StatelessWidget {
     );
   }
 
-  // === ✨ تم تعديل الويدجت لاستقبال متغير الترجمة ===
   Widget _buildVariantCard(
     Variant variant,
     ThemeData theme,
@@ -279,7 +266,7 @@ class ServiceDetailsPagelist extends StatelessWidget {
                   localizedText(
                     variant.name,
                     languageCode,
-                    fallback: loc.package, // ✨ تم التعديل
+                    fallback: loc.package,
                   ),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -298,21 +285,18 @@ class ServiceDetailsPagelist extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-
-          // عرض أوقات التوفر (Availabilities)
           if (variant.availabilities.isNotEmpty)
             ...variant.availabilities.map(
-              (avail) =>
-                  _buildAvailabilityRow(avail, theme, loc), // ✨ تمرير الترجمة
+              (avail) => _buildAvailabilityRow(avail, variant, theme, loc),
             ),
         ],
       ),
     );
   }
 
-  // === ✨ تم تعديل الويدجت لاستقبال متغير الترجمة ===
   Widget _buildAvailabilityRow(
     Availability availability,
+    Variant variant,
     ThemeData theme,
     AppLocalizations loc,
   ) {
@@ -355,7 +339,8 @@ class ServiceDetailsPagelist extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      '${loc.capacity}: ${slot.remainingCapacity}', // ✨ تم التعديل
+                      // 🚀 هنا يعرض الرقم الحقيقي للسعة 
+                      '${loc.capacity}: ${variant.capacity}', 
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: slot.remainingCapacity > 0
                             ? Colors.green

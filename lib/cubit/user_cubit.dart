@@ -6,17 +6,16 @@ class UserCubit extends Cubit<UserState> {
   UserCubit(this.userRepository) : super(UserInitial());
   final UserRepository userRepository;
 
-  // 🚀 أضفنا Future هنا لكي يستطيع الـ RefreshIndicator انتظارها
-  // 🚀 أضفنا Future هنا لكي يستطيع الـ RefreshIndicator انتظارها
   Future<void> getListing({
     int? page, 
     String? type, 
     String? categoryId,
-    // 🚀 استقبال الفلاتر الجديدة من الواجهة
-    String? search,
+    // ✨ التعديل هنا: استخدام title بدلاً من search
+    String? title,
     String? minPrice,
     String? maxPrice,
-    String? capacity,
+    String? capacityMin, 
+    String? capacityMax, 
     String? rating,
     String? date,
     String? location,
@@ -26,11 +25,12 @@ class UserCubit extends Cubit<UserState> {
     final response = await userRepository.getlisting(
       type: type,
       categoryId: categoryId,
-      // 🚀 تمرير الفلاتر للـ Repository
-      search: search,
+      // ✨ التعديل هنا: إرسال المتغير title 
+      title: title,
       minPrice: minPrice,
       maxPrice: maxPrice,
-      capacity: capacity,
+      capacityMin: capacityMin, 
+      capacityMax: capacityMax, 
       rating: rating,
       date: date,
       location: location,
@@ -53,7 +53,7 @@ class UserCubit extends Cubit<UserState> {
     String? bookedStartTime,
     String? customerNotes,
   }) async {
-    emit(CreateBookingLoading()); // إصدار حالة التحميل
+    emit(CreateBookingLoading()); 
 
     final response = await userRepository.createBooking(
       providerId: providerId,
@@ -69,34 +69,35 @@ class UserCubit extends Cubit<UserState> {
 
     response.fold(
       (errMessage) =>
-          emit(CreateBookingFailure(errMessage: errMessage)), // حالة الفشل
+          emit(CreateBookingFailure(errMessage: errMessage)), 
       (bookingResponse) => emit(
         CreateBookingSuccess(bookingResponse: bookingResponse),
-      ), // حالة النجاح
+      ), 
     );
   }
 
   void getMyBookings() async {
-    emit(GetBookingsLoading()); // إصدار حالة التحميل
+    emit(GetBookingsLoading()); 
 
-    final response = await userRepository
-        .getMyBookings(); // استدعاء الدالة من الـ Repository
+    final response = await userRepository.getMyBookings(); 
 
     response.fold(
       (errMessage) =>
-          emit(GetBookingsFailure(errMessage: errMessage)), // حالة الفشل
+          emit(GetBookingsFailure(errMessage: errMessage)), 
       (bookingsResponse) => emit(
         GetBookingsSuccess(bookingsResponse: bookingsResponse),
-      ), // حالة النجاح
+      ), 
     );
   }
 
-  Future<void> getProviders() async {
+ // 🚀 إضافة بارامتر name
+  Future<void> getProviders({String? name}) async {
     emit(GetProvidersLoading());
-    
+
     try {
-      final response = await userRepository.getAllProviders(); 
-      // 3. تغيير الحالة لنجاح أو فشل بناءً على الرد
+      // ✨ تمرير المتغير للـ Repository
+      final response = await userRepository.getAllProviders(name: name); 
+
       response.fold(
         (errMessage) => emit(GetProvidersFailure(errMessage: errMessage)), 
         (providersData) => emit(GetProvidersSuccess(providers: providersData)), 
@@ -108,99 +109,12 @@ class UserCubit extends Cubit<UserState> {
 
   Future<void> getProviderDetails(String id) async {
     emit(GetProviderDetailsLoading());
-    
+
     final response = await userRepository.getProviderDetails(id);
-    
+
     response.fold(
       (errMessage) => emit(GetProviderDetailsFailure(errMessage: errMessage)), 
-      (details) => emit(GetProviderDetailsSuccess(providerDetails: details)), 
+      (details) => emit(GetProviderDetailsSuccess(providerDetails: details)), // details هنا أصبحت PlannerModel
     );
   }
-
-  //Sign in Form key
-  // GlobalKey<FormState> signInFormKey = GlobalKey<FormState>();
-  // //Sign in email
-  // TextEditingController signInEmail = TextEditingController();
-  // //Sign in password
-  // TextEditingController signInPassword = TextEditingController();
-  // //Sign Up Form key
-  // GlobalKey<FormState> signUpFormKey = GlobalKey<FormState>();
-  // //Profile Pic
-  // XFile? profilePic;
-  // //Sign up name
-  // TextEditingController signUpName = TextEditingController();
-  // //Sign up phone number
-  // TextEditingController signUpPhoneNumber = TextEditingController();
-  // //Sign up email
-  // TextEditingController signUpEmail = TextEditingController();
-  // //Sign up password
-  // TextEditingController signUpPassword = TextEditingController();
-  // //Sign up confirm password
-  // TextEditingController confirmPassword = TextEditingController();
-  // SignInModel? user;
-
-  // void uploadProfilePic(XFile image) {
-  //   profilePic = image;
-  //   emit(UploadProfilePic());
-  // }
-
-  // String? emailController;
-  // void setEmailController(String email) {
-  //   emailController = email;
-  // }
-
-  // String? passwordController;
-  // void setPasswordController(String password) {
-  //   passwordController = password;
-  // }
-
-  // String? confirmPasswordController;
-  // void setConfirmPasswordController(String password) {
-  //   confirmPasswordController = password;
-  // }
-
-  // String? firstName;
-  // void setFirstName(String name) {
-  //   firstName = name;
-  // }
-
-  // void signUp() async {
-  //   emit(SignUpLoading());
-
-  //   final response = await userRepository.signUp(
-  //     name1: firstName!, // تأكد من توفير قيمة افتراضية إذا لم يتم تعيين الاسم
-  //     name2:
-  //         'hassssss ', // يمكنك تعديل هذا إذا كان لديك حقل last_name في الواجهة
-  //     email: emailController!,
-  //     password: passwordController!,
-  //     confirmPassword: confirmPasswordController!,
-  //     // تم إزالة phone و profilePic بناءً على الكود السابق
-  //   );
-
-  //   response.fold(
-  //     (errMessage) => emit(SignUpFailure(errMessage: errMessage)),
-  //     (authModel) => emit(SignUpSuccess(message: authModel.message)),
-  //   );
-  // }
-
-  // signIn() async {
-  //   emit(SignInLoading());
-  //   final response = await userRepository.signIn(
-  //     email: signInEmail.text,
-  //     password: signInPassword.text,
-  //   );
-  //   response.fold(
-  //     (errMessage) => emit(SignInFailure(errMessage: errMessage)),
-  //     (signInModel) => emit(SignInSuccess()),
-  //   );
-  // }
-
-  // getUserProfile() async {
-  //   emit(GetUserLoading());
-  //   final response = await userRepository.getUserProfile();
-  //   response.fold(
-  //     (errMessage) => emit(GetUserFailure(errMessage: errMessage)),
-  //     (user) => emit(GetUserSuccess(user: user)),
-  //   );
-  // }
 }
