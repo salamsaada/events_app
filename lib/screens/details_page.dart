@@ -1,15 +1,15 @@
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
 import 'package:eventsapp/core/utils/localized_value.dart';
-import 'package:eventsapp/models/listing_model.dart'; // استيراد الموديل
+import 'package:eventsapp/models/listing_model.dart'; 
 import 'package:eventsapp/screens/booking/Booking.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart'; // لتنسيق التواريخ
+import 'package:intl/intl.dart'; 
 
 class DetailsPage extends StatelessWidget {
-  final ServiceItem item; // استبدال المتغيرات المتعددة بكائن واحد
+  final ServiceItem item; 
 
   const DetailsPage({super.key, required this.item});
 
@@ -17,20 +17,18 @@ class DetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final languageCode = context.watch<LanguageCubit>().languageCode;
-    final loc = AppLocalizations.of(context)!; // ✨ اختصار للوصول للترجمات
+    final loc = AppLocalizations.of(context)!; 
 
-    // استخراج البيانات الأساسية
     final String title = localizedText(item.title, languageCode);
     final String description = localizedText(
       item.description,
       languageCode,
-      fallback: loc.noDescriptionAvailable, // ✨ استخدام الترجمة
+      fallback: loc.noDescriptionAvailable, 
     );
     final String imageUrl = item.images.isNotEmpty
         ? item.images[0]
         : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
 
-    // ✨ تعديل طريقة عرض السعر ليكون موحداً
     final String startingPrice = item.variants.isNotEmpty
         ? '${loc.startingFrom} ${item.variants[0].price} ${item.variants[0].currency}'
         : loc.priceNotAvailable;
@@ -65,7 +63,6 @@ class DetailsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // الاسم والسعر
                   Text(
                     title,
                     style: theme.textTheme.headlineMedium?.copyWith(
@@ -80,8 +77,6 @@ class DetailsPage extends StatelessWidget {
                     ),
                   ),
                   const Divider(height: 40),
-
-                  // الموقع والنوع (تم حل مشكلة الـ Overflow هنا باستخدام Expanded)
                   Row(
                     children: [
                       Icon(
@@ -114,8 +109,6 @@ class DetailsPage extends StatelessWidget {
                     ],
                   ),
                   const Divider(height: 40),
-
-                  // ✨ الوصف
                   Text(
                     loc.descriptionLabel,
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -126,8 +119,6 @@ class DetailsPage extends StatelessWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                   ),
                   const SizedBox(height: 30),
-
-                  // ✨ عرض الباقات
                   if (item.variants.isNotEmpty) ...[
                     Text(
                       loc.availablePackages,
@@ -152,8 +143,7 @@ class DetailsPage extends StatelessWidget {
                       },
                     ),
                   ],
-
-                  const SizedBox(height: 100), // مسافة للزر السفلي
+                  const SizedBox(height: 100), 
                 ],
               ),
             ),
@@ -226,7 +216,7 @@ class DetailsPage extends StatelessWidget {
           if (variant.availabilities.isNotEmpty)
             ...variant.availabilities
                 .map(
-                  (avail) => _buildAvailabilityRow(avail, theme, loc),
+                  (avail) => _buildAvailabilityRow(avail, variant, theme, loc),
                 )
                 .toList(),
         ],
@@ -236,6 +226,7 @@ class DetailsPage extends StatelessWidget {
 
   Widget _buildAvailabilityRow(
     Availability availability,
+    Variant variant,
     ThemeData theme,
     AppLocalizations loc,
   ) {
@@ -275,7 +266,7 @@ class DetailsPage extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      '${loc.capacity}: ${slot.remainingCapacity}',
+                      '${loc.capacity}: ${variant.capacity}',
                       style: TextStyle(
                         color: slot.remainingCapacity > 0
                             ? Colors.green

@@ -14,12 +14,10 @@ Widget buildChoiceCard(
   return Container(
     margin: const EdgeInsets.only(bottom: 20),
     decoration: BoxDecoration(
-      // 1. التعديل هنا: استخدام لون السطح من الثيم
       color: theme.colorScheme.surface,
 
       borderRadius: BorderRadius.circular(15),
 
-      // 2. إضافة ظل خفيف (BoxShadow) لتمييز الكارد عن الخلفية تماماً
       boxShadow: [
         BoxShadow(
           color: Colors.black.withValues(alpha: 0.05),

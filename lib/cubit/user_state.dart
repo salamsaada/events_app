@@ -1,6 +1,7 @@
 ﻿import 'package:eventsapp/models/booking_model.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/models/myBookings_model.dart';
+import 'package:eventsapp/models/planner_model.dart';
 import 'package:eventsapp/models/user_model.dart';
 
 class UserState {}
@@ -99,7 +100,7 @@ class GetProvidersFailure extends UserState {
 
 class GetProviderDetailsLoading extends UserState {}
 class GetProviderDetailsSuccess extends UserState {
-  final dynamic providerDetails; 
+  final PlannerModel providerDetails; // 🚀 تعديل النوع هنا
   GetProviderDetailsSuccess({required this.providerDetails});
 }
 class GetProviderDetailsFailure extends UserState {

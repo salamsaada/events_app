@@ -2,11 +2,11 @@ import 'dart:async'; // 🌟 لاستخدام StreamSubscription وإغلاق ا
 import 'package:eventsapp/core/theme/app_text_styles.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/screens/auth/user_register_screen.dart';
-import 'package:eventsapp/screens/auth/user_log_in_screen.dart'; // 🌟 استدعاء شاشة الـ Login للتوجيه إليها
+import 'package:eventsapp/screens/auth/user_log_in_screen.dart'; 
 import 'package:eventsapp/core/widgets/common/choice_card_widget.dart';
 import 'package:eventsapp/screens/home/home_page.dart';
 import 'package:flutter/material.dart';
-import 'package:app_links/app_links.dart'; // 🌟 استدعاء مكتبة الـ Deep Links
+import 'package:app_links/app_links.dart'; 
 
 class SelectionScreen extends StatefulWidget {
   const SelectionScreen({super.key});
@@ -114,7 +114,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
                 description: l10n.selectionUserDescription,
                 imagePath: "assets/images/Screenshot 2026-04-21 162329.png",
                 buttonText: l10n.selectionJoinTheGala,
-                destination: const UserRegisterScreen(), // تأكدي من إضافة const إن أمكن
+                destination: const UserRegisterScreen(), 
               ),
 
               buildChoiceCard(
@@ -124,7 +124,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
                 imagePath: "assets/images/Screenshot 2026-04-21 162404.png",
                 buttonText: l10n.selectionExploreAsGuest,
                 isPreferred: false,
-                destination: const HomePage(), // تأكدي من إضافة const إن أمكن
+                destination: const HomePage(), 
               ),
             ],
           ),

@@ -7,7 +7,7 @@ import 'package:eventsapp/cubit/user_state.dart';
 import 'package:eventsapp/cubit/favorites_cubit.dart';
 import 'package:eventsapp/cubit/favorites_state.dart';
 import 'package:eventsapp/core/utils/localized_value.dart';
-import 'package:eventsapp/core/widgets/common/result_card.dart'; // تأكدي من مسار الـ ResultCard لديك
+import 'package:eventsapp/core/widgets/common/result_card.dart';
 import 'service_details_page.dart';
 
 class ServicesCategoriesPage extends StatefulWidget {
@@ -21,9 +21,9 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
   @override
   void initState() {
     super.initState();
-    // 🚀 جلب المنتجات الملموسة فور فتح الصفحة
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserCubit>().getListing(type: 'physical_product');
+      // 🚀 التعديل الأول: طلب الـ service بدل المنتجات
+      context.read<UserCubit>().getListing(type: 'service');
     });
   }
 
@@ -33,7 +33,6 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        // يمكنك وضع l10n.products إذا كانت موجودة بملف الترجمة
         title: Text(l10n.individualServices), 
         centerTitle: true,
       ),
@@ -53,9 +52,9 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
           }
 
           if (state is GetListingSuccess) {
-            // 🚀 فلترة إضافية للتأكد من عرض المنتجات فقط
+            // 🚀 التعديل الثاني: فلترة النتائج لعرض الخدمات فقط
             final products = state.listingResponse.data
-                .where((item) => item.type == 'physical_product')
+                .where((item) => item.type == 'service')
                 .toList();
 
             if (products.isEmpty) {
@@ -64,7 +63,8 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
 
             return RefreshIndicator(
               onRefresh: () async {
-                await context.read<UserCubit>().getListing(type: 'physical_product');
+                // 🚀 التعديل الثالث: تحديث الصفحة يجلب الخدمات فقط
+                await context.read<UserCubit>().getListing(type: 'service');
               },
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
@@ -74,21 +74,23 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                   final languageCode = context.watch<LanguageCubit>().languageCode;
 
                   final String title = localizedText(item.title, languageCode);
-                  // قراءة اسم الشركة المزودة إن وجدت، وإلا نعرض التصنيف
-                  // 🚀 نكتفي بعرض اسم التصنيف (Category) لعدم وجود provider في المودل حالياً
                   final String providerName = item.category.name; 
                   final String price = item.variants.isNotEmpty
                       ? '${item.variants[0].price} ${item.variants[0].currency}'
                       : 'غير متوفر';
                   
                   final String imageUrl = item.images.isNotEmpty
-                      ? (item.images[0]['url'] ?? item.images[0].toString())
+                      ? (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString())
                       : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
 
-                  // 🚀 استخراج الكمية المتاحة (Stock)
-                  String stockInfo = 'نفدت الكمية';
-                  if (item.variants.isNotEmpty && item.variants[0].stock != null) {
-                    stockInfo = 'الكمية المتوفرة: ${item.variants[0].stock}';
+                  // 🚀 التعديل الرابع: معالجة السعة أو الكمية بذكاء
+                  String capacityInfo = '';
+                  if (item.variants.isNotEmpty) {
+                    if (item.variants[0].capacity != null) {
+                      capacityInfo = 'السعة: ${item.variants[0].capacity}';
+                    } else if (item.variants[0].stock != null) {
+                      capacityInfo = 'الكمية: ${item.variants[0].stock}';
+                    }
                   }
 
                   return BlocBuilder<FavoritesCubit, FavoritesState>(
@@ -106,13 +108,13 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                         imageUrl: imageUrl,
                         rating: 4.5,
                         location: item.district.name,
-                        capacity: stockInfo, // إرسال المخزون بدلاً من السعة
+                        capacity: capacityInfo, 
                         isFavorite: isFavorite,
                         onFavoriteToggle: () {
-                          context.read<FavoritesCubit>().toggleHeart(item.id);
+                          // تأكدي من تمرير item المباشر أو item.id حسب دالة الكيوبت عندك
+                          context.read<FavoritesCubit>().toggleHeart(item.id); 
                         },
                         onTap: () {
-                          // التوجيه لصفحة التفاصيل وإرسال المنتج الحقيقي
                           Navigator.push(
                             context,
                             MaterialPageRoute(

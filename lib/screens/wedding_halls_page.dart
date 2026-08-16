@@ -107,12 +107,13 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
     final String location = item.district.name;
 
     String capacityInfo = 'N/A';
-    if (item.variants.isNotEmpty &&
-        item.variants[0].availabilities.isNotEmpty &&
-        item.variants[0].availabilities[0].slots.isNotEmpty) {
-      final capacity =
-          item.variants[0].availabilities[0].slots[0].remainingCapacity;
-      capacityInfo = 'Up to $capacity Guests';
+    
+    if (item.variants.isNotEmpty) {
+      final capacity = item.variants[0].capacity; 
+      
+      if (capacity > 0) {
+        capacityInfo = 'Up to $capacity Guests';
+      }
     }
 
     final String imageUrl = item.images.isNotEmpty
@@ -283,7 +284,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ServiceDetailsPagelist(item: item),
+                          builder: (_) => ServiceDetailsPage(item: item),
                         ),
                       );
                     },
