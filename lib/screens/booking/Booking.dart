@@ -404,7 +404,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                         child: Row(
                           children: [
                             IconButton(
-                              onPressed: _guestCount > 10
+                              onPressed: _guestCount >= 10
                                   ? () => setState(() => _guestCount -= 10)
                                   : null,
                               icon: const Icon(Icons.remove_circle_outline),
@@ -534,7 +534,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                                           'إرسال طلب حجز - ${selectedVariant.price} ${selectedVariant.currency}',
                                         ),
                                 ),
-                        )
+                        ),
                       ),
                       const SizedBox(height: 10),
                       Center(

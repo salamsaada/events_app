@@ -38,7 +38,7 @@ class BookingShift {
     if (json == null) return const BookingShift();
     return BookingShift(
       id: json[ApiKey.id] as String?,
-      name: ListingTitle.fromJson(json['name'] as Map<String, dynamic>?),
+      name: ListingTitle.fromJson(json['name']),
       startTime: DateTime.tryParse(json['start_time'] ?? ''),
       endTime: DateTime.tryParse(json['end_time'] ?? ''),
     );
