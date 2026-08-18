@@ -8,6 +8,13 @@ import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/models/myBookings_model.dart';
 import 'package:eventsapp/models/planner_model.dart';
 import 'package:eventsapp/models/sign_up_model.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart'; // 🚀 1. إضافة هذه المكتبة من أجل دالة compute
+
+// 🚀 2. إضافة هذه الدالة خارج الكلاس لتعمل في مسار خلفي (Background Isolate)
+ListingResponse _parseListingResponseInBackground(Map<String, dynamic> data) {
+  return ListingResponse.fromJson(data);
+}
 
 class UserRepository {
   final ApiConsumer api;
@@ -69,15 +76,14 @@ class UserRepository {
     }
   }
 
- Future<Either<String, ListingResponse>> getlisting({
+  Future<Either<String, ListingResponse>> getlisting({
     String? type,
     String? categoryId,
-    // ✨ التعديل هنا: غيرنا الاسم من search إلى title
-    String? title, 
-    String? minPrice,    
-    String? maxPrice,    
-    String? capacityMin, 
-    String? capacityMax, 
+    String? title,
+    String? minPrice,
+    String? maxPrice,
+    String? capacityMin,
+    String? capacityMax,
     String? rating,
     String? date,
     String? location,
@@ -86,16 +92,13 @@ class UserRepository {
       final response = await api.get(
         EndPoint.getlisting,
         queryParameters: {
-          if (type != null) 'type': type, 
+          if (type != null) 'type': type,
           if (categoryId != null) 'category_id': categoryId,
-          // ✨ التعديل هنا: تمرير title بدلاً من search ليتطابق مع الباك إند
           if (title != null && title.isNotEmpty) 'title': title,
-
           if (minPrice != null && minPrice.isNotEmpty) 'price_min': minPrice,
           if (maxPrice != null && maxPrice.isNotEmpty) 'price_max': maxPrice,
           if (capacityMin != null && capacityMin.isNotEmpty) 'capacity_min': capacityMin,
           if (capacityMax != null && capacityMax.isNotEmpty) 'capacity_max': capacityMax,
-
           if (rating != null && rating.isNotEmpty) 'rating': rating,
           if (date != null && date.isNotEmpty) 'date': date,
           if (location != null && location.isNotEmpty) 'location': location,
@@ -108,9 +111,15 @@ class UserRepository {
         return const Left("لا توجد بيانات حالياً");
       }
 
-      final serviceResponse = ListingResponse.fromJson(response);
-      return Right(serviceResponse);
+      // 🚀 3. تحويل الاستجابة بأمان إلى Map
+      final responseMap = response is Map 
+          ? Map<String, dynamic>.from(response) 
+          : <String, dynamic>{};
 
+      // 🚀 4. السحر هنا: استخدام compute لفك تشفير البيانات الضخمة بدون تجميد الـ UI
+      final serviceResponse = await compute(_parseListingResponseInBackground, responseMap);
+      
+      return Right(serviceResponse);
     } on ServerException catch (e) {
       return Left(e.errModel.errorMessage);
     } catch (e) {
@@ -182,12 +191,10 @@ class UserRepository {
     }
   }
 
-  // 🚀 تعديل الدالة لتستقبل اسم المزود للبحث
   Future<Either<String, List<dynamic>>> getAllProviders({String? name}) async {
     try {
       final response = await api.get(
         'providers',
-        // ✨ إضافة المتغير للرابط
         queryParameters: {
           if (name != null && name.isNotEmpty) 'name': name,
         },
@@ -209,7 +216,7 @@ class UserRepository {
         return const Left("لا يوجد مزودين خدمة حالياً");
       }
 
-      return Right(providersData); 
+      return Right(providersData);
 
     } on ServerException catch (e) {
       return Left(e.errModel.errorMessage);
@@ -217,7 +224,7 @@ class UserRepository {
       return Left("حدث خطأ غير متوقع: $e");
     }
   }
-  // 🚀 التعديل: تغيير نوع الإرجاع لـ PlannerModel بدل dynamic
+
   Future<Either<String, PlannerModel>> getProviderDetails(String id) async {
     try {
       final response = await api.get('providers/$id');
@@ -226,14 +233,68 @@ class UserRepository {
         return const Left("لا توجد بيانات حالياً");
       }
 
-      final detailsData = (response is Map<String, dynamic> && response.containsKey('data')) 
-          ? response['data'] 
+      final detailsData = (response is Map<String, dynamic> && response.containsKey('data'))
+          ? response['data']
           : response;
 
-      // ✨ هون سحر الموديل: تمرير البيانات للموديل ليقوم بتنظيفها وترتيبها
       final planner = PlannerModel.fromJson(detailsData);
 
       return Right(planner);
+    } on ServerException catch (e) {
+      return Left(e.errModel.errorMessage);
+    } catch (e) {
+      return Left("حدث خطأ غير متوقع: $e");
+    }
+  }
+
+  Future<Either<String, String>> uploadPaymentProof({
+    required String bookingId,
+    required String filePath,
+    required String amount,
+  }) async {
+    try {
+      FormData formData = FormData.fromMap({
+        'booking_id': bookingId,
+        'amount': amount,
+        'proof_file': await MultipartFile.fromFile(
+          filePath,
+          filename: filePath.split('/').last,
+        ),
+      });
+
+      final response = await api.post(
+        'payments/upload-proof',
+        data: formData,
+      );
+
+      return Right(response['message'] ?? 'تم استلام الملف بنجاح.');
+    } on DioException catch (e) {
+      final statusCode = e.response?.statusCode ?? 0;
+      final serverMessage = (e.response?.data is Map &&
+              e.response?.data['message'] != null)
+          ? e.response!.data['message'].toString()
+          : 'حدث خطأ غير متوقع، حاول مرة أخرى.';
+
+      return Left('$statusCode|$serverMessage');
+    } catch (e) {
+      return Left('0|${e.toString()}');
+    }
+  }
+
+  Future<Either<String, ServiceItem>> getListingDetails(String id) async {
+    try {
+      final response = await api.get('listings/$id');
+
+      if (response == null) {
+        return const Left("لا توجد بيانات لهذا العرض");
+      }
+
+      final data = (response is Map && response.containsKey('data'))
+          ? response['data']
+          : response;
+
+      final listing = ServiceItem.fromJson(Map<String, dynamic>.from(data));
+      return Right(listing);
     } on ServerException catch (e) {
       return Left(e.errModel.errorMessage);
     } catch (e) {

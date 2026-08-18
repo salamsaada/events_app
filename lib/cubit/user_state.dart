@@ -107,3 +107,26 @@ class GetProviderDetailsFailure extends UserState {
   final String errMessage;
   GetProviderDetailsFailure({required this.errMessage});
 }
+
+//حالات الدفع 
+class UploadProofLoading extends UserState {}
+class UploadProofSuccess extends UserState {
+  final String message;
+  UploadProofSuccess(this.message);
+}
+class UploadProofFailure extends UserState {
+  final String errMessage;
+  UploadProofFailure(this.errMessage);
+}
+
+class GetListingDetailsLoading extends UserState {}
+
+class GetListingDetailsSuccess extends UserState {
+  final ServiceItem listing;
+  GetListingDetailsSuccess({required this.listing});
+}
+
+class GetListingDetailsFailure extends UserState {
+  final String errMessage;
+  GetListingDetailsFailure({required this.errMessage});
+}

@@ -15,6 +15,23 @@ int _safeInt(dynamic value) {
   return 0;
 }
 
+// 🛡️ دالة سحرية لحماية القوائم
+List<Map<String, dynamic>> _safeListOfMaps(dynamic value) {
+  if (value is! List) return [];
+  return value
+      .whereType<Map>()
+      .map((e) => Map<String, dynamic>.from(e))
+      .toList();
+}
+
+// 🆕 تجرب أكتر من اسم حقل محتمل (snake_case أو camelCase) وترجع أول قيمة غير null
+dynamic _firstNonNull(Map<String, dynamic> json, List<String> keys) {
+  for (final k in keys) {
+    if (json.containsKey(k) && json[k] != null) return json[k];
+  }
+  return null;
+}
+
 class Meta {
   final int currentPage;
   final int lastPage;
@@ -83,11 +100,18 @@ class Slot {
 
   factory Slot.fromJson(Map<String, dynamic>? json) {
     if (json == null) return Slot(id: '', startTime: DateTime.now(), endTime: DateTime.now(), remainingCapacity: 0);
+    
+    // دالة داخلية سريعة لتركيب تاريخ وهمي مع الوقت عشان tryParse ما يرجع null
+    DateTime parseTime(String? t) {
+      if (t == null || t.isEmpty) return DateTime.now();
+      return DateTime.tryParse(t) ?? DateTime.tryParse("1970-01-01 $t") ?? DateTime.now();
+    }
+
     return Slot(
       id: json[ApiKey.id]?.toString() ?? '',
       name: json[ApiKey.name],
-      startTime: DateTime.tryParse(json[ApiKey.start_time]?.toString() ?? '') ?? DateTime.now(),
-      endTime: DateTime.tryParse(json[ApiKey.end_time]?.toString() ?? '') ?? DateTime.now(),
+      startTime: parseTime(json[ApiKey.start_time]?.toString()),
+      endTime: parseTime(json[ApiKey.end_time]?.toString()),
       remainingCapacity: _safeInt(json[ApiKey.remaining_capacity]),
     );
   }
@@ -117,17 +141,181 @@ class Availability {
   }
 }
 
+// ==========================================
+// 🆕 موديلات المنتجات المرفقة بالباقة (package_items)
+// مبنية بالاعتماد على العلاقة الفعلية بالباك اند:
+// variants.packageItems.includedVariant.listing.images
+// ==========================================
+
+// 🆕 صورة/عنوان الـ listing تبع المنتج المرفق (chair, table, ...)
+class IncludedVariantListing {
+  final Map<String, dynamic> title;
+  final List<dynamic> images;
+
+  const IncludedVariantListing({required this.title, required this.images});
+
+  factory IncludedVariantListing.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return const IncludedVariantListing(title: {}, images: []);
+    return IncludedVariantListing(
+      title: _safeMap(json[ApiKey.title]),
+      images: json[ApiKey.images] is List ? json[ApiKey.images] : [],
+    );
+  }
+}
+
+// 🆕 الـ Variant المرفق فعليًا (مثلاً "Chair" بسعر 120)
+class IncludedVariant {
+  final String id;
+  final Map<String, dynamic> name;
+  final int price;
+  final String currency;
+  final List<dynamic> images;
+  final IncludedVariantListing? listing;
+
+  const IncludedVariant({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.currency,
+    required this.images,
+    this.listing,
+  });
+
+  factory IncludedVariant.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return const IncludedVariant(id: '', name: {}, price: 0, currency: '', images: []);
+    }
+    // 🔎 نجرب snake_case و camelCase مشان listing المتداخلة
+    final listingJson = _firstNonNull(json, ['listing']);
+
+    return IncludedVariant(
+      id: json[ApiKey.id]?.toString() ?? '',
+      name: _safeMap(json[ApiKey.name]),
+      price: _safeInt(json[ApiKey.price]),
+      currency: json[ApiKey.currency]?.toString() ?? '',
+      images: json[ApiKey.images] is List ? json[ApiKey.images] : [],
+      listing: listingJson is Map<String, dynamic>
+          ? IncludedVariantListing.fromJson(listingJson)
+          : null,
+    );
+  }
+
+  // 🆕 هيلبر: أفضل صورة متاحة (من صور الـ variant نفسه، وإلا من صور الـ listing تبعه)
+  String? get bestImageUrl {
+    if (images.isNotEmpty) {
+      final first = images.first;
+      if (first is Map && first['url'] != null) return first['url'].toString();
+      if (first is String) return first;
+    }
+    if (listing != null && listing!.images.isNotEmpty) {
+      final first = listing!.images.first;
+      if (first is Map && first['url'] != null) return first['url'].toString();
+      if (first is String) return first;
+    }
+    return null;
+  }
+}
+
+class PackageItem {
+  final String id;
+  final String variantId;
+  final int quantity;
+  final IncludedVariant? includedVariant;
+  final Map<String, dynamic> rawData; // 🛡️ احتياط: كامل البيانات الخام لأي حقل غير متوقع
+
+  const PackageItem({
+    required this.id,
+    required this.variantId,
+    required this.quantity,
+    this.includedVariant,
+    required this.rawData,
+  });
+
+  factory PackageItem.fromJson(Map<String, dynamic> json) {
+    // 🔎 نجرب أكتر من اسم محتمل للعلاقة المتداخلة included_variant
+    final includedVariantJson = _firstNonNull(json, [
+      'included_variant',
+      'includedVariant',
+      'variant',
+    ]);
+
+    return PackageItem(
+      id: json['id']?.toString() ?? '',
+      variantId: (_firstNonNull(json, ['variant_id', 'variantId']))?.toString() ?? '',
+      quantity: _safeInt(_firstNonNull(json, ['quantity', 'qty'])),
+      includedVariant: includedVariantJson is Map<String, dynamic>
+          ? IncludedVariant.fromJson(includedVariantJson)
+          : null,
+      rawData: json,
+    );
+  }
+}
+
+// ==========================================
+// 🆕 موديلات الفريلانسرز المرتبطين بالباقة (package_freelancers)
+// العلاقة بالباك اند: variants.packageFreelancers.freelancer
+// ==========================================
+
+class FreelancerInfo {
+  final String id;
+  final String name;
+  final String? role;
+  final String? avatarUrl;
+
+  const FreelancerInfo({
+    required this.id,
+    required this.name,
+    this.role,
+    this.avatarUrl,
+  });
+
+  factory FreelancerInfo.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return const FreelancerInfo(id: '', name: '');
+    return FreelancerInfo(
+      id: json[ApiKey.id]?.toString() ?? '',
+      name: json[ApiKey.name]?.toString() ?? '',
+      role: (_firstNonNull(json, ['role', 'type']))?.toString(),
+      avatarUrl: (_firstNonNull(json, ['avatar_url', 'avatarUrl', 'image']))?.toString(),
+    );
+  }
+}
+
+class PackageFreelancer {
+  final String id;
+  final FreelancerInfo? freelancer;
+  final Map<String, dynamic> rawData;
+
+  const PackageFreelancer({
+    required this.id,
+    this.freelancer,
+    required this.rawData,
+  });
+
+  factory PackageFreelancer.fromJson(Map<String, dynamic> json) {
+    final freelancerJson = _firstNonNull(json, ['freelancer', 'Freelancer']);
+    return PackageFreelancer(
+      id: json['id']?.toString() ?? '',
+      freelancer: freelancerJson is Map<String, dynamic>
+          ? FreelancerInfo.fromJson(freelancerJson)
+          : null,
+      rawData: json,
+    );
+  }
+}
+
 class Variant {
   final String id;
   final Map<String, dynamic> name;
   final int price;
   final String currency;
   final String priceType;
-  final int capacity; // 🚀 ضفنا هاد السطر
+  final int capacity;
   final dynamic stock;
   final dynamic attributes;
   final List<dynamic> images;
   final List<Availability> availabilities;
+  final List<PackageItem> packageItems;
+  final List<PackageFreelancer> packageFreelancers;
 
   const Variant({
     required this.id,
@@ -135,26 +323,73 @@ class Variant {
     required this.price,
     required this.currency,
     required this.priceType,
-    required this.capacity, // 🚀 ضفنا هاد السطر
+    required this.capacity,
     this.stock,
     this.attributes,
     required this.images,
     required this.availabilities,
+    this.packageItems = const [],
+    this.packageFreelancers = const [],
   });
 
   factory Variant.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Variant(id: '', name: {}, price: 0, currency: '', priceType: '', capacity: 0, images: [], availabilities: []);
+    if (json == null) {
+      return const Variant(
+        id: '',
+        name: {},
+        price: 0,
+        currency: '',
+        priceType: '',
+        capacity: 0,
+        images: [],
+        availabilities: [],
+      );
+    }
+
+    final rawAttributes = json[ApiKey.attributes];
+    final dynamic rawCapacity = json['capacity'] ??
+        (rawAttributes is Map ? rawAttributes['capacity'] : null);
+
+    // 🔎 نجرب snake_case و camelCase لاسمي الحقلين
+    final rawPackageItems = _firstNonNull(json, ['package_items', 'packageItems']);
+    final rawPackageFreelancers = _firstNonNull(json, ['package_freelancers', 'packageFreelancers']);
+
+    List<PackageItem> parsedItems = [];
+    for (final item in _safeListOfMaps(rawPackageItems)) {
+      try {
+        parsedItems.add(PackageItem.fromJson(item));
+      } catch (e) {
+        print("⚠️ Skipped a package item due to error: $e");
+        print("⚠️ Raw package item that failed: $item");
+      }
+    }
+
+    List<PackageFreelancer> parsedFreelancers = [];
+    for (final item in _safeListOfMaps(rawPackageFreelancers)) {
+      try {
+        parsedFreelancers.add(PackageFreelancer.fromJson(item));
+      } catch (e) {
+        print("⚠️ Skipped a package freelancer due to error: $e");
+        print("⚠️ Raw package freelancer that failed: $item");
+      }
+    }
+
     return Variant(
       id: json[ApiKey.id]?.toString() ?? '',
       name: _safeMap(json[ApiKey.name]),
       price: _safeInt(json[ApiKey.price]),
       currency: json[ApiKey.currency]?.toString() ?? '',
       priceType: json[ApiKey.price_type]?.toString() ?? '',
-      capacity: json['capacity'] ?? (json['attributes'] != null ? json['attributes']['capacity'] : 0) ?? 0,
+      capacity: _safeInt(rawCapacity),
       stock: json[ApiKey.stock],
-      attributes: json[ApiKey.attributes],
+      attributes: rawAttributes,
       images: json[ApiKey.images] ?? [],
-      availabilities: (json[ApiKey.availabilities] as List<dynamic>?)?.map((item) => Availability.fromJson(item)).toList() ?? [],
+      availabilities: (json[ApiKey.availabilities] as List<dynamic>?)
+              ?.map((item) => Availability.fromJson(item))
+              .toList() ??
+          [],
+      packageItems: parsedItems,
+      packageFreelancers: parsedFreelancers,
     );
   }
 }
@@ -204,15 +439,27 @@ class ServiceItem {
     if (json == null) throw Exception("ServiceItem json is null");
 
     try {
+      // 🚀 استخدام is Map بدلاً من is Map<String, dynamic>
       var catData = json[ApiKey.category];
-      Category category = (catData is Map<String, dynamic>) 
-          ? Category.fromJson(catData) 
+      Category category = (catData is Map)
+          ? Category.fromJson(Map<String, dynamic>.from(catData))
           : Category(id: 0, name: catData?.toString() ?? 'N/A');
 
       var distData = json[ApiKey.district];
-      District district = (distData is Map<String, dynamic>) 
-          ? District.fromJson(distData) 
+      District district = (distData is Map)
+          ? District.fromJson(Map<String, dynamic>.from(distData))
           : District(id: 0, name: distData?.toString() ?? 'N/A');
+
+      final rawVariants = json[ApiKey.variants] as List<dynamic>? ?? [];
+      final List<Variant> parsedVariants = [];
+      for (final v in rawVariants) {
+        try {
+          parsedVariants.add(Variant.fromJson(v));
+        } catch (e) {
+          print("⚠️ Skipped a variant due to error: $e");
+          print("⚠️ Raw variant that failed: $v");
+        }
+      }
 
       return ServiceItem(
         id: json[ApiKey.id]?.toString() ?? '',
@@ -230,7 +477,7 @@ class ServiceItem {
         category: category,
         district: district,
         images: json[ApiKey.images] ?? [],
-        variants: (json[ApiKey.variants] as List<dynamic>?)?.map((item) => Variant.fromJson(item)).toList() ?? [],
+        variants: parsedVariants,
         createdAt: DateTime.tryParse(json[ApiKey.created_at]?.toString() ?? '') ?? DateTime.now(),
         updatedAt: DateTime.tryParse(json[ApiKey.updated_at]?.toString() ?? '') ?? DateTime.now(),
       );
@@ -257,13 +504,15 @@ class ListingResponse {
       return ListingResponse(
         success: json[ApiKey.success] ?? true,
         data: (json['data'] as List<dynamic>?)?.map((item) {
-          try {
-            return ServiceItem.fromJson(item);
-          } catch (e) {
-            print("⚠️ Skipped an item due to error: $e");
-            return null;
-          }
-        }).whereType<ServiceItem>().toList() ?? [],
+              try {
+                return ServiceItem.fromJson(item);
+              } catch (e) {
+                print("⚠️ Skipped an item due to error: $e");
+                print("⚠️ Raw item that failed: $item");
+                return null;
+              }
+            }).whereType<ServiceItem>().toList() ??
+            [],
         meta: Meta.fromJson(json['meta']),
       );
     } catch (e) {

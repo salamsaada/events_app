@@ -117,4 +117,34 @@ class UserCubit extends Cubit<UserState> {
       (details) => emit(GetProviderDetailsSuccess(providerDetails: details)), // details هنا أصبحت PlannerModel
     );
   }
+
+ Future<void> uploadProof({
+  required String bookingId,
+  required String filePath,
+  required String amount, // 👈 أضيفي المبلغ هنا
+}) async {
+  emit(UploadProofLoading());
+
+  final response = await userRepository.uploadPaymentProof(
+    bookingId: bookingId, 
+    filePath: filePath,
+    amount: amount, // 👈 مرريه للـ Repository
+  );
+
+  response.fold(
+    (errMessage) => emit(UploadProofFailure(errMessage)),
+    (successMessage) => emit(UploadProofSuccess(successMessage)),
+  );
+}
+
+Future<void> getListingDetails(String id) async {
+  emit(GetListingDetailsLoading());
+
+  final response = await userRepository.getListingDetails(id);
+
+  response.fold(
+    (errMessage) => emit(GetListingDetailsFailure(errMessage: errMessage)),
+    (listing) => emit(GetListingDetailsSuccess(listing: listing)),
+  );
+}
 }

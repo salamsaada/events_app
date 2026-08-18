@@ -97,7 +97,7 @@ class SearchResultsPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DetailsPage(item: item),
+                        builder: (context) => DetailsPage(listingId: item.id),
                       ),
                     );
                   },
