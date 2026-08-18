@@ -214,5 +214,37 @@
 "package": "باقة",
 "capacity": "السعة",
 "notAvailable": "غير متوفر"
+,"filterWhatLookingFor": "ماذا تبحث عنه؟",
+"filterCategoryVenues": "القاعات",
+"filterCategoryPackages": "الباقات الجاهزة",
+"filterCategoryServicesProducts": "الخدمات والمنتجات",
+"filterCategoryProviders": "مزودو الخدمة",
+"filterHallsTitle": "تصفية القاعات",
+"filterPackagesTitle": "تصفية الباقات",
+"filterServicesProductsTitle": "تصفية الخدمات والمنتجات",
+"filterProvidersTitle": "تصفية مزودي الخدمة",
+"filterSearchNameLabel": "ابحث بالاسم...",
+"filterMinCapacityLabel": "الحد الأدنى للسعة",
+"filterMaxCapacityLabel": "الحد الأقصى للسعة",
+"filterMinPriceLabel": "الحد الأدنى للسعر",
+"filterMinimumRatingLabel": "أدنى تقييم",
+"searchResultsTitle": "النتائج: {category}",
+"@searchResultsTitle": {
+  "placeholders": {
+    "category": {}
+  }
+},
+"noResultsForFilters": "لا توجد نتائج مطابقة للفلاتر.",
+"noProvidersFound": "لم يتم العثور على مزودي خدمة.",
+"providerUnnamed": "بدون اسم",
+"providerTypeCompany": "شركة",
+"providerTypeFreelancer": "مستقل",
+"chatConversationsTitle": "المحادثات",
+"chatStartFetching": "بدء جلب المحادثات...",
+"chatNoProvidersAvailable": "لا يوجد مزودون متاحون حالياً",
+"chatBadgeOfficial": "رسمي",
+"chatBadgeIndie": "مستقل",
+"chatNoMessagesYet": "لا توجد رسائل بعد\nابدأ المحادثة الآن!",
+"chatTypeMessageHint": "اكتب رسالتك..."
 
 }

@@ -1363,6 +1363,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'N/A'**
   String get notAvailable;
+
+  /// No description provided for @filterWhatLookingFor.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you looking for?'**
+  String get filterWhatLookingFor;
+
+  /// No description provided for @filterCategoryVenues.
+  ///
+  /// In en, this message translates to:
+  /// **'Venues (Halls)'**
+  String get filterCategoryVenues;
+
+  /// No description provided for @filterCategoryPackages.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready Packages'**
+  String get filterCategoryPackages;
+
+  /// No description provided for @filterCategoryServicesProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Services & Products'**
+  String get filterCategoryServicesProducts;
+
+  /// No description provided for @filterCategoryProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers'**
+  String get filterCategoryProviders;
+
+  /// No description provided for @filterHallsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Halls'**
+  String get filterHallsTitle;
+
+  /// No description provided for @filterPackagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Packages'**
+  String get filterPackagesTitle;
+
+  /// No description provided for @filterServicesProductsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Services & Products'**
+  String get filterServicesProductsTitle;
+
+  /// No description provided for @filterProvidersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Providers'**
+  String get filterProvidersTitle;
+
+  /// No description provided for @filterSearchNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Name...'**
+  String get filterSearchNameLabel;
+
+  /// No description provided for @filterMinCapacityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Min Capacity'**
+  String get filterMinCapacityLabel;
+
+  /// No description provided for @filterMaxCapacityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Capacity'**
+  String get filterMaxCapacityLabel;
+
+  /// No description provided for @filterMinPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Min Price'**
+  String get filterMinPriceLabel;
+
+  /// No description provided for @filterMinimumRatingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum Rating'**
+  String get filterMinimumRatingLabel;
+
+  /// No description provided for @searchResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Results: {category}'**
+  String searchResultsTitle(Object category);
+
+  /// No description provided for @noResultsForFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found for your filters.'**
+  String get noResultsForFilters;
+
+  /// No description provided for @noProvidersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No providers found.'**
+  String get noProvidersFound;
+
+  /// No description provided for @providerUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed'**
+  String get providerUnnamed;
+
+  /// No description provided for @providerTypeCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get providerTypeCompany;
+
+  /// No description provided for @providerTypeFreelancer.
+  ///
+  /// In en, this message translates to:
+  /// **'Freelancer'**
+  String get providerTypeFreelancer;
+
+  /// No description provided for @chatConversationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations'**
+  String get chatConversationsTitle;
+
+  /// No description provided for @chatStartFetching.
+  ///
+  /// In en, this message translates to:
+  /// **'Start fetching conversations...'**
+  String get chatStartFetching;
+
+  /// No description provided for @chatNoProvidersAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No providers are currently available'**
+  String get chatNoProvidersAvailable;
+
+  /// No description provided for @chatBadgeOfficial.
+  ///
+  /// In en, this message translates to:
+  /// **'OFFICIAL'**
+  String get chatBadgeOfficial;
+
+  /// No description provided for @chatBadgeIndie.
+  ///
+  /// In en, this message translates to:
+  /// **'INDIE'**
+  String get chatBadgeIndie;
+
+  /// No description provided for @chatNoMessagesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet\nStart the conversation now!'**
+  String get chatNoMessagesYet;
+
+  /// No description provided for @chatTypeMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your message...'**
+  String get chatTypeMessageHint;
 }
 
 class _AppLocalizationsDelegate

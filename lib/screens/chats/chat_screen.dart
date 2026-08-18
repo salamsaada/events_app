@@ -6,6 +6,7 @@ import 'package:eventsapp/core/theme/app_text_styles.dart';
 import 'package:eventsapp/features/chat/repository/chat_api_repository.dart';
 import 'package:eventsapp/features/chat/repository/chat_repository.dart';
 import 'package:eventsapp/features/chat/repository/planners_repository.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -45,7 +46,12 @@ class ChatScreenContent extends StatefulWidget {
   final String receiverId;
   final String receiverName;
 
-  const ChatScreenContent({super.key, required this.myId, required this.receiverId, required this.receiverName});
+  const ChatScreenContent({
+    super.key,
+    required this.myId,
+    required this.receiverId,
+    required this.receiverName,
+  });
 
   @override
   State<ChatScreenContent> createState() => _ChatScreenContentState();
@@ -56,20 +62,27 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
 
-    // 🌟 الحل الجذري: نحدد الـ ID الفعلي هنا. 
+    // 🌟 الحل الجذري: نحدد الـ ID الفعلي هنا.
     // إذا كان الـ ID القادم من الـ Navigator فارغاً، نسحبه من الكاش فوراً.
-    final String effectiveMyId = widget.myId.isNotEmpty 
-        ? widget.myId 
+    final String effectiveMyId = widget.myId.isNotEmpty
+        ? widget.myId
         : (CacheHelper().getData(key: 'my_id') ?? "").toString();
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.background : AppColors.lightBackground,
+      backgroundColor: isDark
+          ? AppColors.background
+          : AppColors.lightBackground,
       appBar: AppBar(
-        title: Text(widget.receiverName, 
-            style: AppTextStyles.sectionTitle.copyWith(color: AppColors.primaryGold)),
+        title: Text(
+          widget.receiverName,
+          style: AppTextStyles.sectionTitle.copyWith(
+            color: AppColors.primaryGold,
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.primaryGold),
@@ -79,9 +92,11 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
           Expanded(
             child: BlocBuilder<ChatCubit, ChatState>(
               builder: (context, state) {
-                if (state is ChatLoading) return const Center(child: CircularProgressIndicator());
-                if (state is ChatError) return Center(child: Text(state.message));
-                
+                if (state is ChatLoading)
+                  return const Center(child: CircularProgressIndicator());
+                if (state is ChatError)
+                  return Center(child: Text(state.message));
+
                 if (state is ChatMessagesLoaded) {
                   // 🌟 إضافة الحالة هنا: إذا كانت القائمة فارغة نعرض أيقونة
                   if (state.messages.isEmpty) {
@@ -96,10 +111,12 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            "لا توجد رسائل بعد\nابدأ المحادثة الآن!",
+                            l10n.chatNoMessagesYet,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: isDark ? Colors.grey[500] : Colors.grey[600],
+                              color: isDark
+                                  ? Colors.grey[500]
+                                  : Colors.grey[600],
                               fontSize: 16,
                               height: 1.5,
                             ),
@@ -117,32 +134,58 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
                       final msg = state.messages[index];
 
                       // 🌟 استخدمنا effectiveMyId للمقارنة لضمان الثبات
-                      final isMe = msg.senderId.toString().trim() == effectiveMyId.trim();
-                      
-                      final time = msg.timestamp != null
-                          ? "${msg.timestamp!.hour}:${msg.timestamp!.minute.toString().padLeft(2, '0')}"
-                          : "";
+                      final isMe =
+                          msg.senderId.toString().trim() ==
+                          effectiveMyId.trim();
+
+                      final time =
+                          "${msg.timestamp.hour}:${msg.timestamp.minute.toString().padLeft(2, '0')}";
 
                       return Column(
-                        crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        crossAxisAlignment: isMe
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: isMe ? AppColors.primaryGold : Colors.grey[200],
+                              color: isMe
+                                  ? AppColors.primaryGold
+                                  : Colors.grey[200],
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(12),
                                 topRight: const Radius.circular(12),
-                                bottomLeft: isMe ? const Radius.circular(12) : Radius.zero,
-                                bottomRight: isMe ? Radius.zero : const Radius.circular(12),
+                                bottomLeft: isMe
+                                    ? const Radius.circular(12)
+                                    : Radius.zero,
+                                bottomRight: isMe
+                                    ? Radius.zero
+                                    : const Radius.circular(12),
                               ),
                             ),
-                            child: Text(msg.text, style: TextStyle(color: isMe ? Colors.white : Colors.black)),
+                            child: Text(
+                              msg.text,
+                              style: TextStyle(
+                                color: isMe ? Colors.white : Colors.black,
+                              ),
+                            ),
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text(time, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                            child: Text(
+                              time,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ),
                         ],
                       );
@@ -153,20 +196,26 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
               },
             ),
           ),
-          _buildInputBar(context, effectiveMyId), // مررنا الـ ID الفعلي هنا أيضاً
+          _buildInputBar(
+            context,
+            effectiveMyId,
+          ), // مررنا الـ ID الفعلي هنا أيضاً
         ],
       ),
     );
   }
 
   Widget _buildInputBar(BuildContext context, String currentMyId) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.background : Colors.white, 
-        border: Border(top: BorderSide(color: AppColors.primaryGold.withOpacity(0.3))),
+        color: isDark ? AppColors.background : Colors.white,
+        border: Border(
+          top: BorderSide(color: AppColors.primaryGold.withOpacity(0.3)),
+        ),
       ),
       child: Row(
         children: [
@@ -175,8 +224,10 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
               controller: _messageController,
               style: TextStyle(color: isDark ? Colors.white : Colors.black),
               decoration: InputDecoration(
-                hintText: "اكتب رسالتك...",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
+                hintText: l10n.chatTypeMessageHint,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
               ),
             ),
           ),
@@ -187,8 +238,10 @@ class _ChatScreenContentState extends State<ChatScreenContent> {
               if (text.isNotEmpty) {
                 // 🌟 نستخدم currentMyId هنا لضمان إرسال الرسالة بالـ ID الصحيح دائماً
                 context.read<ChatCubit>().sendMessage(
-                  chatId: context.read<ChatCubit>().activeChatId ?? "", // تجنب خطأ الـ Null
-                  senderId: currentMyId, 
+                  chatId:
+                      context.read<ChatCubit>().activeChatId ??
+                      "", // تجنب خطأ الـ Null
+                  senderId: currentMyId,
                   receiverId: widget.receiverId,
                   text: text,
                 );

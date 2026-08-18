@@ -672,4 +672,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notAvailable => 'N/A';
+
+  @override
+  String get filterWhatLookingFor => 'What are you looking for?';
+
+  @override
+  String get filterCategoryVenues => 'Venues (Halls)';
+
+  @override
+  String get filterCategoryPackages => 'Ready Packages';
+
+  @override
+  String get filterCategoryServicesProducts => 'Services & Products';
+
+  @override
+  String get filterCategoryProviders => 'Providers';
+
+  @override
+  String get filterHallsTitle => 'Filter Halls';
+
+  @override
+  String get filterPackagesTitle => 'Filter Packages';
+
+  @override
+  String get filterServicesProductsTitle => 'Filter Services & Products';
+
+  @override
+  String get filterProvidersTitle => 'Filter Providers';
+
+  @override
+  String get filterSearchNameLabel => 'Search Name...';
+
+  @override
+  String get filterMinCapacityLabel => 'Min Capacity';
+
+  @override
+  String get filterMaxCapacityLabel => 'Max Capacity';
+
+  @override
+  String get filterMinPriceLabel => 'Min Price';
+
+  @override
+  String get filterMinimumRatingLabel => 'Minimum Rating';
+
+  @override
+  String searchResultsTitle(Object category) {
+    return 'Results: $category';
+  }
+
+  @override
+  String get noResultsForFilters => 'No results found for your filters.';
+
+  @override
+  String get noProvidersFound => 'No providers found.';
+
+  @override
+  String get providerUnnamed => 'Unnamed';
+
+  @override
+  String get providerTypeCompany => 'Company';
+
+  @override
+  String get providerTypeFreelancer => 'Freelancer';
+
+  @override
+  String get chatConversationsTitle => 'Conversations';
+
+  @override
+  String get chatStartFetching => 'Start fetching conversations...';
+
+  @override
+  String get chatNoProvidersAvailable => 'No providers are currently available';
+
+  @override
+  String get chatBadgeOfficial => 'OFFICIAL';
+
+  @override
+  String get chatBadgeIndie => 'INDIE';
+
+  @override
+  String get chatNoMessagesYet =>
+      'No messages yet\nStart the conversation now!';
+
+  @override
+  String get chatTypeMessageHint => 'Type your message...';
 }

@@ -213,5 +213,37 @@
 "availablePackages": "Available Packages",
 "package": "Package",
 "capacity": "Capacity",
-"notAvailable": "N/A"
+"notAvailable": "N/A",
+"filterWhatLookingFor": "What are you looking for?",
+"filterCategoryVenues": "Venues (Halls)",
+"filterCategoryPackages": "Ready Packages",
+"filterCategoryServicesProducts": "Services & Products",
+"filterCategoryProviders": "Providers",
+"filterHallsTitle": "Filter Halls",
+"filterPackagesTitle": "Filter Packages",
+"filterServicesProductsTitle": "Filter Services & Products",
+"filterProvidersTitle": "Filter Providers",
+"filterSearchNameLabel": "Search Name...",
+"filterMinCapacityLabel": "Min Capacity",
+"filterMaxCapacityLabel": "Max Capacity",
+"filterMinPriceLabel": "Min Price",
+"filterMinimumRatingLabel": "Minimum Rating",
+"searchResultsTitle": "Results: {category}",
+"@searchResultsTitle": {
+  "placeholders": {
+    "category": {}
+  }
+},
+"noResultsForFilters": "No results found for your filters.",
+"noProvidersFound": "No providers found.",
+"providerUnnamed": "Unnamed",
+"providerTypeCompany": "Company",
+"providerTypeFreelancer": "Freelancer",
+"chatConversationsTitle": "Conversations",
+"chatStartFetching": "Start fetching conversations...",
+"chatNoProvidersAvailable": "No providers are currently available",
+"chatBadgeOfficial": "OFFICIAL",
+"chatBadgeIndie": "INDIE",
+"chatNoMessagesYet": "No messages yet\nStart the conversation now!",
+"chatTypeMessageHint": "Type your message..."
 }

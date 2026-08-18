@@ -4,7 +4,8 @@ import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/core/widgets/common/custom_gold_button.dart';
 import 'package:eventsapp/core/widgets/common/text_field_widget.dart';
 import 'package:eventsapp/core/widgets/custom_dropdown.dart';
-import 'search_results_page.dart'; 
+import 'package:eventsapp/generated/app_localizations.dart';
+import 'search_results_page.dart';
 
 class FilterDialogWidget extends StatefulWidget {
   const FilterDialogWidget({super.key});
@@ -19,22 +20,21 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
 
   // متغيرات الفلاتر
   final TextEditingController searchController = TextEditingController();
-  
+
   final TextEditingController minPriceController = TextEditingController();
   final TextEditingController maxPriceController = TextEditingController();
 
   final TextEditingController minCapacityController = TextEditingController();
   final TextEditingController maxCapacityController = TextEditingController();
 
-  String? selectedRating; 
-  
+  String? selectedRating;
 
   @override
   void dispose() {
     searchController.dispose();
-    minPriceController.dispose(); 
+    minPriceController.dispose();
     maxPriceController.dispose();
-    minCapacityController.dispose(); 
+    minCapacityController.dispose();
     maxCapacityController.dispose();
     super.dispose();
   }
@@ -59,6 +59,7 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
   // الشاشة الأولى: اختيار القسم
   // ==========================================
   Widget _buildCategorySelection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Padding(
       key: const ValueKey('Categories'),
@@ -67,17 +68,31 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "What are you looking for?",
-            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            l10n.filterWhatLookingFor,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 24),
-          _buildCategoryButton('Venues (Halls)', Icons.store, 'hall'),
+          _buildCategoryButton(l10n.filterCategoryVenues, Icons.store, 'hall'),
           const SizedBox(height: 12),
-          _buildCategoryButton('Ready Packages', Icons.card_giftcard, 'package'),
+          _buildCategoryButton(
+            l10n.filterCategoryPackages,
+            Icons.card_giftcard,
+            'package',
+          ),
           const SizedBox(height: 12),
-          _buildCategoryButton('Services & Products', Icons.room_service, 'service'),
+          _buildCategoryButton(
+            l10n.filterCategoryServicesProducts,
+            Icons.room_service,
+            'service',
+          ),
           const SizedBox(height: 12),
-          _buildCategoryButton('Providers', Icons.business_center, 'provider'),
+          _buildCategoryButton(
+            l10n.filterCategoryProviders,
+            Icons.business_center,
+            'provider',
+          ),
         ],
       ),
     );
@@ -89,10 +104,15 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
       height: 55,
       child: ElevatedButton.icon(
         icon: Icon(icon, color: Colors.white),
-        label: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16)),
+        label: Text(
+          title,
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+        ),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFD6B237),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.symmetric(horizontal: 20),
         ),
@@ -109,13 +129,15 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
   // الشاشة الثانية: عرض فلاتر القسم المختار
   // ==========================================
   Widget _buildFiltersForm(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     String title = "";
-    if (selectedMainCategory == 'hall') title = "Filter Halls";
-    if (selectedMainCategory == 'package') title = "Filter Packages";
-    if (selectedMainCategory == 'service') title = "Filter Services & Products";
-    if (selectedMainCategory == 'provider') title = "Filter Providers";
+    if (selectedMainCategory == 'hall') title = l10n.filterHallsTitle;
+    if (selectedMainCategory == 'package') title = l10n.filterPackagesTitle;
+    if (selectedMainCategory == 'service')
+      title = l10n.filterServicesProductsTitle;
+    if (selectedMainCategory == 'provider') title = l10n.filterProvidersTitle;
 
     return Padding(
       key: const ValueKey('Filters'),
@@ -131,41 +153,55 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
                 onPressed: () {
                   setState(() {
                     selectedMainCategory = null;
-                    _clearFilters(); 
+                    _clearFilters();
                   });
                 },
               ),
               Expanded(
                 child: Text(
                   title,
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
           const Divider(height: 20),
 
-          _buildDynamicFields(),
+          _buildDynamicFields(context),
 
           const SizedBox(height: 32),
 
           CustomGoldButton(
-            text: "Apply Filters",
+            text: l10n.applyFilters,
             onTap: () {
               if (selectedMainCategory == 'provider') {
                 // ✨ التعديل هنا: إرسال النص المكتوب بحقل البحث
                 context.read<UserCubit>().getProviders(
-                  name: searchController.text.isNotEmpty ? searchController.text : null,
+                  name: searchController.text.isNotEmpty
+                      ? searchController.text
+                      : null,
                 );
               } else {
                 // باقي الكود كما هو ...
                 context.read<UserCubit>().getListing(
-                  type: selectedMainCategory, 
-                  title: searchController.text.isNotEmpty ? searchController.text : null,
-                  capacityMin: minCapacityController.text.isNotEmpty ? minCapacityController.text : null,
-                  capacityMax: maxCapacityController.text.isNotEmpty ? maxCapacityController.text : null,
-                  minPrice: minPriceController.text.isNotEmpty ? minPriceController.text : null,
-                  maxPrice: maxPriceController.text.isNotEmpty ? maxPriceController.text : null,
+                  type: selectedMainCategory,
+                  title: searchController.text.isNotEmpty
+                      ? searchController.text
+                      : null,
+                  capacityMin: minCapacityController.text.isNotEmpty
+                      ? minCapacityController.text
+                      : null,
+                  capacityMax: maxCapacityController.text.isNotEmpty
+                      ? maxCapacityController.text
+                      : null,
+                  minPrice: minPriceController.text.isNotEmpty
+                      ? minPriceController.text
+                      : null,
+                  maxPrice: maxPriceController.text.isNotEmpty
+                      ? maxPriceController.text
+                      : null,
                   rating: selectedRating,
                 );
               }
@@ -187,9 +223,9 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
 
   void _clearFilters() {
     searchController.clear();
-    minPriceController.clear(); 
+    minPriceController.clear();
     maxPriceController.clear();
-    minCapacityController.clear(); 
+    minCapacityController.clear();
     maxCapacityController.clear();
     selectedRating = null;
   }
@@ -197,22 +233,24 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
   // ==========================================
   // بناء الحقول بشكل ديناميكي حسب القسم
   // ==========================================
-  Widget _buildDynamicFields() {
+  Widget _buildDynamicFields(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         CustomTextField(
-          label: "Search Name...",
+          label: l10n.filterSearchNameLabel,
           icon: Icons.search,
           controller: searchController,
         ),
         const SizedBox(height: 12),
 
-        if (selectedMainCategory == 'hall' || selectedMainCategory == 'package') ...[
+        if (selectedMainCategory == 'hall' ||
+            selectedMainCategory == 'package') ...[
           Row(
             children: [
               Expanded(
                 child: CustomTextField(
-                  label: "Min Capacity",
+                  label: l10n.filterMinCapacityLabel,
                   icon: Icons.people_outline,
                   controller: minCapacityController,
                   keyboardType: TextInputType.number,
@@ -221,7 +259,7 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
               const SizedBox(width: 12),
               Expanded(
                 child: CustomTextField(
-                  label: "Max Capacity",
+                  label: l10n.filterMaxCapacityLabel,
                   icon: Icons.people_alt_outlined,
                   controller: maxCapacityController,
                   keyboardType: TextInputType.number,
@@ -237,7 +275,7 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
             children: [
               Expanded(
                 child: CustomTextField(
-                  label: "Min Price", 
+                  label: l10n.filterMinPriceLabel,
                   icon: Icons.attach_money,
                   controller: minPriceController,
                   keyboardType: TextInputType.number,
@@ -246,7 +284,7 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
               const SizedBox(width: 12),
               Expanded(
                 child: CustomTextField(
-                  label: "Max Price", 
+                  label: l10n.maxPriceLabel,
                   icon: Icons.money_off,
                   controller: maxPriceController,
                   keyboardType: TextInputType.number,
@@ -258,7 +296,7 @@ class _FilterDialogWidgetState extends State<FilterDialogWidget> {
         ],
 
         CustomDropdown(
-          label: "Minimum Rating",
+          label: l10n.filterMinimumRatingLabel,
           items: const ['1', '2', '3', '4', '5'],
           value: selectedRating,
           onChanged: (val) => setState(() => selectedRating = val),

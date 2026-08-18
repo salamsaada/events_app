@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/user_state.dart';
-import 'package:eventsapp/screens/details_page.dart'; 
+import 'package:eventsapp/generated/app_localizations.dart';
+import 'package:eventsapp/screens/details_page.dart';
 
 class SearchResultsPage extends StatelessWidget {
   final String categoryName;
@@ -11,30 +12,35 @@ class SearchResultsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Results: $categoryName'),
+        title: Text(l10n.searchResultsTitle(categoryName)),
         centerTitle: true,
       ),
       backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocBuilder<UserCubit, UserState>(
         builder: (context, state) {
-          
           // ==========================================
           // 1. حالات الـ Listings (الصالات والباكجات والخدمات)
           // ==========================================
-          
+
           // حالة التحميل للـ Listings
           if (state is GetListingLoading) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFFD6B237)));
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFFD6B237)),
+            );
           }
 
           // حالة الخطأ للـ Listings
           if (state is GetListingFailure) {
             return Center(
-              child: Text(state.errMessage, style: const TextStyle(color: Colors.red)),
+              child: Text(
+                state.errMessage,
+                style: const TextStyle(color: Colors.red),
+              ),
             );
           }
 
@@ -47,11 +53,18 @@ class SearchResultsPage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.search_off, size: 80, color: Colors.grey.shade400),
+                    Icon(
+                      Icons.search_off,
+                      size: 80,
+                      color: Colors.grey.shade400,
+                    ),
                     const SizedBox(height: 16),
                     Text(
-                      'No results found for your filters.',
-                      style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                      l10n.noResultsForFilters,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                   ],
                 ),
@@ -63,14 +76,21 @@ class SearchResultsPage extends StatelessWidget {
               itemCount: listings.length,
               itemBuilder: (context, index) {
                 final item = listings[index];
-                
+
                 final String imageUrl = item.images.isNotEmpty
                     ? item.images[0]
                     : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
 
-                final String price = item.variants.isNotEmpty 
-                    ? '${item.variants[0].price} ${item.variants[0].currency}' 
-                    : 'Price not specified';
+                final String price = item.variants.isNotEmpty
+                    ? '${item.variants[0].price} ${item.variants[0].currency}'
+                    : l10n.priceNotAvailable;
+
+                final localeCode = Localizations.localeOf(context).languageCode;
+                final String localizedTitle =
+                    item.title[localeCode] ??
+                    item.title['en'] ??
+                    item.title['ar'] ??
+                    l10n.notAvailable;
 
                 return GestureDetector(
                   onTap: () {
@@ -98,17 +118,24 @@ class SearchResultsPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(16),
+                          ),
                           child: Image.network(
                             imageUrl,
                             height: 180,
                             width: double.infinity,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              height: 180,
-                              color: Colors.grey.shade300,
-                              child: const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  height: 180,
+                                  color: Colors.grey.shade300,
+                                  child: const Icon(
+                                    Icons.image_not_supported,
+                                    size: 50,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                           ),
                         ),
                         Padding(
@@ -117,13 +144,14 @@ class SearchResultsPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      item.title['en'] ?? item.title['ar'] ?? 'No Title',
+                                      localizedTitle,
                                       style: const TextStyle(
-                                        fontSize: 18, 
+                                        fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
                                       maxLines: 1,
@@ -131,9 +159,14 @@ class SearchResultsPage extends StatelessWidget {
                                     ),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFD6B237).withOpacity(0.1),
+                                      color: const Color(
+                                        0xFFD6B237,
+                                      ).withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
@@ -150,20 +183,26 @@ class SearchResultsPage extends StatelessWidget {
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  Icon(Icons.location_on, size: 16, color: Colors.grey.shade600),
+                                  Icon(
+                                    Icons.location_on,
+                                    size: 16,
+                                    color: Colors.grey.shade600,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     item.district.name,
-                                    style: TextStyle(color: Colors.grey.shade600),
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                    ),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 12),
                               Row(
                                 children: [
-                                  const Text(
-                                    'Starts from: ',
-                                    style: TextStyle(color: Colors.grey),
+                                  Text(
+                                    '${l10n.startingFrom}: ',
+                                    style: const TextStyle(color: Colors.grey),
                                   ),
                                   Text(
                                     price,
@@ -186,37 +225,48 @@ class SearchResultsPage extends StatelessWidget {
             );
           }
 
-
           // ==========================================
           // 2. حالات الـ Providers (مزودي الخدمة) 🚀
           // ==========================================
 
           // حالة التحميل للمزودين
           if (state is GetProvidersLoading) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFFD6B237)));
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFFD6B237)),
+            );
           }
 
           // حالة الخطأ للمزودين
           if (state is GetProvidersFailure) {
             return Center(
-              child: Text(state.errMessage, style: const TextStyle(color: Colors.red)),
+              child: Text(
+                state.errMessage,
+                style: const TextStyle(color: Colors.red),
+              ),
             );
           }
 
           // حالة النجاح للمزودين
           if (state is GetProvidersSuccess) {
-            final providers = state.providers; 
-            
+            final providers = state.providers;
+
             if (providers.isEmpty) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.group_off, size: 80, color: Colors.grey.shade400),
+                    Icon(
+                      Icons.group_off,
+                      size: 80,
+                      color: Colors.grey.shade400,
+                    ),
                     const SizedBox(height: 16),
                     Text(
-                      'No providers found.',
-                      style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                      l10n.noProvidersFound,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                   ],
                 ),
@@ -228,7 +278,7 @@ class SearchResultsPage extends StatelessWidget {
               itemCount: providers.length,
               itemBuilder: (context, index) {
                 final provider = providers[index];
-                
+
                 return Card(
                   elevation: 2,
                   margin: const EdgeInsets.only(bottom: 12),
@@ -243,17 +293,26 @@ class SearchResultsPage extends StatelessWidget {
                       child: Icon(Icons.business_center, color: Colors.white),
                     ),
                     title: Text(
-                      provider['name'] ?? 'بدون اسم',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      provider['name'] ?? l10n.providerUnnamed,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        provider['type'] == 'company' ? 'Company (شركة)' : 'Freelancer (مستقل)',
+                        provider['type'] == 'company'
+                            ? l10n.providerTypeCompany
+                            : l10n.providerTypeFreelancer,
                         style: TextStyle(color: Colors.grey.shade600),
                       ),
                     ),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFFD6B237)),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Color(0xFFD6B237),
+                    ),
                     onTap: () {
                       // هنا يمكنك لاحقاً إضافة الكود للانتقال إلى تفاصيل المزود
                       // Navigator.push(...);

@@ -8,7 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/cubit/chat_cubit.dart';
 import 'package:eventsapp/screens/chats/chat_screen.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
-import 'package:eventsapp/models/planner_model.dart'; 
+import 'package:eventsapp/generated/app_localizations.dart';
+import 'package:eventsapp/models/planner_model.dart';
 
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({super.key});
@@ -17,12 +18,12 @@ class ChatListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ChatCubit(
-        ChatRepository(), 
+        ChatRepository(),
         ChatApiRepository(context.read<ApiConsumer>()),
         PlannersRepository(apiConsumer: context.read<ApiConsumer>()),
-      )..getProviders(), 
-      
-      child: const ChatListContent(), 
+      )..getProviders(),
+
+      child: const ChatListContent(),
     );
   }
 }
@@ -32,6 +33,7 @@ class ChatListContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return DefaultTabController(
@@ -39,28 +41,31 @@ class ChatListContent extends StatelessWidget {
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          title: Text("Conversations", 
-            style: AppTextStyles.mainTitle.copyWith(color: theme.textTheme.titleLarge?.color)),
+          title: Text(
+            l10n.chatConversationsTitle,
+            style: AppTextStyles.mainTitle.copyWith(
+              color: theme.textTheme.titleLarge?.color,
+            ),
+          ),
           backgroundColor: Colors.transparent,
           elevation: 0,
           bottom: TabBar(
             labelColor: theme.primaryColor,
             unselectedLabelColor: theme.hintColor,
             indicatorColor: theme.primaryColor,
-            tabs: const [
-              Tab(text: "Companies"),
-              Tab(text: "Freelancers"),
+            tabs: [
+              Tab(text: l10n.providerTypeCompany),
+              Tab(text: l10n.providerTypeFreelancer),
             ],
           ),
         ),
-        
+
         body: BlocBuilder<ChatCubit, ChatState>(
           builder: (context, state) {
-            
             if (state is ChatLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            
+
             if (state is ChatError) {
               return Center(child: Text(state.message));
             }
@@ -68,8 +73,12 @@ class ChatListContent extends StatelessWidget {
             if (state is ChatLoaded) {
               final List<PlannerModel> allProviders = state.providers;
 
-              final companies = allProviders.where((p) => p.type == 'company').toList();
-              final freelancers = allProviders.where((p) => p.type == 'freelancer').toList();
+              final companies = allProviders
+                  .where((p) => p.type == 'company')
+                  .toList();
+              final freelancers = allProviders
+                  .where((p) => p.type == 'freelancer')
+                  .toList();
 
               return TabBarView(
                 children: [
@@ -80,7 +89,7 @@ class ChatListContent extends StatelessWidget {
               );
             }
 
-            return const Center(child: Text("ابدأ جلب المحادثات..."));
+            return Center(child: Text(l10n.chatStartFetching));
           },
         ),
       ),
@@ -91,7 +100,7 @@ class ChatListContent extends StatelessWidget {
 // 🌟 الكلاس الجديد: StatefulWidget لمنع الشاشة من التدمير
 class KeepAliveChatList extends StatefulWidget {
   final List<PlannerModel> items;
-  
+
   const KeepAliveChatList({super.key, required this.items});
 
   @override
@@ -99,24 +108,25 @@ class KeepAliveChatList extends StatefulWidget {
 }
 
 // 🌟 هنا ندمج AutomaticKeepAliveClientMixin
-class _KeepAliveChatListState extends State<KeepAliveChatList> with AutomaticKeepAliveClientMixin {
-  
+class _KeepAliveChatListState extends State<KeepAliveChatList>
+    with AutomaticKeepAliveClientMixin {
   // 🌟 تفعيل خاصية الاحتفاظ بالحالة
   @override
   bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // 🌟 هذا السطر ضروري جداً لكي يعمل الـ Mixin
     super.build(context);
 
     final items = widget.items;
     final theme = Theme.of(context);
-    
+
     if (items.isEmpty) {
       return Center(
         child: Text(
-          "لا يوجد مزودين متاحين حالياً",
+          l10n.chatNoProvidersAvailable,
           style: AppTextStyles.bodyGrey,
         ),
       );
@@ -128,7 +138,7 @@ class _KeepAliveChatListState extends State<KeepAliveChatList> with AutomaticKee
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final item = items[index];
-        final isCompany = item.type == 'company'; 
+        final isCompany = item.type == 'company';
 
         return Container(
           decoration: BoxDecoration(
@@ -139,20 +149,23 @@ class _KeepAliveChatListState extends State<KeepAliveChatList> with AutomaticKee
                 color: Colors.black.withOpacity(0.1),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
-              )
+              ),
             ],
           ),
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
             leading: CircleAvatar(
-              backgroundColor: isCompany 
-                  ? theme.primaryColor.withOpacity(0.2) 
+              backgroundColor: isCompany
+                  ? theme.primaryColor.withOpacity(0.2)
                   : Colors.blue.withOpacity(0.2),
               child: Text(
-                item.name.isNotEmpty ? item.name[0].toUpperCase() : '?', 
+                item.name.isNotEmpty ? item.name[0].toUpperCase() : '?',
                 style: TextStyle(
-                  color: isCompany ? theme.primaryColor : Colors.blue, 
-                  fontWeight: FontWeight.bold
+                  color: isCompany ? theme.primaryColor : Colors.blue,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -160,31 +173,41 @@ class _KeepAliveChatListState extends State<KeepAliveChatList> with AutomaticKee
               children: [
                 Expanded(
                   child: Text(
-                    item.name, 
-                    style: AppTextStyles.sectionTitle.copyWith(color: theme.textTheme.titleMedium?.color),
+                    item.name,
+                    style: AppTextStyles.sectionTitle.copyWith(
+                      color: theme.textTheme.titleMedium?.color,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                  )
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: isCompany ? theme.primaryColor.withOpacity(0.15) : Colors.blue.withOpacity(0.15), 
-                    borderRadius: BorderRadius.circular(4)
+                    color: isCompany
+                        ? theme.primaryColor.withOpacity(0.15)
+                        : Colors.blue.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    isCompany ? "OFFICIAL" : "INDIE", 
+                    isCompany ? l10n.chatBadgeOfficial : l10n.chatBadgeIndie,
                     style: TextStyle(
-                      fontSize: 8, 
-                      color: isCompany ? theme.primaryColor : Colors.blue, 
-                      fontWeight: FontWeight.bold
-                    )
+                      fontSize: 8,
+                      color: isCompany ? theme.primaryColor : Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
             ),
-            subtitle: Text(item.role, style: AppTextStyles.bodyGrey.copyWith(color: theme.hintColor)),
+            subtitle: Text(
+              item.role,
+              style: AppTextStyles.bodyGrey.copyWith(color: theme.hintColor),
+            ),
             onTap: () {
               // 1. سحب الـ ID الخاص بالمستخدم من الكاش
               final String currentUserId =

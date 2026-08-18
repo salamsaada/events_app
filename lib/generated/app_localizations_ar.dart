@@ -667,4 +667,87 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get notAvailable => 'غير متوفر';
+
+  @override
+  String get filterWhatLookingFor => 'ماذا تبحث عنه؟';
+
+  @override
+  String get filterCategoryVenues => 'القاعات';
+
+  @override
+  String get filterCategoryPackages => 'الباقات الجاهزة';
+
+  @override
+  String get filterCategoryServicesProducts => 'الخدمات والمنتجات';
+
+  @override
+  String get filterCategoryProviders => 'مزودو الخدمة';
+
+  @override
+  String get filterHallsTitle => 'تصفية القاعات';
+
+  @override
+  String get filterPackagesTitle => 'تصفية الباقات';
+
+  @override
+  String get filterServicesProductsTitle => 'تصفية الخدمات والمنتجات';
+
+  @override
+  String get filterProvidersTitle => 'تصفية مزودي الخدمة';
+
+  @override
+  String get filterSearchNameLabel => 'ابحث بالاسم...';
+
+  @override
+  String get filterMinCapacityLabel => 'الحد الأدنى للسعة';
+
+  @override
+  String get filterMaxCapacityLabel => 'الحد الأقصى للسعة';
+
+  @override
+  String get filterMinPriceLabel => 'الحد الأدنى للسعر';
+
+  @override
+  String get filterMinimumRatingLabel => 'أدنى تقييم';
+
+  @override
+  String searchResultsTitle(Object category) {
+    return 'النتائج: $category';
+  }
+
+  @override
+  String get noResultsForFilters => 'لا توجد نتائج مطابقة للفلاتر.';
+
+  @override
+  String get noProvidersFound => 'لم يتم العثور على مزودي خدمة.';
+
+  @override
+  String get providerUnnamed => 'بدون اسم';
+
+  @override
+  String get providerTypeCompany => 'شركة';
+
+  @override
+  String get providerTypeFreelancer => 'مستقل';
+
+  @override
+  String get chatConversationsTitle => 'المحادثات';
+
+  @override
+  String get chatStartFetching => 'بدء جلب المحادثات...';
+
+  @override
+  String get chatNoProvidersAvailable => 'لا يوجد مزودون متاحون حالياً';
+
+  @override
+  String get chatBadgeOfficial => 'رسمي';
+
+  @override
+  String get chatBadgeIndie => 'مستقل';
+
+  @override
+  String get chatNoMessagesYet => 'لا توجد رسائل بعد\nابدأ المحادثة الآن!';
+
+  @override
+  String get chatTypeMessageHint => 'اكتب رسالتك...';
 }
