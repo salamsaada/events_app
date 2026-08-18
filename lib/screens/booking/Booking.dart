@@ -1,6 +1,9 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+import 'package:eventsapp/cubit/notification_cubit.dart';
 import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
-import 'package:eventsapp/cubit/user_cubit.dart'; // عدّل المسار حسب مكان الـ Cubit عندك
+import 'package:eventsapp/cubit/user_cubit.dart'; 
 import 'package:eventsapp/cubit/user_state.dart';
 import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/models/listing_model.dart';
@@ -38,6 +41,42 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
     super.dispose();
   }
 
+  // 🚀 دالة لاختيار ملف الـ PDF ورفعه
+ Future<void> _pickAndUploadPdf(BuildContext context, String currentBookingId, String amount) async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['pdf'], 
+  );
+
+  if (result != null) {
+    File file = File(result.files.single.path!);
+    
+    int fileSizeInBytes = file.lengthSync();
+    double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+    
+    if (fileSizeInMB > 2.0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_tr('File is too large! Max 2MB allowed.', 'حجم الملف كبير جداً! الحد الأقصى 2 ميغابايت.')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return; 
+    }
+
+    // استدعاء دالة الرفع من الكيوبت مع تمرير المبلغ
+    if (mounted) {
+      context.read<UserCubit>().uploadProof(
+        bookingId: currentBookingId,
+        filePath: file.path,
+        amount: amount, // 👈 صار معرف ومتاح هنا تماماً
+      );
+    }
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -53,20 +92,110 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
     return BlocConsumer<UserCubit, UserState>(
       listener: (context, state) {
         if (state is CreateBookingSuccess) {
-          Navigator.pop(context);
+          Navigator.pop(context); // إغلاق نافذة الحجز
+
+          // 🚀 تحديث الإشعارات فوراً
+          context.read<NotificationCubit>().fetchNotifications();
+
+          // استخراج الـ ID الخاص بالحجز (حسب شكل البيانات العائدة من السيرفر)
+          String currentBookingId = '';
+          try {
+            // نستخدم النقطة للوصول للمتغيرات لأن هذا موديل (Object)
+            currentBookingId = state.bookingResponse.data!.id.toString();
+          } catch (e) {
+            print("خطأ في استخراج رقم الحجز: $e");
+          }
+
+          // 🚀 عرض نافذة خيارات الدفع (فترة السماح)
+          // 🚀 عرض نافذة خيارات الدفع (فترة السماح)
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext dialogContext) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              icon: const Icon(
+                Icons.check_circle_outline,
+                color: Colors.green,
+                size: 60,
+              ),
+              title: Text(
+                _tr('Request Sent Successfully!', 'تم إرسال طلبك بنجاح!'),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              content: Text(
+                _tr(
+                  'You have 48 hours to upload the payment proof to confirm your booking, otherwise it will be cancelled automatically.',
+                  'لديك 48 ساعة لرفع إيصال الدفع وتأكيد حجزك بشكل نهائي، وإلا سيتم إلغاء الحجز تلقائياً.',
+                ),
+                textAlign: TextAlign.center,
+                style: const TextStyle(height: 1.5),
+              ),
+              actionsAlignment: MainAxisAlignment.center,
+              actionsOverflowDirection: VerticalDirection.down,
+              actions: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(dialogContext); // إغلاق النافذة
+                      
+                      // ✅ تم التعديل هنا: تمرير سعر الباقة المحددة بدلاً من booking.price
+                      _pickAndUploadPdf(
+                        context, 
+                        currentBookingId, 
+                        selectedVariant?.price.toString() ?? '0'
+                      );
+                    },
+                    child: Text(
+                      _tr('Upload Proof Now', 'رفع إيصال الدفع الآن'),
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext); // إغلاق النافذة
+                    },
+                    child: Text(
+                      _tr('Pay Later', 'الدفع لاحقاً'),
+                      style: const TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+        } else if (state is CreateBookingFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                // تم تعديل رسالة النجاح
-                _tr(
-                  'Booking request sent for $title on ${DateFormat('dd MMM, yyyy').format(_selectedDate)}.',
-                  'تم إرسال طلب الحجز لـ $title في ${DateFormat('dd MMM, yyyy').format(_selectedDate)}.',
-                ),
-              ),
+              content: Text(state.errMessage),
+              backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
           );
-        } else if (state is CreateBookingFailure) {
+        } else if (state is UploadProofSuccess) { // 🚀 في حال نجاح رفع الإيصال
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(_tr('Payment proof uploaded successfully!', 'تم رفع الإيصال بنجاح!')),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else if (state is UploadProofFailure) { // 🚀 في حال فشل الرفع
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errMessage),
@@ -77,7 +206,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
         }
       },
       builder: (context, state) {
-        final isLoading = state is CreateBookingLoading;
+        final isLoading = state is CreateBookingLoading || state is UploadProofLoading; // أضفنا حالة الرفع للـ Loading
 
         return DraggableScrollableSheet(
           initialChildSize: 0.9,
@@ -120,14 +249,12 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  // تم التعديل
                                   _tr('Booking request', 'طلب حجز'),
                                   style: theme.textTheme.headlineSmall
                                       ?.copyWith(fontWeight: FontWeight.w800),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  // تم التعديل
                                   _tr(
                                     'Complete the details and send your request in a polished booking flow.',
                                     'أكمل التفاصيل وأرسل طلبك في مسار حجز احترافي.',
@@ -210,7 +337,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                               child: _buildSummaryBadge(
                                 theme,
                                 icon: Icons.groups_outlined,
-                                // تم التعديل
                                 label: _tr(
                                   '$_guestCount guests',
                                   '$_guestCount ضيف',
@@ -223,7 +349,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        // تم التعديل
                         _tr('Choose a package', 'اختر باقة'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
@@ -244,7 +369,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                               final packageName = localizedText(
                                 variant.name,
                                 languageCode,
-                                // تم التعديل
                                 fallback: _tr('Package', 'باقة'),
                               );
 
@@ -277,7 +401,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
-                            // تم التعديل
                             _tr(
                               'No package variants are available for this listing.',
                               'لا توجد باقات متاحة لهذه الخدمة.',
@@ -287,7 +410,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                         ),
                       const SizedBox(height: 20),
                       Text(
-                        // تم التعديل
                         _tr('Event date', 'تاريخ المناسبة'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
@@ -349,7 +471,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        // تم التعديل
                         _tr('Preferred time', 'الوقت المفضل'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
@@ -380,7 +501,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        // تم التعديل
                         _tr('Guest count', 'عدد الضيوف'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
@@ -429,7 +549,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        // تم التعديل
                         _tr('Special notes', 'ملاحظات خاصة'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
@@ -440,7 +559,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                         controller: _notesController,
                         maxLines: 4,
                         decoration: InputDecoration(
-                          // تم التعديل
                           hintText: _tr(
                             'Add any special requests, event theme, or setup details...',
                             'أضف أي طلبات خاصة، أو موضوع للمناسبة، أو تفاصيل الإعداد...',
@@ -473,36 +591,21 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                           onPressed: isLoading
                               ? null
                               : () {
-                                  // 🚀 التعديل الجذري هنا: استخراج الـ ID الخاص بالفترة الزمنية
                                   String? selectedSlotId;
-
                                   if (selectedVariant != null &&
-                                      selectedVariant
-                                          .availabilities
-                                          .isNotEmpty) {
-                                    // للتبسيط: نجلب أول فترة متاحة (Slot) من قائمة التوافر
-                                    // (في المستقبل، يمكنك تعديل هذا الشرط ليطابق التاريخ والوقت الذي اختاره المستخدم بدقة)
-                                    if (selectedVariant
-                                        .availabilities[0]
-                                        .slots
-                                        .isNotEmpty) {
-                                      selectedSlotId = selectedVariant
-                                          .availabilities[0]
-                                          .slots[0]
-                                          .id;
+                                      selectedVariant.availabilities.isNotEmpty) {
+                                    if (selectedVariant.availabilities[0].slots.isNotEmpty) {
+                                      selectedSlotId = selectedVariant.availabilities[0].slots[0].id;
                                     }
                                   }
 
                                   context.read<UserCubit>().createBooking(
                                     listingId: widget.item.id,
                                     listingVariantId: selectedVariant?.id,
-                                    // 🚀 وضعنا المتغير الجديد بدلاً من null
                                     listingSlotId: selectedSlotId,
                                     bookingType: 'request',
                                     quantity: _guestCount,
-                                    bookedDate: DateFormat(
-                                      'yyyy-MM-dd',
-                                    ).format(_selectedDate),
+                                    bookedDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
                                     bookedStartTime: _selectedTime,
                                     customerNotes: _notesController.text.trim(),
                                   );
@@ -539,7 +642,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                       const SizedBox(height: 10),
                       Center(
                         child: Text(
-                          // تم التعديل
                           _tr(
                             'Our team will review your request and contact you shortly.',
                             'سيقوم فريقنا بمراجعة طلبك والتواصل معك قريباً.',

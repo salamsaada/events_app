@@ -29,12 +29,9 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   void _openFilterSheet() {
-    // 🚀 التعديل الجذري: استخدام showDialog لفتح النافذة المنبثقة
     showDialog(
       context: context,
       builder: (context) {
-        // 💡 ملاحظة: إذا قمتِ بتغيير اسم الكلاس داخل ملف filter_section.dart 
-        // إلى FilterSection، فاكتبي هنا FilterSection() بدلاً من FilterDialogWidget()
         return const FilterDialogWidget(); 
       },
     );

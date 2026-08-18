@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -5,33 +8,38 @@ import '../../generated/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/common/bottom_navigation.dart';
-import '../../core/utils/localized_value.dart'; // ✨ استيراد دالة الترجمة
-import '../../cubit/user_cubit.dart'; // ✨ استيراد الـ Cubit
-import '../../cubit/user_state.dart'; // ✨ استيراد الـ States
+import '../../core/utils/localized_value.dart';
+import '../../cubit/user_cubit.dart';
+import '../../cubit/user_state.dart';
 import '../home/home_page.dart';
 import '../profile/profile_page.dart';
 import '../chat/chat_page.dart';
-
+ 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
-
+ 
   @override
   State<OrdersPage> createState() => _OrdersPageState();
 }
-
+ 
 class _OrdersPageState extends State<OrdersPage> {
+  // 🚀 الحجوزات يلي المستخدم دفع لها بالفعل (مرة واحدة بس مسموحة)
+  final Set<String> _submittedBookingIds = {};
+  String? _lastAttemptedBookingId;
+ 
+  // 🆕 مفتاح الفلتر المختار حالياً: all / pending / confirmed / completed
+  String _selectedStatusFilter = 'all';
+ 
   @override
   void initState() {
     super.initState();
-    // ✨ استدعاء دالة جلب الحجوزات بمجرد فتح الصفحة
     Future.microtask(() {
       if (mounted) {
         context.read<UserCubit>().getMyBookings();
       }
     });
   }
-
-  // ✨ دالة مساعدة لترجمة الحالة (Pending, Confirmed, الخ..)
+ 
   String _translateStatus(String status) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     switch (status.toLowerCase()) {
@@ -47,13 +55,58 @@ class _OrdersPageState extends State<OrdersPage> {
         return status;
     }
   }
-
+ 
+  // 🚀 دالة اختيار الإيصال ورفعه من صفحة الطلبات
+  Future<void> _pickAndUploadPdf(BuildContext context, String currentBookingId, String amount) async {
+    // ⛔ لو سبق ورفع إيصال لهاد الحجز، منعطيه فرصة تانية
+    if (_submittedBookingIds.contains(currentBookingId)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تم إرسال الدفعة مسبقاً لهذا الحجز.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+ 
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+ 
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      double fileSizeInMB = file.lengthSync() / (1024 * 1024);
+ 
+      if (fileSizeInMB > 2.0) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('حجم الملف كبير جداً! الحد الأقصى 2 ميغابايت.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+ 
+      if (mounted) {
+        _lastAttemptedBookingId = currentBookingId; // 🚀 نتذكر لأي حجز عم نرفع
+        context.read<UserCubit>().uploadProof(
+          bookingId: currentBookingId,
+          filePath: file.path,
+          amount: amount,
+        );
+      }
+    }
+  }
+ 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
-
+ 
     return Scaffold(
       bottomNavigationBar: AppBottomNavigation(
         selectedIndex: 2,
@@ -72,18 +125,22 @@ class _OrdersPageState extends State<OrdersPage> {
         child: SafeArea(
           child: Column(
             children: [
-              // Header
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
                 child: _OrdersHeader(theme: theme, l10n: l10n),
               ),
-              // Tabs/Filters
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _OrdersFilter(theme: theme, l10n: l10n),
+                // 🆕 مررنا القيمة الحالية ودالة التغيير للفلتر
+                child: _OrdersFilter(
+                  theme: theme,
+                  l10n: l10n,
+                  selectedFilter: _selectedStatusFilter,
+                  onFilterChanged: (filter) {
+                    setState(() => _selectedStatusFilter = filter);
+                  },
+                ),
               ),
-
-              // ✨ استبدال الـ ListView الثابت بـ BlocConsumer
               Expanded(
                 child: BlocConsumer<UserCubit, UserState>(
                   listener: (context, state) {
@@ -94,77 +151,108 @@ class _OrdersPageState extends State<OrdersPage> {
                           backgroundColor: Colors.red,
                         ),
                       );
+                    } else if (state is UploadProofSuccess) {
+                      // 🚀 بمجرد النجاح: نمنع أي محاولة دفع تانية لهاد الحجز نهائياً
+                      if (_lastAttemptedBookingId != null) {
+                        setState(() {
+                          _submittedBookingIds.add(_lastAttemptedBookingId!);
+                        });
+                      }
+ 
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('تم رفع الإيصال بنجاح! جاري التحديث...'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      context.read<UserCubit>().getMyBookings();
+                    } else if (state is UploadProofFailure) {
+                      // 🛡️ كحماية إضافية: لو السيرفر رجع 409 لسبب ما
+                      if (state.errMessage.contains('مسجّلة') && _lastAttemptedBookingId != null) {
+                        setState(() {
+                          _submittedBookingIds.add(_lastAttemptedBookingId!);
+                        });
+                      }
+ 
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.errMessage),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
                     }
                   },
                   builder: (context, state) {
-                    // 1. حالة التحميل
-                    if (state is GetBookingsLoading) {
+                    if (state is GetBookingsLoading || state is UploadProofLoading) {
                       return const Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primaryGold,
                         ),
                       );
                     }
-
-                    // 2. حالة النجاح (وجود بيانات)
+ 
                     if (state is GetBookingsSuccess) {
-                      final bookings = state.bookingsResponse.data;
-                      final languageCode = Localizations.localeOf(
-                        context,
-                      ).languageCode;
-
-                      // إذا كانت القائمة فارغة
+                      final allBookings = state.bookingsResponse.data;
+                      final languageCode = Localizations.localeOf(context).languageCode;
+                      final isAr = languageCode == 'ar';
+ 
+                      // 🆕 فلترة الحجوزات حسب الحالة المختارة
+                      final bookings = _selectedStatusFilter == 'all'
+                          ? allBookings
+                          : allBookings
+                              .where((b) => (b.status ?? '').toLowerCase() == _selectedStatusFilter)
+                              .toList();
+ 
                       if (bookings.isEmpty) {
-                        final isAr = languageCode == 'ar';
                         return Center(
                           child: Text(
-                            isAr
-                                ? 'لا توجد حجوزات حالياً'
-                                : 'No bookings available',
+                            isAr ? 'لا توجد حجوزات ضمن هذا التصنيف' : 'No bookings in this category',
                             style: AppTextStyles.subtitle,
                           ),
                         );
                       }
-
-                      // عرض قائمة الحجوزات الديناميكية
+ 
                       return ListView.builder(
                         padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
                         itemCount: bookings.length,
                         itemBuilder: (context, index) {
                           final booking = bookings[index];
-
-                          // تنسيق الوقت إذا كان متوفراً
+ 
                           String formattedTime = '--';
                           if (booking.shift?.startTime != null) {
-                            formattedTime = DateFormat(
-                              'hh:mm a',
-                            ).format(booking.shift!.startTime!);
+                            formattedTime = DateFormat('hh:mm a').format(booking.shift!.startTime!);
                           }
-
+ 
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
                             child: _OrderCard(
-                              orderNumber:
-                                  '#${booking.id?.substring(0, 6) ?? 'N/A'}',
-                              hallName:
-                                  (languageCode == 'ar'
+                              bookingId: booking.id ?? '',
+                              orderNumber: '#${booking.id?.substring(0, 6) ?? 'N/A'}',
+                              hallName: (languageCode == 'ar'
                                       ? booking.listing?.title?.ar
                                       : booking.listing?.title?.en) ??
                                   'بدون اسم',
                               date: booking.createdAtHuman ?? '--',
                               time: formattedTime,
-                              guests:
-                                  '--', // لم يوفرها الـ API في الـ JSON الحالي
+                              guests: '--',
                               status: _translateStatus(booking.status ?? ''),
-                              amount:
-                                  '${booking.price ?? '0'} ${booking.currency ?? ''}',
+                              originalStatus: booking.status ?? '',
+                              amount: '${booking.price ?? '0'} ${booking.currency ?? ''}',
+                              hasSubmittedProof: _submittedBookingIds.contains(booking.id ?? ''),
+                              onPayPressed: () {
+                                if (booking.id != null) {
+                                  _pickAndUploadPdf(
+                                    context,
+                                    booking.id!,
+                                    booking.price?.toString() ?? '0',
+                                  );
+                                }
+                              },
                             ),
                           );
                         },
                       );
                     }
-
-                    // 3. الحالة الافتراضية (قبل تحميل البيانات)
                     return const SizedBox.shrink();
                   },
                 ),
@@ -175,7 +263,7 @@ class _OrdersPageState extends State<OrdersPage> {
       ),
     );
   }
-
+ 
   void _handleNavigation(BuildContext context, int index) {
     if (index == 2) return;
     if (index == 0) {
@@ -186,30 +274,26 @@ class _OrdersPageState extends State<OrdersPage> {
       return;
     }
     if (index == 1) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const ChatPage()));
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ChatPage()));
       return;
     }
     if (index == 3) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const ProfilePage()));
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfilePage()));
       return;
     }
   }
 }
-
+ 
 // ==========================================
-// باقي الويدجت بدون تغيير كبير (فقط توحيد للغة)
+// الهيدر
 // ==========================================
-
+ 
 class _OrdersHeader extends StatelessWidget {
   final ThemeData theme;
   final AppLocalizations l10n;
-
+ 
   const _OrdersHeader({required this.theme, required this.l10n});
-
+ 
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -258,66 +342,68 @@ class _OrdersHeader extends StatelessWidget {
     );
   }
 }
-
-class _OrdersFilter extends StatefulWidget {
+ 
+// ==========================================
+// الفلتر — الآن يتحكم فيه الأب (OrdersPage) فعلياً
+// ==========================================
+ 
+class _OrdersFilter extends StatelessWidget {
   final ThemeData theme;
   final AppLocalizations l10n;
-
-  const _OrdersFilter({required this.theme, required this.l10n});
-
-  @override
-  State<_OrdersFilter> createState() => _OrdersFilterState();
-}
-
-class _OrdersFilterState extends State<_OrdersFilter> {
-  int selectedIndex = 0;
-
+  final String selectedFilter; // 'all' / 'pending' / 'confirmed' / 'completed'
+  final ValueChanged<String> onFilterChanged;
+ 
+  const _OrdersFilter({
+    required this.theme,
+    required this.l10n,
+    required this.selectedFilter,
+    required this.onFilterChanged,
+  });
+ 
   @override
   Widget build(BuildContext context) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
-    final filters = isAr
-        ? ['الكل', 'قيد الانتظار', 'مؤكد', 'مكتمل']
-        : ['All', 'Pending', 'Confirmed', 'Completed'];
-
+ 
+    // 🆕 كل عنصر عبارة عن (مفتاح الحالة الحقيقي، النص المعروض)
+    final List<MapEntry<String, String>> filters = [
+      MapEntry('all', isAr ? 'الكل' : 'All'),
+      MapEntry('pending', isAr ? 'قيد الانتظار' : 'Pending'),
+      MapEntry('confirmed', isAr ? 'مؤكد' : 'Confirmed'),
+      MapEntry('completed', isAr ? 'مكتمل' : 'Completed'),
+    ];
+ 
     return SizedBox(
       height: 40,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: filters.length,
         itemBuilder: (context, index) {
-          final filter = filters[index];
-          final isSelected = selectedIndex == index;
-
+          final filterKey = filters[index].key;
+          final filterLabel = filters[index].value;
+          final isSelected = selectedFilter == filterKey;
+ 
           return Padding(
             padding: EdgeInsets.only(right: index == 0 ? 0 : 12),
             child: GestureDetector(
-              onTap: () => setState(() => selectedIndex = index),
+              onTap: () => onFilterChanged(filterKey), // 🆕 بيبلغ الأب مباشرة
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primaryGold
-                      : widget.theme.colorScheme.surface,
+                  color: isSelected ? AppColors.primaryGold : theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected
-                        ? AppColors.primaryGold
-                        : AppColors.primaryGold.withValues(alpha: 0.2),
+                    color: isSelected ? AppColors.primaryGold : AppColors.primaryGold.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
                 child: Text(
-                  filter,
+                  filterLabel,
                   style: AppTextStyles.bodyGrey.copyWith(
-                    color: isSelected
-                        ? Colors.black
-                        : widget.theme.colorScheme.onSurface,
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+                    color: isSelected ? Colors.black : theme.colorScheme.onSurface,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ),
@@ -328,34 +414,46 @@ class _OrdersFilterState extends State<_OrdersFilter> {
     );
   }
 }
-
+ 
+// ==========================================
+// كرت الطلب
+// ==========================================
+ 
 class _OrderCard extends StatelessWidget {
+  final String bookingId;
   final String orderNumber;
   final String hallName;
   final String date;
   final String time;
   final String guests;
   final String status;
+  final String originalStatus;
   final String amount;
-
+  final bool hasSubmittedProof;
+  final VoidCallback? onPayPressed;
+ 
   const _OrderCard({
+    required this.bookingId,
     required this.orderNumber,
     required this.hallName,
     required this.date,
     required this.time,
     required this.guests,
     required this.status,
+    required this.originalStatus,
     required this.amount,
+    this.hasSubmittedProof = false,
+    this.onPayPressed,
   });
-
+ 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
-
+ 
     Color statusColor;
     IconData statusIcon;
-
+ 
     switch (status.toLowerCase()) {
       case 'completed':
       case 'مكتمل':
@@ -376,13 +474,11 @@ class _OrderCard extends StatelessWidget {
         statusColor = const Color(0xFF6B7280);
         statusIcon = Icons.info;
     }
-
+ 
     return GestureDetector(
       onTap: () {
         final detailLabel = isAr ? 'تفاصيل الطلب' : 'Order Details';
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$detailLabel: $orderNumber')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$detailLabel: $orderNumber')));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -402,7 +498,6 @@ class _OrderCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // الجزء العلوي (رقم الطلب، الاسم، الحالة)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
               child: Row(
@@ -424,21 +519,15 @@ class _OrderCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.bodyGrey.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.6,
-                            ),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // كود حالة الحاجة (مكتوب مرة واحدة فقط)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
@@ -460,14 +549,12 @@ class _OrderCard extends StatelessWidget {
                 ],
               ),
             ),
-            // الخط الفاصل
             Divider(
               color: AppColors.primaryGold.withValues(alpha: 0.1),
               height: 1,
               indent: 16,
               endIndent: 16,
             ),
-            // الجزء السفلي (التاريخ، المبلغ، الأزرار)
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -502,9 +589,7 @@ class _OrderCard extends StatelessWidget {
                       Text(
                         isAr ? 'المبلغ الكلي' : 'Total Amount',
                         style: AppTextStyles.bodyGrey.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.6,
-                          ),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                       Text(
@@ -519,23 +604,48 @@ class _OrderCard extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.message, size: 18),
-                          label: Text(isAr ? 'اتصل' : 'Call'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primaryGold,
-                            side: const BorderSide(
-                              color: AppColors.primaryGold,
+                      if (originalStatus.toLowerCase() == 'pending') ...[
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: hasSubmittedProof ? null : onPayPressed,
+                            icon: Icon(
+                              hasSubmittedProof ? Icons.hourglass_top : Icons.upload_file,
+                              size: 18,
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                            label: Text(
+                              hasSubmittedProof
+                                  ? (isAr ? 'بانتظار المراجعة' : 'Awaiting Review')
+                                  : (isAr ? 'إتمام الدفع' : 'Pay Now'),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: hasSubmittedProof ? Colors.grey : const Color(0xFF10B981),
+                              side: BorderSide(
+                                color: hasSubmittedProof ? Colors.grey : const Color(0xFF10B981),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
+                        const SizedBox(width: 12),
+                      ] else ...[
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(Icons.message, size: 18),
+                            label: Text(isAr ? 'اتصل' : 'Call'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primaryGold,
+                              side: const BorderSide(color: AppColors.primaryGold),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {},
@@ -561,20 +671,20 @@ class _OrderCard extends StatelessWidget {
     );
   }
 }
-
+ 
 class _DetailItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
   final ThemeData theme;
-
+ 
   const _DetailItem({
     required this.icon,
     required this.label,
     required this.value,
     required this.theme,
   });
-
+ 
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -602,3 +712,4 @@ class _DetailItem extends StatelessWidget {
     );
   }
 }
+ 

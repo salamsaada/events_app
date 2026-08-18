@@ -1,34 +1,32 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:eventsapp/generated/app_localizations.dart';
-import 'package:eventsapp/cubit/language_cubit.dart';
-import 'package:eventsapp/cubit/user_cubit.dart';
-import 'package:eventsapp/cubit/user_state.dart';
-import 'package:eventsapp/cubit/theme_cubit.dart';
+import 'package:eventsapp/core/widgets/common/favorite_button.dart';
 import 'package:eventsapp/cubit/favorites_cubit.dart';
 import 'package:eventsapp/cubit/favorites_state.dart';
+import 'package:eventsapp/cubit/theme_cubit.dart';
+import 'package:eventsapp/cubit/language_cubit.dart';
 import 'package:eventsapp/core/utils/localized_value.dart';
-import 'package:eventsapp/core/widgets/common/favorite_button.dart';
+import 'package:eventsapp/cubit/user_cubit.dart';
+import 'package:eventsapp/cubit/user_state.dart';
 import 'package:eventsapp/models/listing_model.dart';
-import 'details_page.dart';
+import 'package:eventsapp/screens/detailsListings.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ReadyMadePackagesPage extends StatefulWidget {
-  final String categoryName;
-
-  const ReadyMadePackagesPage({super.key, required this.categoryName});
+class ProductsPage extends StatefulWidget {
+  const ProductsPage({super.key});
 
   @override
-  State<ReadyMadePackagesPage> createState() => _ReadyMadePackagesPageState();
+  State<ProductsPage> createState() => _ProductsPageState();
 }
 
-class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
+class _ProductsPageState extends State<ProductsPage> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<UserCubit>().state;
-      if (state is! GetListingLoading && state is! GetListingSuccess) {
-        context.read<UserCubit>().getListing(type: 'package');
+      if (state is! GetListingLoading) {
+        // 🚀 تم التعديل إلى physical_product
+        context.read<UserCubit>().getListing(type: 'physical_product');
       }
     });
   }
@@ -41,7 +39,7 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(widget.categoryName),
+        title: const Text('المنتجات'), // ✋ بدون ترجمة مؤقتًا
         centerTitle: true,
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
@@ -49,12 +47,6 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
         titleTextStyle: theme.appBarTheme.titleTextStyle,
       ),
       body: BlocBuilder<UserCubit, UserState>(
-        // 🚀 هذا الشرط الجوهري يمنع الصفحة من الانهيار عندما تطلبين التفاصيل
-        buildWhen: (previous, current) {
-          return current is GetListingLoading ||
-                 current is GetListingSuccess ||
-                 current is GetListingFailure;
-        },
         builder: (context, state) {
           if (state is GetListingLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -65,48 +57,31 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
               child: Text(
                 state.errMessage,
                 style: TextStyle(color: theme.colorScheme.error),
+                textAlign: TextAlign.center,
               ),
             );
           }
 
           if (state is GetListingSuccess) {
             final listings = state.listingResponse.data
-                .where((item) => item.type == 'package')
+                .where((item) => item.type == 'physical_product') // 🚀 تم التعديل هنا أيضاً
                 .toList();
 
             if (listings.isEmpty) {
-              return Center(
-                child: Text(AppLocalizations.of(context)!.pageWillBeAvailable),
+              return const Center(
+                child: Text('لا توجد منتجات متاحة حاليًا'), // ✋ بدون ترجمة مؤقتًا
               );
             }
 
             return RefreshIndicator(
               onRefresh: () async =>
-                  context.read<UserCubit>().getListing(type: 'package'),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context)!.searchHint,
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: listings.length,
-                      itemBuilder: (context, index) {
-                        return _buildPackageCard(context, isDark, listings[index]);
-                      },
-                    ),
-                  ),
-                ],
+                  context.read<UserCubit>().getListing(type: 'physical_product'),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: listings.length,
+                itemBuilder: (context, index) {
+                  return _buildProductCard(context, isDark, listings[index]);
+                },
               ),
             );
           }
@@ -117,32 +92,22 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
     );
   }
 
-  Widget _buildPackageCard(BuildContext context, bool isDark, ServiceItem item) {
+  Widget _buildProductCard(BuildContext context, bool isDark, ServiceItem item) {
     final theme = Theme.of(context);
     final languageCode = context.watch<LanguageCubit>().languageCode;
 
-    final String packageName = localizedText(
+    final String productName = localizedText(
       item.title,
       languageCode,
-      fallback: 'Unknown Package',
+      fallback: 'Unknown Product',
     );
     final String price = item.variants.isNotEmpty
         ? '${item.variants[0].price} ${item.variants[0].currency}'
         : 'N/A';
     final String location = item.district.name;
 
-    String capacityInfo = 'N/A';
-    if (item.variants.isNotEmpty) {
-      final capacity = item.variants[0].capacity;
-      if (capacity > 0) {
-        capacityInfo = 'Up to $capacity Guests';
-      }
-    }
-
     final String imageUrl = item.images.isNotEmpty
-        ? (item.images[0] is Map
-            ? item.images[0]['url']
-            : item.images[0].toString())
+        ? item.images[0]['url'] ?? item.images[0].toString()
         : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
 
     return Container(
@@ -164,8 +129,7 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
           Stack(
             children: [
               ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                 child: Image.network(
                   imageUrl,
                   height: 200,
@@ -182,20 +146,17 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                 top: 15,
                 right: 15,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.star,
-                          color: theme.colorScheme.primary, size: 16),
+                      Icon(Icons.star, color: theme.colorScheme.primary, size: 16),
                       const Text(
                         " 4.9",
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -214,8 +175,7 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                       builder: (context, favState) {
                         bool isFav = false;
                         if (favState is FavoritesLoaded) {
-                          isFav = favState.favorites
-                              .any((favItem) => favItem.id == item.id);
+                          isFav = favState.favorites.any((f) => f.id == item.id);
                         }
                         return FavoriteButton(
                           key: ValueKey('${item.id}_$isFav'),
@@ -239,9 +199,8 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                   children: [
                     Expanded(
                       child: Text(
-                        packageName,
-                        style: theme.textTheme.displayLarge
-                            ?.copyWith(fontSize: 18),
+                        productName,
+                        style: theme.textTheme.displayLarge?.copyWith(fontSize: 18),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -258,43 +217,27 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Icon(Icons.location_on,
-                        color: isDark ? Colors.grey[500] : Colors.grey[400],
-                        size: 18),
+                    Icon(Icons.location_on, color: isDark ? Colors.grey[500] : Colors.grey[400], size: 18),
                     const SizedBox(width: 5),
                     Text(location, style: theme.textTheme.bodySmall),
-                    const SizedBox(width: 20),
-                    Icon(Icons.line_weight_sharp,
-                        color: isDark ? Colors.grey[500] : Colors.grey[400],
-                        size: 18),
-                    const SizedBox(width: 5),
-                    Text(capacityInfo, style: theme.textTheme.bodySmall),
                   ],
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Divider(
-                      color: theme.colorScheme.onSurface.withOpacity(0.1)),
+                  child: Divider(color: theme.colorScheme.onSurface.withOpacity(0.1)),
                 ),
                 SizedBox(
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
-                      // 🚀 نمرر الـ Cubit الحالي للصفحة الجديدة لتجنب التضارب
-                      final currentCubit = context.read<UserCubit>();
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => BlocProvider.value(
-                            value: currentCubit,
-                            child: DetailsPage(listingId: item.id),
-                          ),
-                        ),
+                        MaterialPageRoute(builder: (_) => ServiceDetailsPage(item: item)),
                       );
                     },
                     style: theme.elevatedButtonTheme.style,
-                    child: Text(AppLocalizations.of(context)!.viewDetails),
+                    child: const Text('عرض التفاصيل'), // ✋ بدون ترجمة مؤقتًا
                   ),
                 ),
               ],
