@@ -3,7 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:eventsapp/cubit/notification_cubit.dart';
 import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
-import 'package:eventsapp/cubit/user_cubit.dart'; 
+import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/user_state.dart';
 import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/models/listing_model.dart';
@@ -24,6 +24,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
   final TextEditingController _notesController = TextEditingController();
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 7));
   String _selectedTime = '16:00';
+  String? _selectedSlotId; // سيحتفظ بـ ID الفترة التي يختارها المستخدم
   int _guestCount = 50;
   int _selectedPackageIndex = 0;
 
@@ -42,40 +43,49 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
   }
 
   // 🚀 دالة لاختيار ملف الـ PDF ورفعه
- Future<void> _pickAndUploadPdf(BuildContext context, String currentBookingId, String amount) async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles(
-    type: FileType.custom,
-    allowedExtensions: ['pdf'], 
-  );
+  Future<void> _pickAndUploadPdf(
+    BuildContext context,
+    String currentBookingId,
+    String amount,
+  ) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
 
-  if (result != null) {
-    File file = File(result.files.single.path!);
-    
-    int fileSizeInBytes = file.lengthSync();
-    double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
-    
-    if (fileSizeInMB > 2.0) {
+    if (result != null) {
+      File file = File(result.files.single.path!);
+
+      int fileSizeInBytes = file.lengthSync();
+      double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+
+      if (fileSizeInMB > 2.0) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                _tr(
+                  'File is too large! Max 2MB allowed.',
+                  'حجم الملف كبير جداً! الحد الأقصى 2 ميغابايت.',
+                ),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // استدعاء دالة الرفع من الكيوبت مع تمرير المبلغ
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_tr('File is too large! Max 2MB allowed.', 'حجم الملف كبير جداً! الحد الأقصى 2 ميغابايت.')),
-            backgroundColor: Colors.red,
-          ),
+        context.read<UserCubit>().uploadProof(
+          bookingId: currentBookingId,
+          filePath: file.path,
+          amount: amount, // 👈 صار معرف ومتاح هنا تماماً
         );
       }
-      return; 
-    }
-
-    // استدعاء دالة الرفع من الكيوبت مع تمرير المبلغ
-    if (mounted) {
-      context.read<UserCubit>().uploadProof(
-        bookingId: currentBookingId,
-        filePath: file.path,
-        amount: amount, // 👈 صار معرف ومتاح هنا تماماً
-      );
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -108,77 +118,80 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
 
           // 🚀 عرض نافذة خيارات الدفع (فترة السماح)
           // 🚀 عرض نافذة خيارات الدفع (فترة السماح)
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext dialogContext) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-              icon: const Icon(
-                Icons.check_circle_outline,
-                color: Colors.green,
-                size: 60,
-              ),
-              title: Text(
-                _tr('Request Sent Successfully!', 'تم إرسال طلبك بنجاح!'),
-                style: const TextStyle(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              content: Text(
-                _tr(
-                  'You have 48 hours to upload the payment proof to confirm your booking, otherwise it will be cancelled automatically.',
-                  'لديك 48 ساعة لرفع إيصال الدفع وتأكيد حجزك بشكل نهائي، وإلا سيتم إلغاء الحجز تلقائياً.',
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext dialogContext) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(height: 1.5),
-              ),
-              actionsAlignment: MainAxisAlignment.center,
-              actionsOverflowDirection: VerticalDirection.down,
-              actions: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                icon: const Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.green,
+                  size: 60,
+                ),
+                title: Text(
+                  _tr('Request Sent Successfully!', 'تم إرسال طلبك بنجاح!'),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                content: Text(
+                  _tr(
+                    'You have 48 hours to upload the payment proof to confirm your booking, otherwise it will be cancelled automatically.',
+                    'لديك 48 ساعة لرفع إيصال الدفع وتأكيد حجزك بشكل نهائي، وإلا سيتم إلغاء الحجز تلقائياً.',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(height: 1.5),
+                ),
+                actionsAlignment: MainAxisAlignment.center,
+                actionsOverflowDirection: VerticalDirection.down,
+                actions: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(dialogContext); // إغلاق النافذة
+
+                        // ✅ تم التعديل هنا: تمرير سعر الباقة المحددة بدلاً من booking.price
+                        _pickAndUploadPdf(
+                          context,
+                          currentBookingId,
+                          selectedVariant?.price.toString() ?? '0',
+                        );
+                      },
+                      child: Text(
+                        _tr('Upload Proof Now', 'رفع إيصال الدفع الآن'),
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.pop(dialogContext); // إغلاق النافذة
-                      
-                      // ✅ تم التعديل هنا: تمرير سعر الباقة المحددة بدلاً من booking.price
-                      _pickAndUploadPdf(
-                        context, 
-                        currentBookingId, 
-                        selectedVariant?.price.toString() ?? '0'
-                      );
-                    },
-                    child: Text(
-                      _tr('Upload Proof Now', 'رفع إيصال الدفع الآن'),
-                      style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext); // إغلاق النافذة
+                      },
+                      child: Text(
+                        _tr('Pay Later', 'الدفع لاحقاً'),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pop(dialogContext); // إغلاق النافذة
-                    },
-                    child: Text(
-                      _tr('Pay Later', 'الدفع لاحقاً'),
-                      style: const TextStyle(color: Colors.grey, fontSize: 16),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
+                ],
+              );
+            },
+          );
         } else if (state is CreateBookingFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -187,15 +200,22 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
               behavior: SnackBarBehavior.floating,
             ),
           );
-        } else if (state is UploadProofSuccess) { // 🚀 في حال نجاح رفع الإيصال
+        } else if (state is UploadProofSuccess) {
+          // 🚀 في حال نجاح رفع الإيصال
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(_tr('Payment proof uploaded successfully!', 'تم رفع الإيصال بنجاح!')),
+              content: Text(
+                _tr(
+                  'Payment proof uploaded successfully!',
+                  'تم رفع الإيصال بنجاح!',
+                ),
+              ),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
             ),
           );
-        } else if (state is UploadProofFailure) { // 🚀 في حال فشل الرفع
+        } else if (state is UploadProofFailure) {
+          // 🚀 في حال فشل الرفع
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errMessage),
@@ -206,7 +226,9 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
         }
       },
       builder: (context, state) {
-        final isLoading = state is CreateBookingLoading || state is UploadProofLoading; // أضفنا حالة الرفع للـ Loading
+        final isLoading =
+            state is CreateBookingLoading ||
+            state is UploadProofLoading; // أضفنا حالة الرفع للـ Loading
 
         return DraggableScrollableSheet(
           initialChildSize: 0.9,
@@ -471,34 +493,85 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        _tr('Preferred time', 'الوقت المفضل'),
+                        _tr('Available Time Slots', 'الفترات الزمنية المتاحة'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          ..._timeSlots.map((slot) {
-                            final isSelected = _selectedTime == slot;
-                            return ChoiceChip(
-                              selected: isSelected,
-                              label: Text(slot),
-                              onSelected: (_) =>
-                                  setState(() => _selectedTime = slot),
-                              selectedColor: theme.colorScheme.primary,
-                              labelStyle: theme.textTheme.bodyMedium?.copyWith(
-                                color: isSelected
-                                    ? Colors.white
-                                    : theme.colorScheme.onSurface,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            );
-                          }),
-                        ],
-                      ),
+                      if (selectedVariant != null &&
+                          selectedVariant.availabilities.isNotEmpty)
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: [
+                            ...selectedVariant.availabilities
+                                .where(
+                                  (avail) =>
+                                      DateFormat(
+                                        'yyyy-MM-dd',
+                                      ).format(avail.availableDate.toLocal()) ==
+                                      DateFormat(
+                                        'yyyy-MM-dd',
+                                      ).format(_selectedDate),
+                                )
+                                .expand((avail) => avail.slots)
+                                .map((slot) {
+                                  final timeFormat = DateFormat('hh:mm a');
+                                  final slotTime =
+                                      '${timeFormat.format(slot.startTime.toLocal())} - ${timeFormat.format(slot.endTime.toLocal())}';
+
+                                  final isSelected = _selectedSlotId == slot.id;
+
+                                  return ChoiceChip(
+                                    selected: isSelected,
+                                    label: Text(
+                                      '$slotTime (${slot.remainingCapacity > 0 ? "${slot.remainingCapacity} متاح" : "مكتمل"})',
+                                    ),
+                                    onSelected: (chosen) {
+                                      if (slot.remainingCapacity > 0) {
+                                        setState(() {
+                                          _selectedSlotId = slot.id;
+                                          _selectedTime = timeFormat.format(
+                                            slot.startTime.toLocal(),
+                                          );
+                                        });
+                                      }
+                                    },
+                                    selectedColor: theme.colorScheme.primary,
+                                    labelStyle: theme.textTheme.bodyMedium
+                                        ?.copyWith(
+                                          color: isSelected
+                                              ? Colors.white
+                                              : (slot.remainingCapacity > 0
+                                                    ? theme
+                                                          .colorScheme
+                                                          .onSurface
+                                                    : Colors.grey),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  );
+                                }),
+                          ],
+                        )
+                      else
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.06,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            _tr(
+                              'No available time slots for this date.',
+                              'لا توجد فترات زمنية متاحة لهذا التاريخ.',
+                            ),
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ),
                       const SizedBox(height: 20),
                       Text(
                         _tr('Guest count', 'عدد الضيوف'),
@@ -591,22 +664,31 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                           onPressed: isLoading
                               ? null
                               : () {
-                                  String? selectedSlotId;
-                                  if (selectedVariant != null &&
-                                      selectedVariant.availabilities.isNotEmpty) {
-                                    if (selectedVariant.availabilities[0].slots.isNotEmpty) {
-                                      selectedSlotId = selectedVariant.availabilities[0].slots[0].id;
-                                    }
+                                  if (_selectedSlotId == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          _tr(
+                                            'Please select an available time slot.',
+                                            'يرجى اختيار فترة زمنية متاحة.',
+                                          ),
+                                        ),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                    return;
                                   }
 
                                   context.read<UserCubit>().createBooking(
                                     listingId: widget.item.id,
                                     listingVariantId: selectedVariant?.id,
-                                    listingSlotId: selectedSlotId,
+                                    listingSlotId: _selectedSlotId,
                                     bookingType: 'request',
                                     quantity: _guestCount,
-                                    bookedDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
-                                    bookedStartTime: _selectedTime,
+                                    bookedDate: DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(_selectedDate),
+                                    bookedStartTime: null,
                                     customerNotes: _notesController.text.trim(),
                                   );
                                 },
