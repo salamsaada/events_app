@@ -8,7 +8,6 @@ import '../../generated/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/common/bottom_navigation.dart';
-import '../../core/utils/localized_value.dart';
 import '../../cubit/user_cubit.dart';
 import '../../cubit/user_state.dart';
 import '../home/home_page.dart';
@@ -102,6 +101,36 @@ class _OrdersPageState extends State<OrdersPage> {
     }
   }
 
+  Future<void> _confirmCancelBooking(String bookingId) async {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final shouldCancel = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(isAr ? 'إلغاء الحجز' : 'Cancel Booking'),
+        content: Text(
+          isAr
+              ? 'هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟'
+              : 'Are you sure you want to cancel this booking?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(isAr ? 'تراجع' : 'Back'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: Text(isAr ? 'إلغاء الحجز' : 'Cancel Booking'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldCancel == true && mounted) {
+      context.read<UserCubit>().cancelBooking(bookingId);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -181,11 +210,27 @@ class _OrdersPageState extends State<OrdersPage> {
                           backgroundColor: Colors.red,
                         ),
                       );
+                    } else if (state is CancelBookingSuccess) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      context.read<UserCubit>().getMyBookings();
+                    } else if (state is CancelBookingFailure) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.errMessage),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
                     }
                   },
                   builder: (context, state) {
                     if (state is GetBookingsLoading ||
-                        state is UploadProofLoading) {
+                        state is UploadProofLoading ||
+                        state is CancelBookingLoading) {
                       return const Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primaryGold,
@@ -267,6 +312,8 @@ class _OrdersPageState extends State<OrdersPage> {
                                   ),
                                 );
                               },
+                              onCancelPressed: () =>
+                                  _confirmCancelBooking(booking.id ?? ''),
                             ),
                           );
                         },
@@ -455,6 +502,7 @@ class _OrderCard extends StatelessWidget {
   final String status;
   final String amount;
   final VoidCallback onRatePressed;
+  final VoidCallback onCancelPressed;
 
   const _OrderCard({
     required this.bookingId,
@@ -466,6 +514,7 @@ class _OrderCard extends StatelessWidget {
     required this.status,
     required this.amount,
     required this.onRatePressed,
+    required this.onCancelPressed,
   });
 
   @override
@@ -629,13 +678,13 @@ class _OrderCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.visibility, size: 18),
-                        label: Text(isAr ? 'عرض التفاصيل' : 'View Details'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryGold,
-                          foregroundColor: Colors.black,
+                      child: OutlinedButton.icon(
+                        onPressed: onCancelPressed,
+                        icon: const Icon(Icons.cancel_outlined, size: 18),
+                        label: Text(isAr ? 'إلغاء الحجز' : 'Cancel Booking'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),

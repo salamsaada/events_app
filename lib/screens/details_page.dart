@@ -6,6 +6,8 @@ import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/screens/booking/Booking.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
+import 'package:eventsapp/core/widgets/service_reviews_section.dart';
+import 'package:eventsapp/screens/service_reviews_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -98,9 +100,9 @@ class _DetailsPageState extends State<DetailsPage> {
     );
     final String imageUrl = item.images.isNotEmpty
         ? (item.images[0] is Map
-            ? (item.images[0]['url'] ??
-                'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000')
-            : item.images[0].toString())
+              ? (item.images[0]['url'] ??
+                    'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000')
+              : item.images[0].toString())
         : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
     final String startingPrice = item.variants.isNotEmpty
         ? '${loc.startingFrom} ${item.variants[0].price} ${item.variants[0].currency}'
@@ -130,8 +132,9 @@ class _DetailsPageState extends State<DetailsPage> {
                 transform: Matrix4.translationValues(0, -20, 0),
                 decoration: BoxDecoration(
                   color: theme.scaffoldBackgroundColor,
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(30)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(30),
+                  ),
                 ),
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
                 child: Column(
@@ -139,20 +142,25 @@ class _DetailsPageState extends State<DetailsPage> {
                   children: [
                     Text(
                       title,
-                      style: theme.textTheme.headlineMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       startingPrice,
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(color: const Color(0xFFF9C54D)),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: const Color(0xFFF9C54D),
+                      ),
                     ),
                     const Divider(height: 40),
                     Row(
                       children: [
-                        Icon(Icons.location_on,
-                            color: theme.colorScheme.primary, size: 20),
+                        Icon(
+                          Icons.location_on,
+                          color: theme.colorScheme.primary,
+                          size: 20,
+                        ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -162,8 +170,11 @@ class _DetailsPageState extends State<DetailsPage> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Icon(Icons.category,
-                            color: theme.colorScheme.primary, size: 20),
+                        Icon(
+                          Icons.category,
+                          color: theme.colorScheme.primary,
+                          size: 20,
+                        ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -178,7 +189,9 @@ class _DetailsPageState extends State<DetailsPage> {
                     Text(
                       loc.descriptionLabel,
                       style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Text(
@@ -186,11 +199,28 @@ class _DetailsPageState extends State<DetailsPage> {
                       style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                     ),
                     const SizedBox(height: 30),
+                    ServiceReviewsSection(
+                      reviews: item.reviews,
+                      averageRating: item.averageRating,
+                      reviewCount: item.reviewCount,
+                      isArabic: languageCode == 'ar',
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ServiceReviewsPage(
+                            providerId: item.providerId,
+                            serviceName: title,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
                     if (item.variants.isNotEmpty) ...[
                       Text(
                         loc.availablePackages,
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 15),
                       ListView.builder(
@@ -200,7 +230,11 @@ class _DetailsPageState extends State<DetailsPage> {
                         itemBuilder: (context, index) {
                           final variant = item.variants[index];
                           return _buildVariantCard(
-                              variant, theme, languageCode, loc);
+                            variant,
+                            theme,
+                            languageCode,
+                            loc,
+                          );
                         },
                       ),
                     ],
@@ -247,15 +281,18 @@ class _DetailsPageState extends State<DetailsPage> {
         child: CustomGoldButton(
           text: 'احجز الآن', // استخدم المسمى الخاص باللغة (أو 'احجز الآن')
           onTap: () {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true, // مهم جداً لأنك تستخدم DraggableScrollableSheet
-    backgroundColor: Colors.transparent, // ضروري لتظهر الحواف الدائرية التي صممتها
-    builder: (context) => BookingRequestSheet(
-      item: item, // تأكد أن تمرر item كما هو معرّف في كلاس BookingRequestSheet
-    ),
-  );
-},
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled:
+                  true, // مهم جداً لأنك تستخدم DraggableScrollableSheet
+              backgroundColor:
+                  Colors.transparent, // ضروري لتظهر الحواف الدائرية التي صممتها
+              builder: (context) => BookingRequestSheet(
+                item:
+                    item, // تأكد أن تمرر item كما هو معرّف في كلاس BookingRequestSheet
+              ),
+            );
+          },
         ),
       ),
     );
@@ -273,8 +310,7 @@ class _DetailsPageState extends State<DetailsPage> {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-            color: theme.colorScheme.onSurface.withOpacity(0.1)),
+        border: Border.all(color: theme.colorScheme.onSurface.withOpacity(0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,8 +320,11 @@ class _DetailsPageState extends State<DetailsPage> {
             children: [
               Expanded(
                 child: Text(
-                  localizedText(variant.name, languageCode,
-                      fallback: loc.package),
+                  localizedText(
+                    variant.name,
+                    languageCode,
+                    fallback: loc.package,
+                  ),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -304,7 +343,8 @@ class _DetailsPageState extends State<DetailsPage> {
           ),
           if (variant.availabilities.isNotEmpty)
             ...variant.availabilities.map(
-                (avail) => _buildAvailabilityRow(avail, variant, theme, loc)),
+              (avail) => _buildAvailabilityRow(avail, variant, theme, loc),
+            ),
         ],
       ),
     );
@@ -326,8 +366,11 @@ class _DetailsPageState extends State<DetailsPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.calendar_today,
-                  size: 14, color: theme.colorScheme.primary),
+              Icon(
+                Icons.calendar_today,
+                size: 14,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(width: 6),
               Text(
                 dateFormat.format(availability.availableDate.toLocal()),

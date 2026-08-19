@@ -6,6 +6,7 @@ import 'package:eventsapp/core/api/api_consumer.dart';
 import 'package:eventsapp/core/api/end_ponits.dart';
 import 'package:eventsapp/core/errors/exceptions.dart';
 import 'package:eventsapp/models/booking_model.dart';
+import 'package:eventsapp/models/getModelsReviews.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/models/myBookings_model.dart';
 import 'package:eventsapp/models/planner_model.dart';
@@ -333,6 +334,51 @@ class UserRepository {
       return Left(e.errModel.errorMessage);
     } catch (e) {
       return Left('حدث خطأ غير متوقع');
+    }
+  }
+
+  Future<Either<String, String>> cancelBooking(String bookingId) async {
+    try {
+      final response = await api.delete('${EndPoint.cancelBooking}/$bookingId');
+      final message = response is Map<String, dynamic>
+          ? response[ApiKey.message]?.toString()
+          : null;
+      return Right(message ?? 'تم إلغاء الحجز بنجاح');
+    } on ServerException catch (e) {
+      return Left(e.errModel.errorMessage);
+    } catch (e) {
+      return Left('حدث خطأ غير متوقع: $e');
+    }
+  }
+
+  Future<Either<String, ReviewsResponsee>> getProviderReviews({
+    required String providerId,
+    int page = 1, // ✨ دعم الصفحات (Pagination)
+  }) async {
+    try {
+      // ✨ استبدل EndPoint.getProviderReviews بالرابط الخاص بك
+      // إذا كان الرابط يتطلب إضافة الـ ID في النص مثلاً: '/providers/$providerId/reviews'
+      final response = await api.get(
+        '${EndPoint.getProviderReviews}/$providerId/reviews',
+        queryParameters: {
+          'page': page, // ✨ إرسال رقم الصفحة للسيرفر
+        },
+      );
+      // ✅ حالة النجاح
+      if (response['success'] == true) {
+        return Right(ReviewsResponsee.fromJson(response));
+      }
+      // ✅ حالة الفشل (مثلاً: مزود الخدمة غير موجود)
+      else {
+        final String errorMsg =
+            response['message'] ?? 'حدث خطأ أثناء جلب التقييمات';
+        return Left(errorMsg);
+      }
+    } on ServerException catch (e) {
+      // ✨ نفس أسلوب التقييم في استخراج رسالة الخطأ
+      return Left(e.errModel.errorMessage);
+    } catch (e) {
+      return Left('حدث خطأ غير متوقع أثناء تحميل التقييمات');
     }
   }
 }

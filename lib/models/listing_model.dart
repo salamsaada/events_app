@@ -32,6 +32,47 @@ dynamic _firstNonNull(Map<String, dynamic> json, List<String> keys) {
   return null;
 }
 
+double _safeDouble(dynamic value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+class ServiceReview {
+  final double rating;
+  final String comment;
+  final String reviewerName;
+  final DateTime? createdAt;
+
+  const ServiceReview({
+    required this.rating,
+    required this.comment,
+    required this.reviewerName,
+    this.createdAt,
+  });
+
+  factory ServiceReview.fromJson(Map<String, dynamic> json) {
+    final user = json['user'] is Map
+        ? Map<String, dynamic>.from(json['user'])
+        : <String, dynamic>{};
+    final reviewerName =
+        _firstNonNull(json, ['reviewer_name', 'name']) ??
+        _firstNonNull(user, ['name', 'full_name']) ??
+        '${user['first_name'] ?? ''} ${user['last_name'] ?? ''}'.trim();
+
+    return ServiceReview(
+      rating: _safeDouble(_firstNonNull(json, ['rating', 'stars'])),
+      comment: (_firstNonNull(json, ['comment', 'review', 'content']) ?? '')
+          .toString(),
+      reviewerName: reviewerName.toString().isEmpty
+          ? 'Anonymous'
+          : reviewerName.toString(),
+      createdAt: DateTime.tryParse(
+        (_firstNonNull(json, ['created_at', 'date']) ?? '').toString(),
+      ),
+    );
+  }
+}
+
 class Meta {
   final int currentPage;
   final int lastPage;
@@ -99,12 +140,20 @@ class Slot {
   });
 
   factory Slot.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Slot(id: '', startTime: DateTime.now(), endTime: DateTime.now(), remainingCapacity: 0);
-    
+    if (json == null)
+      return Slot(
+        id: '',
+        startTime: DateTime.now(),
+        endTime: DateTime.now(),
+        remainingCapacity: 0,
+      );
+
     // دالة داخلية سريعة لتركيب تاريخ وهمي مع الوقت عشان tryParse ما يرجع null
     DateTime parseTime(String? t) {
       if (t == null || t.isEmpty) return DateTime.now();
-      return DateTime.tryParse(t) ?? DateTime.tryParse("1970-01-01 $t") ?? DateTime.now();
+      return DateTime.tryParse(t) ??
+          DateTime.tryParse("1970-01-01 $t") ??
+          DateTime.now();
     }
 
     return Slot(
@@ -131,12 +180,25 @@ class Availability {
   });
 
   factory Availability.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Availability(id: '', availableDate: DateTime.now(), isBlocked: false, slots: []);
+    if (json == null)
+      return Availability(
+        id: '',
+        availableDate: DateTime.now(),
+        isBlocked: false,
+        slots: [],
+      );
     return Availability(
       id: json[ApiKey.id]?.toString() ?? '',
-      availableDate: DateTime.tryParse(json[ApiKey.available_date]?.toString() ?? '') ?? DateTime.now(),
-      isBlocked: json[ApiKey.is_blocked] == 1 || json[ApiKey.is_blocked] == true,
-      slots: (json[ApiKey.slots] as List<dynamic>?)?.map((item) => Slot.fromJson(item)).toList() ?? [],
+      availableDate:
+          DateTime.tryParse(json[ApiKey.available_date]?.toString() ?? '') ??
+          DateTime.now(),
+      isBlocked:
+          json[ApiKey.is_blocked] == 1 || json[ApiKey.is_blocked] == true,
+      slots:
+          (json[ApiKey.slots] as List<dynamic>?)
+              ?.map((item) => Slot.fromJson(item))
+              .toList() ??
+          [],
     );
   }
 }
@@ -155,7 +217,8 @@ class IncludedVariantListing {
   const IncludedVariantListing({required this.title, required this.images});
 
   factory IncludedVariantListing.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return const IncludedVariantListing(title: {}, images: []);
+    if (json == null)
+      return const IncludedVariantListing(title: {}, images: []);
     return IncludedVariantListing(
       title: _safeMap(json[ApiKey.title]),
       images: json[ApiKey.images] is List ? json[ApiKey.images] : [],
@@ -183,7 +246,13 @@ class IncludedVariant {
 
   factory IncludedVariant.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
-      return const IncludedVariant(id: '', name: {}, price: 0, currency: '', images: []);
+      return const IncludedVariant(
+        id: '',
+        name: {},
+        price: 0,
+        currency: '',
+        images: [],
+      );
     }
     // 🔎 نجرب snake_case و camelCase مشان listing المتداخلة
     final listingJson = _firstNonNull(json, ['listing']);
@@ -221,7 +290,8 @@ class PackageItem {
   final String variantId;
   final int quantity;
   final IncludedVariant? includedVariant;
-  final Map<String, dynamic> rawData; // 🛡️ احتياط: كامل البيانات الخام لأي حقل غير متوقع
+  final Map<String, dynamic>
+  rawData; // 🛡️ احتياط: كامل البيانات الخام لأي حقل غير متوقع
 
   const PackageItem({
     required this.id,
@@ -241,7 +311,8 @@ class PackageItem {
 
     return PackageItem(
       id: json['id']?.toString() ?? '',
-      variantId: (_firstNonNull(json, ['variant_id', 'variantId']))?.toString() ?? '',
+      variantId:
+          (_firstNonNull(json, ['variant_id', 'variantId']))?.toString() ?? '',
       quantity: _safeInt(_firstNonNull(json, ['quantity', 'qty'])),
       includedVariant: includedVariantJson is Map<String, dynamic>
           ? IncludedVariant.fromJson(includedVariantJson)
@@ -275,7 +346,11 @@ class FreelancerInfo {
       id: json[ApiKey.id]?.toString() ?? '',
       name: json[ApiKey.name]?.toString() ?? '',
       role: (_firstNonNull(json, ['role', 'type']))?.toString(),
-      avatarUrl: (_firstNonNull(json, ['avatar_url', 'avatarUrl', 'image']))?.toString(),
+      avatarUrl: (_firstNonNull(json, [
+        'avatar_url',
+        'avatarUrl',
+        'image',
+      ]))?.toString(),
     );
   }
 }
@@ -347,12 +422,19 @@ class Variant {
     }
 
     final rawAttributes = json[ApiKey.attributes];
-    final dynamic rawCapacity = json['capacity'] ??
+    final dynamic rawCapacity =
+        json['capacity'] ??
         (rawAttributes is Map ? rawAttributes['capacity'] : null);
 
     // 🔎 نجرب snake_case و camelCase لاسمي الحقلين
-    final rawPackageItems = _firstNonNull(json, ['package_items', 'packageItems']);
-    final rawPackageFreelancers = _firstNonNull(json, ['package_freelancers', 'packageFreelancers']);
+    final rawPackageItems = _firstNonNull(json, [
+      'package_items',
+      'packageItems',
+    ]);
+    final rawPackageFreelancers = _firstNonNull(json, [
+      'package_freelancers',
+      'packageFreelancers',
+    ]);
 
     List<PackageItem> parsedItems = [];
     for (final item in _safeListOfMaps(rawPackageItems)) {
@@ -384,7 +466,8 @@ class Variant {
       stock: json[ApiKey.stock],
       attributes: rawAttributes,
       images: json[ApiKey.images] ?? [],
-      availabilities: (json[ApiKey.availabilities] as List<dynamic>?)
+      availabilities:
+          (json[ApiKey.availabilities] as List<dynamic>?)
               ?.map((item) => Availability.fromJson(item))
               .toList() ??
           [],
@@ -396,6 +479,7 @@ class Variant {
 
 class ServiceItem {
   final String id;
+  final String providerId;
   final Map<String, dynamic> title;
   final Map<String, dynamic> description;
   final String type;
@@ -411,11 +495,15 @@ class ServiceItem {
   final District district;
   final List<dynamic> images;
   final List<Variant> variants;
+  final double averageRating;
+  final int reviewCount;
+  final List<ServiceReview> reviews;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   const ServiceItem({
     required this.id,
+    required this.providerId,
     required this.title,
     required this.description,
     required this.type,
@@ -431,6 +519,9 @@ class ServiceItem {
     required this.district,
     required this.images,
     required this.variants,
+    required this.averageRating,
+    required this.reviewCount,
+    required this.reviews,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -461,25 +552,101 @@ class ServiceItem {
         }
       }
 
+      final reviewsData = _firstNonNull(json, ['reviews', 'review']);
+      final rawReviews = reviewsData is List
+          ? reviewsData
+          : reviewsData is Map && reviewsData['data'] is List
+          ? reviewsData['data'] as List
+          : const [];
+      final parsedReviews = rawReviews
+          .whereType<Map>()
+          .map(
+            (review) =>
+                ServiceReview.fromJson(Map<String, dynamic>.from(review)),
+          )
+          .toList();
+      final ratingData = json['rating'];
+      final ratingValue =
+          _firstNonNull(json, [
+            'average_rating',
+            'avg_rating',
+            'rating_average',
+            'rating_avg',
+            'averageRating',
+          ]) ??
+          (ratingData is Map
+              ? _firstNonNull(Map<String, dynamic>.from(ratingData), [
+                  'average',
+                  'avg',
+                  'value',
+                ])
+              : ratingData);
+      final countValue =
+          _firstNonNull(json, [
+            'review_count',
+            'reviews_count',
+            'ratings_count',
+            'total_reviews',
+            'total_ratings',
+            'reviewCount',
+            'reviewsCount',
+          ]) ??
+          (ratingData is Map
+              ? _firstNonNull(Map<String, dynamic>.from(ratingData), [
+                  'count',
+                  'total',
+                ])
+              : null);
+      final calculatedRating = parsedReviews.isEmpty
+          ? 0.0
+          : parsedReviews.fold<double>(
+                  0,
+                  (sum, review) => sum + review.rating,
+                ) /
+                parsedReviews.length;
+      final providerData = json[ApiKey.provider_id] ?? json['provider'];
+      final providerId =
+          json[ApiKey.provider_id]?.toString() ??
+          (providerData is Map ? providerData[ApiKey.id]?.toString() : null) ??
+          '';
+
       return ServiceItem(
         id: json[ApiKey.id]?.toString() ?? '',
+        providerId: providerId,
         title: _safeMap(json[ApiKey.title]),
         description: _safeMap(json[ApiKey.description]),
         type: json[ApiKey.type]?.toString() ?? '',
         status: json[ApiKey.status]?.toString() ?? '',
         materialComposition: json[ApiKey.material_composition],
         secondaryContactNumber: json[ApiKey.secondary_contact_number],
-        cancelBeforeAcceptance: json[ApiKey.cancel_before_acceptance] == 1 || json[ApiKey.cancel_before_acceptance] == true,
-        cancelAfterAcceptance: json[ApiKey.cancel_after_acceptance] == 1 || json[ApiKey.cancel_after_acceptance] == true,
-        cancelBeforePayment: json[ApiKey.cancel_before_payment] == 1 || json[ApiKey.cancel_before_payment] == true,
-        isProviderLocationBased: json[ApiKey.is_provider_location_based] == 1 || json[ApiKey.is_provider_location_based] == true,
+        cancelBeforeAcceptance:
+            json[ApiKey.cancel_before_acceptance] == 1 ||
+            json[ApiKey.cancel_before_acceptance] == true,
+        cancelAfterAcceptance:
+            json[ApiKey.cancel_after_acceptance] == 1 ||
+            json[ApiKey.cancel_after_acceptance] == true,
+        cancelBeforePayment:
+            json[ApiKey.cancel_before_payment] == 1 ||
+            json[ApiKey.cancel_before_payment] == true,
+        isProviderLocationBased:
+            json[ApiKey.is_provider_location_based] == 1 ||
+            json[ApiKey.is_provider_location_based] == true,
         rejectionReason: json[ApiKey.rejection_reason],
         category: category,
         district: district,
         images: json[ApiKey.images] ?? [],
         variants: parsedVariants,
-        createdAt: DateTime.tryParse(json[ApiKey.created_at]?.toString() ?? '') ?? DateTime.now(),
-        updatedAt: DateTime.tryParse(json[ApiKey.updated_at]?.toString() ?? '') ?? DateTime.now(),
+        averageRating: ratingValue == null
+            ? calculatedRating
+            : _safeDouble(ratingValue),
+        reviewCount: _safeInt(countValue ?? parsedReviews.length),
+        reviews: parsedReviews,
+        createdAt:
+            DateTime.tryParse(json[ApiKey.created_at]?.toString() ?? '') ??
+            DateTime.now(),
+        updatedAt:
+            DateTime.tryParse(json[ApiKey.updated_at]?.toString() ?? '') ??
+            DateTime.now(),
       );
     } catch (e) {
       print("❌ CRITICAL ERROR in ServiceItem for ID ${json[ApiKey.id]}: $e");
@@ -503,15 +670,19 @@ class ListingResponse {
     try {
       return ListingResponse(
         success: json[ApiKey.success] ?? true,
-        data: (json['data'] as List<dynamic>?)?.map((item) {
-              try {
-                return ServiceItem.fromJson(item);
-              } catch (e) {
-                print("⚠️ Skipped an item due to error: $e");
-                print("⚠️ Raw item that failed: $item");
-                return null;
-              }
-            }).whereType<ServiceItem>().toList() ??
+        data:
+            (json['data'] as List<dynamic>?)
+                ?.map((item) {
+                  try {
+                    return ServiceItem.fromJson(item);
+                  } catch (e) {
+                    print("⚠️ Skipped an item due to error: $e");
+                    print("⚠️ Raw item that failed: $item");
+                    return null;
+                  }
+                })
+                .whereType<ServiceItem>()
+                .toList() ??
             [],
         meta: Meta.fromJson(json['meta']),
       );

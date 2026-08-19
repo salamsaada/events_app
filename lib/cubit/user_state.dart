@@ -1,4 +1,5 @@
 ﻿import 'package:eventsapp/models/booking_model.dart';
+import 'package:eventsapp/models/getModelsReviews.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/models/myBookings_model.dart';
 import 'package:eventsapp/models/planner_model.dart';
@@ -149,4 +150,32 @@ class SendRatingSuccess extends UserState {
 class SendRatingFailure extends UserState {
   final String errMessage;
   SendRatingFailure({required this.errMessage});
+}
+
+class CancelBookingLoading extends UserState {}
+
+class CancelBookingSuccess extends UserState {
+  final String message;
+  CancelBookingSuccess({required this.message});
+}
+
+class CancelBookingFailure extends UserState {
+  final String errMessage;
+  CancelBookingFailure({required this.errMessage});
+}
+
+// حالة التحميل (جاري جلب التقييمات)
+class GetReviewsLoading extends UserState {}
+
+// حالة النجاح (تم جلب التقييمات بنجاح)
+class GetReviewsSuccess extends UserState {
+  final ReviewsResponsee
+  reviewsResponse; // ✨ نستخدم الموديل الذي أنشأناه سابقاً
+  GetReviewsSuccess({required this.reviewsResponse});
+}
+
+// حالة الفشل (فشل جلب التقييمات)
+class GetReviewsFailure extends UserState {
+  final String errMessage;
+  GetReviewsFailure({required this.errMessage});
 }

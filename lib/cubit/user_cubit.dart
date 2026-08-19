@@ -171,4 +171,36 @@ class UserCubit extends Cubit<UserState> {
       (messageModel) => emit(SendRatingSuccess(message: messageModel)),
     );
   }
+
+  Future<void> cancelBooking(String bookingId) async {
+    emit(CancelBookingLoading());
+
+    final result = await userRepository.cancelBooking(bookingId);
+    if (isClosed) return;
+
+    result.fold(
+      (errMessage) => emit(CancelBookingFailure(errMessage: errMessage)),
+      (message) => emit(CancelBookingSuccess(message: message)),
+    );
+  }
+
+  Future<void> getProviderReviews(String id, {int page = 1}) async {
+    // إصدار حالة التحميل
+    emit(GetReviewsLoading());
+
+    // استدعاء الـ Repository وتمرير الـ ID ورقم الصفحة
+    final response = await userRepository.getProviderReviews(
+      providerId: id,
+      page: page,
+    );
+
+    // التحقق من أن الـ Cubit لا يزال مفتوحاً
+    if (isClosed) return;
+
+    // معالجة الرد
+    response.fold(
+      (errMessage) => emit(GetReviewsFailure(errMessage: errMessage)),
+      (reviews) => emit(GetReviewsSuccess(reviewsResponse: reviews)),
+    );
+  }
 }

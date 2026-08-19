@@ -1,9 +1,6 @@
-import 'package:eventsapp/cache/cache_helper.dart';
-import 'package:eventsapp/core/api/end_ponits.dart';
 import 'package:eventsapp/core/theme/app_colors.dart';
 import 'package:eventsapp/core/theme/app_text_styles.dart';
 // removed generated/localizations to keep splash screen English-only
-import 'package:eventsapp/screens/home/home_page.dart';
 import 'package:eventsapp/screens/selection_screen.dart';
 import 'package:flutter/material.dart';
 
