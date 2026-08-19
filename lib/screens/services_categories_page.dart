@@ -114,14 +114,27 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                           // تأكدي من تمرير item المباشر أو item.id حسب دالة الكيوبت عندك
                           context.read<FavoritesCubit>().toggleHeart(item.id); 
                         },
+                        // في ملف ServicesCategoriesPage
+                        // ...
                         onTap: () {
+                          // 🚀 1. نجلب الـ Cubit الحالي قبل الانتقال
+                          final currentCubit = context.read<UserCubit>();
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ServiceDetailsPage(item: item), 
+                              // 🚀 2. نغلف الصفحة الجديدة بـ BlocProvider.value لنفس الكيوبت
+                              builder: (_) => BlocProvider.value(
+                                value: currentCubit,
+                                child: ServiceDetailsPage(
+                                  // نمرر الـ id فقط أو الـ item كله، بس الأهم نستدعي الـ API
+                                  item: item,
+                                ),
+                              ),
                             ),
                           );
                         },
+                          // ...
                       );
                     },
                   );
