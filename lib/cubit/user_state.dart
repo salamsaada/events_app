@@ -2,6 +2,7 @@
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/models/myBookings_model.dart';
 import 'package:eventsapp/models/planner_model.dart';
+import 'package:eventsapp/models/sendReviwe.dart';
 import 'package:eventsapp/models/user_model.dart';
 
 class UserState {}
@@ -87,33 +88,40 @@ final class GetBookingsFailure extends UserState {
   final String errMessage;
   GetBookingsFailure({required this.errMessage});
 }
-//حالات البروفايدر 
+
+//حالات البروفايدر
 class GetProvidersLoading extends UserState {}
+
 class GetProvidersSuccess extends UserState {
   final List<dynamic> providers;
   GetProvidersSuccess({required this.providers});
 }
+
 class GetProvidersFailure extends UserState {
   final String errMessage;
   GetProvidersFailure({required this.errMessage});
 }
 
 class GetProviderDetailsLoading extends UserState {}
+
 class GetProviderDetailsSuccess extends UserState {
   final PlannerModel providerDetails; // 🚀 تعديل النوع هنا
   GetProviderDetailsSuccess({required this.providerDetails});
 }
+
 class GetProviderDetailsFailure extends UserState {
   final String errMessage;
   GetProviderDetailsFailure({required this.errMessage});
 }
 
-//حالات الدفع 
+//حالات الدفع
 class UploadProofLoading extends UserState {}
+
 class UploadProofSuccess extends UserState {
   final String message;
   UploadProofSuccess(this.message);
 }
+
 class UploadProofFailure extends UserState {
   final String errMessage;
   UploadProofFailure(this.errMessage);
@@ -129,4 +137,16 @@ class GetListingDetailsSuccess extends UserState {
 class GetListingDetailsFailure extends UserState {
   final String errMessage;
   GetListingDetailsFailure({required this.errMessage});
+}
+
+class SendRatingLoading extends UserState {}
+
+class SendRatingSuccess extends UserState {
+  final SendReviewModel message; // تم تصحيح النوع
+  SendRatingSuccess({required this.message});
+}
+
+class SendRatingFailure extends UserState {
+  final String errMessage;
+  SendRatingFailure({required this.errMessage});
 }

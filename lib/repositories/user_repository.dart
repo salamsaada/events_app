@@ -1,4 +1,6 @@
-﻿import 'package:dartz/dartz.dart';
+﻿import 'dart:io';
+
+import 'package:dartz/dartz.dart';
 import 'package:eventsapp/cache/cache_helper.dart';
 import 'package:eventsapp/core/api/api_consumer.dart';
 import 'package:eventsapp/core/api/end_ponits.dart';
@@ -7,6 +9,7 @@ import 'package:eventsapp/models/booking_model.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/models/myBookings_model.dart';
 import 'package:eventsapp/models/planner_model.dart';
+import 'package:eventsapp/models/sendReviwe.dart';
 import 'package:eventsapp/models/sign_up_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart'; // 🚀 1. إضافة هذه المكتبة من أجل دالة compute
@@ -97,8 +100,10 @@ class UserRepository {
           if (title != null && title.isNotEmpty) 'title': title,
           if (minPrice != null && minPrice.isNotEmpty) 'price_min': minPrice,
           if (maxPrice != null && maxPrice.isNotEmpty) 'price_max': maxPrice,
-          if (capacityMin != null && capacityMin.isNotEmpty) 'capacity_min': capacityMin,
-          if (capacityMax != null && capacityMax.isNotEmpty) 'capacity_max': capacityMax,
+          if (capacityMin != null && capacityMin.isNotEmpty)
+            'capacity_min': capacityMin,
+          if (capacityMax != null && capacityMax.isNotEmpty)
+            'capacity_max': capacityMax,
           if (rating != null && rating.isNotEmpty) 'rating': rating,
           if (date != null && date.isNotEmpty) 'date': date,
           if (location != null && location.isNotEmpty) 'location': location,
@@ -112,13 +117,16 @@ class UserRepository {
       }
 
       // 🚀 3. تحويل الاستجابة بأمان إلى Map
-      final responseMap = response is Map 
-          ? Map<String, dynamic>.from(response) 
+      final responseMap = response is Map
+          ? Map<String, dynamic>.from(response)
           : <String, dynamic>{};
 
       // 🚀 4. السحر هنا: استخدام compute لفك تشفير البيانات الضخمة بدون تجميد الـ UI
-      final serviceResponse = await compute(_parseListingResponseInBackground, responseMap);
-      
+      final serviceResponse = await compute(
+        _parseListingResponseInBackground,
+        responseMap,
+      );
+
       return Right(serviceResponse);
     } on ServerException catch (e) {
       return Left(e.errModel.errorMessage);
@@ -195,9 +203,7 @@ class UserRepository {
     try {
       final response = await api.get(
         'providers',
-        queryParameters: {
-          if (name != null && name.isNotEmpty) 'name': name,
-        },
+        queryParameters: {if (name != null && name.isNotEmpty) 'name': name},
       );
 
       if (response == null) {
@@ -217,7 +223,6 @@ class UserRepository {
       }
 
       return Right(providersData);
-
     } on ServerException catch (e) {
       return Left(e.errModel.errorMessage);
     } catch (e) {
@@ -233,7 +238,8 @@ class UserRepository {
         return const Left("لا توجد بيانات حالياً");
       }
 
-      final detailsData = (response is Map<String, dynamic> && response.containsKey('data'))
+      final detailsData =
+          (response is Map<String, dynamic> && response.containsKey('data'))
           ? response['data']
           : response;
 
@@ -262,16 +268,13 @@ class UserRepository {
         ),
       });
 
-      final response = await api.post(
-        'payments/upload-proof',
-        data: formData,
-      );
+      final response = await api.post('payments/upload-proof', data: formData);
 
       return Right(response['message'] ?? 'تم استلام الملف بنجاح.');
     } on DioException catch (e) {
       final statusCode = e.response?.statusCode ?? 0;
-      final serverMessage = (e.response?.data is Map &&
-              e.response?.data['message'] != null)
+      final serverMessage =
+          (e.response?.data is Map && e.response?.data['message'] != null)
           ? e.response!.data['message'].toString()
           : 'حدث خطأ غير متوقع، حاول مرة أخرى.';
 
@@ -299,6 +302,37 @@ class UserRepository {
       return Left(e.errModel.errorMessage);
     } catch (e) {
       return Left("حدث خطأ غير متوقع: $e");
+    }
+  }
+
+  Future<Either<String, SendReviewModel>> submitReview({
+    required String bookingId,
+    required int rating,
+    String? comment,
+  }) async {
+    try {
+      final response = await api.post(
+        EndPoint.sendReview,
+        data: {
+          'booking_id': bookingId,
+          'rating': rating.toString(),
+          'comment': comment ?? 'بدون تعليق',
+        },
+      );
+
+      // ✅ حالة النجاح
+      if (response['success'] == true) {
+        return Right(SendReviewModel.fromJson(response));
+      }
+      // ✅ حالة الفشل (مثل: لقد قمت بتقييم هذا الحجز مسبقاً)
+      else {
+        final String errorMsg = response['message'] ?? 'حدث خطأ غير معروف';
+        return Left(errorMsg); // ← هنا يتم إرسال رسالة السيرفر للحubit
+      }
+    } on ServerException catch (e) {
+      return Left(e.errModel.errorMessage);
+    } catch (e) {
+      return Left('حدث خطأ غير متوقع');
     }
   }
 }

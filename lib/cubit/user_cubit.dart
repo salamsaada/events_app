@@ -7,38 +7,39 @@ class UserCubit extends Cubit<UserState> {
   final UserRepository userRepository;
 
   Future<void> getListing({
-    int? page, 
-    String? type, 
+    int? page,
+    String? type,
     String? categoryId,
     // ✨ التعديل هنا: استخدام title بدلاً من search
     String? title,
     String? minPrice,
     String? maxPrice,
-    String? capacityMin, 
-    String? capacityMax, 
+    String? capacityMin,
+    String? capacityMax,
     String? rating,
     String? date,
     String? location,
   }) async {
-    emit(GetListingLoading()); 
+    emit(GetListingLoading());
 
     final response = await userRepository.getlisting(
       type: type,
       categoryId: categoryId,
-      // ✨ التعديل هنا: إرسال المتغير title 
+      // ✨ التعديل هنا: إرسال المتغير title
       title: title,
       minPrice: minPrice,
       maxPrice: maxPrice,
-      capacityMin: capacityMin, 
-      capacityMax: capacityMax, 
+      capacityMin: capacityMin,
+      capacityMax: capacityMax,
       rating: rating,
       date: date,
       location: location,
     );
 
     response.fold(
-      (errMessage) => emit(GetListingFailure(errMessage: errMessage)), 
-      (listingResponse) => emit(GetListingSuccess(listingResponse: listingResponse)), 
+      (errMessage) => emit(GetListingFailure(errMessage: errMessage)),
+      (listingResponse) =>
+          emit(GetListingSuccess(listingResponse: listingResponse)),
     );
   }
 
@@ -53,7 +54,7 @@ class UserCubit extends Cubit<UserState> {
     String? bookedStartTime,
     String? customerNotes,
   }) async {
-    emit(CreateBookingLoading()); 
+    emit(CreateBookingLoading());
 
     final response = await userRepository.createBooking(
       providerId: providerId,
@@ -68,39 +69,35 @@ class UserCubit extends Cubit<UserState> {
     );
 
     response.fold(
-      (errMessage) =>
-          emit(CreateBookingFailure(errMessage: errMessage)), 
-      (bookingResponse) => emit(
-        CreateBookingSuccess(bookingResponse: bookingResponse),
-      ), 
+      (errMessage) => emit(CreateBookingFailure(errMessage: errMessage)),
+      (bookingResponse) =>
+          emit(CreateBookingSuccess(bookingResponse: bookingResponse)),
     );
   }
 
   void getMyBookings() async {
-    emit(GetBookingsLoading()); 
+    emit(GetBookingsLoading());
 
-    final response = await userRepository.getMyBookings(); 
+    final response = await userRepository.getMyBookings();
 
     response.fold(
-      (errMessage) =>
-          emit(GetBookingsFailure(errMessage: errMessage)), 
-      (bookingsResponse) => emit(
-        GetBookingsSuccess(bookingsResponse: bookingsResponse),
-      ), 
+      (errMessage) => emit(GetBookingsFailure(errMessage: errMessage)),
+      (bookingsResponse) =>
+          emit(GetBookingsSuccess(bookingsResponse: bookingsResponse)),
     );
   }
 
- // 🚀 إضافة بارامتر name
+  // 🚀 إضافة بارامتر name
   Future<void> getProviders({String? name}) async {
     emit(GetProvidersLoading());
 
     try {
       // ✨ تمرير المتغير للـ Repository
-      final response = await userRepository.getAllProviders(name: name); 
+      final response = await userRepository.getAllProviders(name: name);
 
       response.fold(
-        (errMessage) => emit(GetProvidersFailure(errMessage: errMessage)), 
-        (providersData) => emit(GetProvidersSuccess(providers: providersData)), 
+        (errMessage) => emit(GetProvidersFailure(errMessage: errMessage)),
+        (providersData) => emit(GetProvidersSuccess(providers: providersData)),
       );
     } catch (e) {
       emit(GetProvidersFailure(errMessage: e.toString()));
@@ -113,38 +110,65 @@ class UserCubit extends Cubit<UserState> {
     final response = await userRepository.getProviderDetails(id);
 
     response.fold(
-      (errMessage) => emit(GetProviderDetailsFailure(errMessage: errMessage)), 
-      (details) => emit(GetProviderDetailsSuccess(providerDetails: details)), // details هنا أصبحت PlannerModel
+      (errMessage) => emit(GetProviderDetailsFailure(errMessage: errMessage)),
+      (details) => emit(
+        GetProviderDetailsSuccess(providerDetails: details),
+      ), // details هنا أصبحت PlannerModel
     );
   }
 
- Future<void> uploadProof({
-  required String bookingId,
-  required String filePath,
-  required String amount, // 👈 أضيفي المبلغ هنا
-}) async {
-  emit(UploadProofLoading());
+  Future<void> uploadProof({
+    required String bookingId,
+    required String filePath,
+    required String amount, // 👈 أضيفي المبلغ هنا
+  }) async {
+    emit(UploadProofLoading());
 
-  final response = await userRepository.uploadPaymentProof(
-    bookingId: bookingId, 
-    filePath: filePath,
-    amount: amount, // 👈 مرريه للـ Repository
-  );
+    final response = await userRepository.uploadPaymentProof(
+      bookingId: bookingId,
+      filePath: filePath,
+      amount: amount, // 👈 مرريه للـ Repository
+    );
 
-  response.fold(
-    (errMessage) => emit(UploadProofFailure(errMessage)),
-    (successMessage) => emit(UploadProofSuccess(successMessage)),
-  );
-}
+    response.fold(
+      (errMessage) => emit(UploadProofFailure(errMessage)),
+      (successMessage) => emit(UploadProofSuccess(successMessage)),
+    );
+  }
 
-Future<void> getListingDetails(String id) async {
-  emit(GetListingDetailsLoading());
+  Future<void> getListingDetails(String id) async {
+    emit(GetListingDetailsLoading());
 
-  final response = await userRepository.getListingDetails(id);
+    final response = await userRepository.getListingDetails(id);
 
-  response.fold(
-    (errMessage) => emit(GetListingDetailsFailure(errMessage: errMessage)),
-    (listing) => emit(GetListingDetailsSuccess(listing: listing)),
-  );
-}
+    response.fold(
+      (errMessage) => emit(GetListingDetailsFailure(errMessage: errMessage)),
+      (listing) => emit(GetListingDetailsSuccess(listing: listing)),
+    );
+  }
+
+  Future<void> sendRating({
+    required String bookingId,
+    required int rating,
+    String? comment,
+  }) async {
+    // 1. إصدار حالة التحميل
+    emit(SendRatingLoading());
+
+    // 2. استدعاء الـ Repository وإرسال البيانات
+    final result = await userRepository.submitReview(
+      bookingId: bookingId,
+      rating: rating,
+      comment: comment,
+    );
+
+    // 3. 🛡️ التحقق من أن الـ Cubit لا يزال مفتوحاً (لم يتم إغلاقه من الصفحة)
+    if (isClosed) return;
+
+    // 4. معالجة الرد (نجاح أو فشل)
+    result.fold(
+      (errMessage) => emit(SendRatingFailure(errMessage: errMessage)),
+      (messageModel) => emit(SendRatingSuccess(message: messageModel)),
+    );
+  }
 }

@@ -1,6 +1,6 @@
 class EndPoint {
-  static const String baseUrl = "https://preflight-refusal-luminous.ngrok-free.dev/api/";
-
+  // static const String baseUrl = "https://preflight-refusal-luminous.ngrok-free.dev/api/";
+  static const String baseUrl = "http://192.168.1.105:8000/api/";
   static const String signIn = "login";
   static const String signUp = "register";
   static const String getlisting =
@@ -8,6 +8,8 @@ class EndPoint {
   static const String getUserDataEndPoint = "user";
   static const String Mybookings = "bookings";
   static const String createBooking = "bookings";
+  static const String sendReview =
+      "reviews/provider"; // يجب إضافة هذا الـ Endpoint في كلاس EndPoint
 }
 
 class ApiKey {

@@ -1,4 +1,5 @@
 import 'package:eventsapp/core/theme/app_colors.dart';
+import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class AppBottomNavigation extends StatelessWidget {
@@ -23,6 +24,7 @@ class AppBottomNavigation extends StatelessWidget {
         : AppColors.primaryGold.withValues(alpha: 0.14);
     final selectedColor = AppColors.primaryGold;
     final unselectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.55);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
@@ -45,7 +47,7 @@ class AppBottomNavigation extends StatelessWidget {
           children: [
             _buildNavItem(
               Icons.person,
-              'الملف الشخصي',
+              l10n.profileTitle,
               3,
               selectedBackground,
               selectedColor,
@@ -53,7 +55,7 @@ class AppBottomNavigation extends StatelessWidget {
             ),
             _buildNavItem(
               Icons.receipt_long,
-              'الطلبات',
+              l10n.myOrders,
               2,
               selectedBackground,
               selectedColor,
@@ -61,7 +63,7 @@ class AppBottomNavigation extends StatelessWidget {
             ),
             _buildNavItem(
               Icons.chat_bubble,
-              'الدردشة',
+              l10n.lastConversations,
               1,
               selectedBackground,
               selectedColor,
@@ -69,7 +71,7 @@ class AppBottomNavigation extends StatelessWidget {
             ),
             _buildNavItem(
               Icons.home,
-              'الرئيسية',
+              l10n.home,
               0,
               selectedBackground,
               selectedColor,

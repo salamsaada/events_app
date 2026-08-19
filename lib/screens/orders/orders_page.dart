@@ -8,12 +8,13 @@ import '../../generated/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/common/bottom_navigation.dart';
-import '../../core/utils/localized_value.dart'; // ✨ استيراد دالة الترجمة
-import '../../cubit/user_cubit.dart'; // ✨ استيراد الـ Cubit
-import '../../cubit/user_state.dart'; // ✨ استيراد الـ States
+import '../../core/utils/localized_value.dart';
+import '../../cubit/user_cubit.dart';
+import '../../cubit/user_state.dart';
 import '../home/home_page.dart';
 import '../profile/profile_page.dart';
 import '../chat/chat_page.dart';
+import 'rating_page.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -23,11 +24,9 @@ class OrdersPage extends StatefulWidget {
 }
 
 class _OrdersPageState extends State<OrdersPage> {
-  // 🚀 الحجوزات يلي المستخدم دفع لها بالفعل (مرة واحدة بس مسموحة)
   final Set<String> _submittedBookingIds = {};
   String? _lastAttemptedBookingId;
 
-  // 🆕 مفتاح الفلتر المختار حالياً: all / pending / confirmed / completed
   String _selectedStatusFilter = 'all';
 
   @override
@@ -40,7 +39,6 @@ class _OrdersPageState extends State<OrdersPage> {
     });
   }
 
-  // ✨ دالة مساعدة لترجمة الحالة (Pending, Confirmed, الخ..)
   String _translateStatus(String status) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     switch (status.toLowerCase()) {
@@ -57,13 +55,11 @@ class _OrdersPageState extends State<OrdersPage> {
     }
   }
 
-  // 🚀 دالة اختيار الإيصال ورفعه من صفحة الطلبات
   Future<void> _pickAndUploadPdf(
     BuildContext context,
     String currentBookingId,
     String amount,
   ) async {
-    // ⛔ لو سبق ورفع إيصال لهاد الحجز، منعطيه فرصة تانية
     if (_submittedBookingIds.contains(currentBookingId)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -96,7 +92,7 @@ class _OrdersPageState extends State<OrdersPage> {
       }
 
       if (mounted) {
-        _lastAttemptedBookingId = currentBookingId; // 🚀 نتذكر لأي حجز عم نرفع
+        _lastAttemptedBookingId = currentBookingId;
         context.read<UserCubit>().uploadProof(
           bookingId: currentBookingId,
           filePath: file.path,
@@ -136,7 +132,6 @@ class _OrdersPageState extends State<OrdersPage> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                // 🆕 مررنا القيمة الحالية ودالة التغيير للفلتر
                 child: _OrdersFilter(
                   theme: theme,
                   l10n: l10n,
@@ -157,7 +152,6 @@ class _OrdersPageState extends State<OrdersPage> {
                         ),
                       );
                     } else if (state is UploadProofSuccess) {
-                      // 🚀 بمجرد النجاح: نمنع أي محاولة دفع تانية لهاد الحجز نهائياً
                       if (_lastAttemptedBookingId != null) {
                         setState(() {
                           _submittedBookingIds.add(_lastAttemptedBookingId!);
@@ -174,7 +168,6 @@ class _OrdersPageState extends State<OrdersPage> {
                       );
                       context.read<UserCubit>().getMyBookings();
                     } else if (state is UploadProofFailure) {
-                      // 🛡️ كحماية إضافية: لو السيرفر رجع 409 لسبب ما
                       if (state.errMessage.contains('مسجّلة') &&
                           _lastAttemptedBookingId != null) {
                         setState(() {
@@ -207,7 +200,6 @@ class _OrdersPageState extends State<OrdersPage> {
                       ).languageCode;
                       final isAr = languageCode == 'ar';
 
-                      // 🆕 فلترة الحجوزات حسب الحالة المختارة
                       final bookings = _selectedStatusFilter == 'all'
                           ? allBookings
                           : allBookings
@@ -259,6 +251,22 @@ class _OrdersPageState extends State<OrdersPage> {
                               status: _translateStatus(booking.status ?? ''),
                               amount:
                                   '${booking.price ?? '0'} ${booking.currency ?? ''}',
+                              onRatePressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => RatingPage(
+                                      bookingId:
+                                          booking.id ??
+                                          '', // ✅ إرسال الـ bookingId فقط
+                                      serviceName:
+                                          (languageCode == 'ar'
+                                              ? booking.listing?.title?.ar
+                                              : booking.listing?.title?.en) ??
+                                          'بدون اسم',
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },
@@ -302,7 +310,6 @@ class _OrdersPageState extends State<OrdersPage> {
 // ==========================================
 // الهيدر
 // ==========================================
-
 class _OrdersHeader extends StatelessWidget {
   final ThemeData theme;
   final AppLocalizations l10n;
@@ -359,13 +366,12 @@ class _OrdersHeader extends StatelessWidget {
 }
 
 // ==========================================
-// الفلتر — الآن يتحكم فيه الأب (OrdersPage) فعلياً
+// الفلتر
 // ==========================================
-
 class _OrdersFilter extends StatelessWidget {
   final ThemeData theme;
   final AppLocalizations l10n;
-  final String selectedFilter; // 'all' / 'pending' / 'confirmed' / 'completed'
+  final String selectedFilter;
   final ValueChanged<String> onFilterChanged;
 
   const _OrdersFilter({
@@ -378,8 +384,6 @@ class _OrdersFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
-
-    // 🆕 كل عنصر عبارة عن (مفتاح الحالة الحقيقي، النص المعروض)
     final List<MapEntry<String, String>> filters = [
       MapEntry('all', isAr ? 'الكل' : 'All'),
       MapEntry('pending', isAr ? 'قيد الانتظار' : 'Pending'),
@@ -400,7 +404,7 @@ class _OrdersFilter extends StatelessWidget {
           return Padding(
             padding: EdgeInsets.only(right: index == 0 ? 0 : 12),
             child: GestureDetector(
-              onTap: () => onFilterChanged(filterKey), // 🆕 بيبلغ الأب مباشرة
+              onTap: () => onFilterChanged(filterKey),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -441,7 +445,6 @@ class _OrdersFilter extends StatelessWidget {
 // ==========================================
 // كرت الطلب
 // ==========================================
-
 class _OrderCard extends StatelessWidget {
   final String bookingId;
   final String orderNumber;
@@ -451,6 +454,7 @@ class _OrderCard extends StatelessWidget {
   final String guests;
   final String status;
   final String amount;
+  final VoidCallback onRatePressed;
 
   const _OrderCard({
     required this.bookingId,
@@ -461,6 +465,7 @@ class _OrderCard extends StatelessWidget {
     required this.guests,
     required this.status,
     required this.amount,
+    required this.onRatePressed,
   });
 
   @override
@@ -631,6 +636,21 @@ class _OrderCard extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryGold,
                           foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: onRatePressed,
+                        icon: const Icon(Icons.star_outline, size: 18),
+                        label: Text(isAr ? 'تقييم الخدمة' : 'Rate Service'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primaryGold,
+                          side: const BorderSide(color: AppColors.primaryGold),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
