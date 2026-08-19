@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:eventsapp/core/widgets/service_reviews_section.dart';
+import 'package:eventsapp/screens/service_reviews_page.dart';
 
 class HallDetailsPage extends StatefulWidget {
   final ServiceItem item;
@@ -55,7 +57,9 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
                   const SizedBox(height: 12),
                   TextButton(
                     // ✅ مع Type الصريح
-                    onPressed: () => context.read<UserCubit>().getListingDetails(widget.item.id),
+                    onPressed: () => context
+                        .read<UserCubit>()
+                        .getListingDetails(widget.item.id),
                     child: const Text('إعادة المحاولة'),
                   ),
                 ],
@@ -75,7 +79,11 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
     );
   }
 
-  Widget _buildContent(BuildContext context, ServiceItem item, ThemeData theme) {
+  Widget _buildContent(
+    BuildContext context,
+    ServiceItem item,
+    ThemeData theme,
+  ) {
     // ✅ مع Type الصريح لكل context.read / context.watch
     final isDark = context.read<ThemeCubit>().isDark;
     final languageCode = context.watch<LanguageCubit>().languageCode;
@@ -98,8 +106,9 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
                     Image.network(
                       item.images.isNotEmpty
                           ? (item.images[0] is Map
-                              ? (item.images[0]['url'] ?? 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000')
-                              : item.images[0].toString())
+                                ? (item.images[0]['url'] ??
+                                      'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000')
+                                : item.images[0].toString())
                           : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000',
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
@@ -138,11 +147,16 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
                   children: [
                     Text(
                       localizedText(item.title, languageCode),
-                      style: theme.textTheme.displayLarge?.copyWith(fontSize: 24),
+                      style: theme.textTheme.displayLarge?.copyWith(
+                        fontSize: 24,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -181,6 +195,24 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
                         fallback: loc.noDescriptionAvailable,
                       ),
                       style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+                    ),
+                    const SizedBox(height: 25),
+                    ServiceReviewsSection(
+                      reviews: item.reviews,
+                      averageRating: item.averageRating,
+                      reviewCount: item.reviewCount,
+                      isArabic: languageCode == 'ar',
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ServiceReviewsPage(
+                            providerId: item.providerId,
+                            serviceName: localizedText(
+                              item.title,
+                              languageCode,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 25),
                     if (item.variants.isNotEmpty) ...[
@@ -290,9 +322,19 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
         Icon(icon1, color: theme.colorScheme.primary, size: 20),
         const SizedBox(width: 8),
         Expanded(child: Text(text1, style: theme.textTheme.bodyMedium)),
-        Icon(icon2, color: isDark ? Colors.grey[400] : Colors.grey[600], size: 20),
+        Icon(
+          icon2,
+          color: isDark ? Colors.grey[400] : Colors.grey[600],
+          size: 20,
+        ),
         const SizedBox(width: 8),
-        Expanded(child: Text(text2, style: theme.textTheme.bodyMedium, overflow: TextOverflow.ellipsis)),
+        Expanded(
+          child: Text(
+            text2,
+            style: theme.textTheme.bodyMedium,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }
@@ -320,7 +362,11 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
             children: [
               Expanded(
                 child: Text(
-                  localizedText(variant.name, languageCode, fallback: loc.package),
+                  localizedText(
+                    variant.name,
+                    languageCode,
+                    fallback: loc.package,
+                  ),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -363,11 +409,17 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.calendar_today, size: 14, color: theme.colorScheme.primary),
+              Icon(
+                Icons.calendar_today,
+                size: 14,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(width: 6),
               Text(
                 dateFormat.format(availability.availableDate.toLocal()),
-                style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -388,7 +440,9 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
                     Text(
                       '${loc.capacity}: ${variant.capacity}',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: slot.remainingCapacity > 0 ? Colors.green : Colors.red,
+                        color: slot.remainingCapacity > 0
+                            ? Colors.green
+                            : Colors.red,
                       ),
                     ),
                   ],

@@ -6,8 +6,10 @@ import 'package:eventsapp/cubit/user_cubit.dart'; // 🚀 استيراد الك�
 import 'package:eventsapp/cubit/user_state.dart'; // 🚀 استيراد الحالات
 import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/models/listing_model.dart';
-import 'package:eventsapp/screens/booking/Booking.dart'; 
+import 'package:eventsapp/screens/booking/Booking.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
+import 'package:eventsapp/core/widgets/service_reviews_section.dart';
+import 'package:eventsapp/screens/service_reviews_page.dart';
 
 // 🚀 1. تحويل الصفحة لـ StatefulWidget لاستدعاء الـ API في initState
 class ServiceDetailsPage extends StatefulWidget {
@@ -20,7 +22,6 @@ class ServiceDetailsPage extends StatefulWidget {
 }
 
 class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
-
   @override
   void initState() {
     super.initState();
@@ -32,8 +33,23 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   String _formatDate(dynamic dateData) {
     if (dateData == null || dateData.toString().isEmpty) return 'Date not set';
     try {
-      DateTime dt = dateData is DateTime ? dateData : DateTime.parse(dateData.toString());
-      List<String> months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      DateTime dt = dateData is DateTime
+          ? dateData
+          : DateTime.parse(dateData.toString());
+      List<String> months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       return '${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]}, ${dt.year}';
     } catch (e) {
       return dateData.toString().split('T').first;
@@ -91,11 +107,16 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(state.errMessage, style: TextStyle(color: theme.colorScheme.error)),
+                  Text(
+                    state.errMessage,
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
                   TextButton(
-                    onPressed: () => context.read<UserCubit>().getListingDetails(widget.item.id),
+                    onPressed: () => context
+                        .read<UserCubit>()
+                        .getListingDetails(widget.item.id),
                     child: const Text('إعادة المحاولة'),
-                  )
+                  ),
                 ],
               ),
             );
@@ -114,14 +135,20 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   }
 
   // 🚀 نقلت محتوى الصفحة السابقة إلى هذه الدالة مع تمرير أحدث item
-  Widget _buildContent(BuildContext context, ServiceItem item, ThemeData theme) {
+  Widget _buildContent(
+    BuildContext context,
+    ServiceItem item,
+    ThemeData theme,
+  ) {
     final isDark = context.read<ThemeCubit>().isDark;
     final languageCode = context.watch<LanguageCubit>().languageCode;
     final loc = AppLocalizations.of(context)!;
 
     // استخراج الصورة
     final String imageUrl = item.images.isNotEmpty
-        ? (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString())
+        ? (item.images[0] is Map
+              ? item.images[0]['url']
+              : item.images[0].toString())
         : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
 
     // استخراج السعر الافتتاحي
@@ -131,7 +158,8 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
     const Color goldColor = Color(0xFFD6B237);
 
-    return Stack( // استخدمت Stack مشان نحط زر الحجز الثابت تحت
+    return Stack(
+      // استخدمت Stack مشان نحط زر الحجز الثابت تحت
       children: [
         CustomScrollView(
           slivers: [
@@ -148,7 +176,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(
                     color: Colors.grey[300],
-                    child: const Icon(Icons.image_not_supported, color: Colors.grey, size: 50),
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      color: Colors.grey,
+                      size: 50,
+                    ),
                   ),
                 ),
               ),
@@ -160,9 +192,16 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                 transform: Matrix4.translationValues(0, -20, 0),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(24),
+                  ),
                 ),
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 100), // مساحة زر الحجز
+                padding: const EdgeInsets.fromLTRB(
+                  20,
+                  24,
+                  20,
+                  100,
+                ), // مساحة زر الحجز
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -198,7 +237,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                         // الموقع
                         Row(
                           children: [
-                            const Icon(Icons.location_on, color: goldColor, size: 20),
+                            const Icon(
+                              Icons.location_on,
+                              color: goldColor,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               item.district.name,
@@ -212,7 +255,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                         // التصنيف
                         Row(
                           children: [
-                            const Icon(Icons.category, color: goldColor, size: 20),
+                            const Icon(
+                              Icons.category,
+                              color: goldColor,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               item.category.name,
@@ -240,7 +287,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     // نص الوصف
                     Text(
                       localizedText(
@@ -256,6 +303,25 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     const SizedBox(height: 32),
 
+                    ServiceReviewsSection(
+                      reviews: item.reviews,
+                      averageRating: item.averageRating,
+                      reviewCount: item.reviewCount,
+                      isArabic: languageCode == 'ar',
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ServiceReviewsPage(
+                            providerId: item.providerId,
+                            serviceName: localizedText(
+                              item.title,
+                              languageCode,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
                     // قسم الباقات المتاحة
                     const Text(
                       'Available Packages',
@@ -267,8 +333,13 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     const SizedBox(height: 16),
 
                     // بناء كروت الباقات
-                    ...item.variants.map((variant) => _buildPackageCard(variant, isDark, languageCode)).toList(),
-                    
+                    ...item.variants
+                        .map(
+                          (variant) =>
+                              _buildPackageCard(variant, isDark, languageCode),
+                        )
+                        .toList(),
+
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -325,14 +396,14 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   // 🛠️ تصميم كرت الباقة
   Widget _buildPackageCard(dynamic variant, bool isDark, String languageCode) {
     const Color goldColor = Color(0xFFD6B237);
-    
+
     String dateStr = 'No Date';
     String timeStr = '';
-    
+
     if (variant.availabilities != null && variant.availabilities.isNotEmpty) {
       final avail = variant.availabilities[0];
       dateStr = _formatDate(avail.availableDate ?? avail.available_date);
-      
+
       if (avail.slots != null && avail.slots.isNotEmpty) {
         final slot = avail.slots[0];
         final start = _formatTime(slot.startTime ?? slot.start_time);
@@ -353,7 +424,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     String packageName = 'Package Name';
     if (variant.name != null) {
       if (variant.name is Map) {
-        packageName = variant.name[languageCode] ?? variant.name['en'] ?? variant.name['ar'] ?? 'Package Name';
+        packageName =
+            variant.name[languageCode] ??
+            variant.name['en'] ??
+            variant.name['ar'] ??
+            'Package Name';
       } else {
         packageName = variant.name.toString();
       }
@@ -383,21 +458,38 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               Expanded(
                 child: Text(
                   packageName,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               Text(
                 '${variant.price} ${variant.currency ?? 'SYP'}',
-                style: const TextStyle(color: goldColor, fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  color: goldColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              const Icon(Icons.calendar_today_outlined, color: goldColor, size: 18),
+              const Icon(
+                Icons.calendar_today_outlined,
+                color: goldColor,
+                size: 18,
+              ),
               const SizedBox(width: 8),
-              Text(dateStr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              Text(
+                dateStr,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -418,7 +510,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
                     capacityStr,
-                    style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w500, fontSize: 13),
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
             ],
@@ -429,11 +525,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   }
 
   void _showBookingSheet(BuildContext context, ServiceItem currentItem) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => BookingRequestSheet(item: currentItem),
-  );
-}
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => BookingRequestSheet(item: currentItem),
+    );
+  }
 }
