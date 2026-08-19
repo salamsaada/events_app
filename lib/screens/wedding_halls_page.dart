@@ -281,10 +281,18 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
+                      // 🚀 جلب الكيوبت الحالي
+                      final currentCubit = context.read<UserCubit>(); // ✅ صح (حددنا إنه UserCubit)
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ServiceDetailsPage(item: item),
+                          builder: (_) => BlocProvider.value(
+                            value:
+                                currentCubit, // 🚀 تمرير الكيوبت لصفحة التفاصيل
+                            child: HallDetailsPage(
+                              item: item,
+                            ), // 👈 غيّرنا الاسم لـ HallDetailsPage
+                          ),
                         ),
                       );
                     },

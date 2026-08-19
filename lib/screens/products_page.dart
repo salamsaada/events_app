@@ -8,6 +8,7 @@ import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/user_state.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/screens/detailsListings.dart';
+import 'package:eventsapp/screens/service_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
