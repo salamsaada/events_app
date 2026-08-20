@@ -279,6 +279,9 @@ class _OrdersPageState extends State<OrdersPage> {
                             ).format(booking.shift!.startTime!);
                           }
 
+                          // 🚀 تحديد إذا كان الطلب يحتاج دفع (قيد الانتظار)
+                          bool isPending = (booking.status ?? '').toLowerCase() == 'pending';
+
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
                             child: _OrderCard(
@@ -296,6 +299,17 @@ class _OrdersPageState extends State<OrdersPage> {
                               status: _translateStatus(booking.status ?? ''),
                               amount:
                                   '${booking.price ?? '0'} ${booking.currency ?? ''}',
+                              
+                              showPayButton: isPending, // 👈 تمرير حالة إظهار زر الدفع
+                              
+                              onPayPressed: () {
+                                _pickAndUploadPdf(
+                                  context,
+                                  booking.id ?? '',
+                                  booking.price?.toString() ?? '0',
+                                );
+                              },
+                              
                               onRatePressed: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
@@ -490,7 +504,7 @@ class _OrdersFilter extends StatelessWidget {
 }
 
 // ==========================================
-// كرت الطلب
+// كرت الطلب المعدل (زر رفع الإيصال)
 // ==========================================
 class _OrderCard extends StatelessWidget {
   final String bookingId;
@@ -501,6 +515,8 @@ class _OrderCard extends StatelessWidget {
   final String guests;
   final String status;
   final String amount;
+  final bool showPayButton; // 👈 لمعرفة متى نظهر زر الدفع
+  final VoidCallback onPayPressed; // 👈 دالة الدفع
   final VoidCallback onRatePressed;
   final VoidCallback onCancelPressed;
 
@@ -513,6 +529,8 @@ class _OrderCard extends StatelessWidget {
     required this.guests,
     required this.status,
     required this.amount,
+    required this.showPayButton, // 👈
+    required this.onPayPressed, // 👈
     required this.onRatePressed,
     required this.onCancelPressed,
   });
@@ -674,14 +692,39 @@ class _OrderCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
+
+                // 🚀 زر رفع إيصال الدفع (يظهر فقط إذا كان الطلب Pending)
+                if (showPayButton) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: FilledButton.icon(
+                      onPressed: onPayPressed,
+                      icon: const Icon(Icons.upload_file, size: 20),
+                      label: Text(
+                        isAr ? 'رفع إيصال الدفع' : 'Upload Payment Proof',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primaryGold,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
+                // 🚀 أزرار التقييم والإلغاء
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: onCancelPressed,
                         icon: const Icon(Icons.cancel_outlined, size: 18),
-                        label: Text(isAr ? 'إلغاء الحجز' : 'Cancel Booking'),
+                        label: Text(isAr ? 'إلغاء' : 'Cancel'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.red,
                           side: const BorderSide(color: Colors.red),
@@ -696,7 +739,7 @@ class _OrderCard extends StatelessWidget {
                       child: OutlinedButton.icon(
                         onPressed: onRatePressed,
                         icon: const Icon(Icons.star_outline, size: 18),
-                        label: Text(isAr ? 'تقييم الخدمة' : 'Rate Service'),
+                        label: Text(isAr ? 'تقييم' : 'Rate'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primaryGold,
                           side: const BorderSide(color: AppColors.primaryGold),

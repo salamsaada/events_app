@@ -476,8 +476,7 @@ class Variant {
     );
   }
 }
-
-class ServiceItem {
+ class ServiceItem {
   final String id;
   final String providerId;
   final Map<String, dynamic> title;
@@ -552,7 +551,23 @@ class ServiceItem {
         }
       }
 
-      final reviewsData = _firstNonNull(json, ['reviews', 'review']);
+      // ==========================================
+      // 💡 الكود الجديد لمعالجة صور المنتجات:
+      // ==========================================
+      String itemType = json[ApiKey.type]?.toString() ?? '';
+      List<dynamic> finalImages = json[ApiKey.images] ?? [];
+
+      // إذا كان العنصر "منتج" والمصفوفة الأساسية فارغة، نسحب الصور من الـ Variants
+      if (itemType == 'physical_product' && finalImages.isEmpty && parsedVariants.isNotEmpty) {
+        for (var variant in parsedVariants) {
+          if (variant.images.isNotEmpty) {
+            finalImages = variant.images;
+            break; // نأخذ صور أول نسخة (Variant) ونتوقف
+          }
+        }
+      }
+      // ==========================================
+ final reviewsData = _firstNonNull(json, ['reviews', 'review']);
       final rawReviews = reviewsData is List
           ? reviewsData
           : reviewsData is Map && reviewsData['data'] is List
@@ -565,6 +580,7 @@ class ServiceItem {
                 ServiceReview.fromJson(Map<String, dynamic>.from(review)),
           )
           .toList();
+          
       final ratingData = json['rating'];
       final ratingValue =
           _firstNonNull(json, [
@@ -581,6 +597,7 @@ class ServiceItem {
                   'value',
                 ])
               : ratingData);
+              
       final countValue =
           _firstNonNull(json, [
             'review_count',
@@ -597,6 +614,7 @@ class ServiceItem {
                   'total',
                 ])
               : null);
+              
       final calculatedRating = parsedReviews.isEmpty
           ? 0.0
           : parsedReviews.fold<double>(
@@ -604,6 +622,7 @@ class ServiceItem {
                   (sum, review) => sum + review.rating,
                 ) /
                 parsedReviews.length;
+                
       final providerData = json[ApiKey.provider_id] ?? json['provider'];
       final providerId =
           json[ApiKey.provider_id]?.toString() ??
@@ -615,11 +634,12 @@ class ServiceItem {
         providerId: providerId,
         title: _safeMap(json[ApiKey.title]),
         description: _safeMap(json[ApiKey.description]),
-        type: json[ApiKey.type]?.toString() ?? '',
+        type: itemType, // 💡 تم تمرير المتغير الجديد هنا
         status: json[ApiKey.status]?.toString() ?? '',
         materialComposition: json[ApiKey.material_composition],
         secondaryContactNumber: json[ApiKey.secondary_contact_number],
-        cancelBeforeAcceptance:
+        // 💡 تم تصحيح علامات الـ  هنا
+      cancelBeforeAcceptance:
             json[ApiKey.cancel_before_acceptance] == 1 ||
             json[ApiKey.cancel_before_acceptance] == true,
         cancelAfterAcceptance:
@@ -629,12 +649,12 @@ class ServiceItem {
             json[ApiKey.cancel_before_payment] == 1 ||
             json[ApiKey.cancel_before_payment] == true,
         isProviderLocationBased:
-            json[ApiKey.is_provider_location_based] == 1 ||
+            json[ApiKey.is_provider_location_based] == 1 || 
             json[ApiKey.is_provider_location_based] == true,
         rejectionReason: json[ApiKey.rejection_reason],
         category: category,
         district: district,
-        images: json[ApiKey.images] ?? [],
+        images: finalImages, // 💡 تم تمرير المصفوفة المعالجة للصور هنا
         variants: parsedVariants,
         averageRating: ratingValue == null
             ? calculatedRating

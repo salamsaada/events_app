@@ -24,13 +24,10 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
   final TextEditingController _notesController = TextEditingController();
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 7));
   String _selectedTime = '16:00';
-  String? _selectedSlotId; // سيحتفظ بـ ID الفترة التي يختارها المستخدم
+  String? _selectedSlotId; 
   int _guestCount = 50;
   int _selectedPackageIndex = 0;
 
-  // final List<String> _timeSlots = const ['16:00', '19:00', '21:00'];
-
-  // ✨ دالة الترجمة المضافة لتوحيد اللغة في هذه الصفحة
   String _tr(String en, String ar) {
     final languageCode = context.read<LanguageCubit>().languageCode;
     return languageCode == 'ar' ? ar : en;
@@ -72,17 +69,23 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
               backgroundColor: Colors.red,
             ),
           );
+          // 🚀 نغلق نافذة الحجز هنا لأن الحجز تم أصلاً
+          Navigator.pop(context); 
         }
         return;
       }
 
-      // استدعاء دالة الرفع من الكيوبت مع تمرير المبلغ
       if (mounted) {
         context.read<UserCubit>().uploadProof(
           bookingId: currentBookingId,
           filePath: file.path,
-          amount: amount, // 👈 صار معرف ومتاح هنا تماماً
+          amount: amount, 
         );
+      }
+    } else {
+      // 🚀 إذا تراجع المستخدم عن اختيار الملف، نغلق النافذة لمنعه من تكرار الحجز
+      if (mounted) {
+        Navigator.pop(context);
       }
     }
   }
@@ -102,22 +105,17 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
     return BlocConsumer<UserCubit, UserState>(
       listener: (context, state) {
         if (state is CreateBookingSuccess) {
-          Navigator.pop(context); // إغلاق نافذة الحجز
+          // 🚀 1. تم إزالة إغلاق النافذة من هنا لتبقى المحادثة حية مع الكيوبت!
 
-          // 🚀 تحديث الإشعارات فوراً
           context.read<NotificationCubit>().fetchNotifications();
 
-          // استخراج الـ ID الخاص بالحجز (حسب شكل البيانات العائدة من السيرفر)
           String currentBookingId = '';
           try {
-            // نستخدم النقطة للوصول للمتغيرات لأن هذا موديل (Object)
             currentBookingId = state.bookingResponse.data!.id.toString();
           } catch (e) {
             print("خطأ في استخراج رقم الحجز: $e");
           }
 
-          // 🚀 عرض نافذة خيارات الدفع (فترة السماح)
-          // 🚀 عرض نافذة خيارات الدفع (فترة السماح)
           showDialog(
             context: context,
             barrierDismissible: false,
@@ -157,9 +155,9 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pop(dialogContext); // إغلاق النافذة
+                        Navigator.pop(dialogContext); // إغلاق حوار الدفع
 
-                        // ✅ تم التعديل هنا: تمرير سعر الباقة المحددة بدلاً من booking.price
+                        // 🚀 2. استدعاء دالة الرفع بحرية والنافذة الأساسية لا تزال حية
                         _pickAndUploadPdf(
                           context,
                           currentBookingId,
@@ -177,7 +175,8 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                     width: double.infinity,
                     child: TextButton(
                       onPressed: () {
-                        Navigator.pop(dialogContext); // إغلاق النافذة
+                        Navigator.pop(dialogContext); // إغلاق الحوار
+                        Navigator.pop(context); // 🚀 3. نغلق نافذة الحجز هنا لأن المستخدم اختار الدفع لاحقاً
                       },
                       child: Text(
                         _tr('Pay Later', 'الدفع لاحقاً'),
@@ -201,7 +200,8 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
             ),
           );
         } else if (state is UploadProofSuccess) {
-          // 🚀 في حال نجاح رفع الإيصال
+          // 🚀 4. نغلق نافذة الحجز ونعرض الإشعار بعد نجاح الرفع
+          if (mounted) Navigator.pop(context); 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -215,7 +215,8 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
             ),
           );
         } else if (state is UploadProofFailure) {
-          // 🚀 في حال فشل الرفع
+          // 🚀 5. نغلق نافذة الحجز لتجنب تكرار ضغط المستخدم على الحجز، ونظهر الخطأ
+          if (mounted) Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errMessage),
@@ -228,7 +229,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
       builder: (context, state) {
         final isLoading =
             state is CreateBookingLoading ||
-            state is UploadProofLoading; // أضفنا حالة الرفع للـ Loading
+            state is UploadProofLoading; // 🚀 سيعرض الدائرة أثناء الرفع أيضاً
 
         return DraggableScrollableSheet(
           initialChildSize: 0.9,
@@ -544,10 +545,10 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                                           color: isSelected
                                               ? Colors.white
                                               : (slot.remainingCapacity > 0
-                                                    ? theme
-                                                          .colorScheme
-                                                          .onSurface
-                                                    : Colors.grey),
+                                                  ? theme
+                                                      .colorScheme
+                                                      .onSurface
+                                                  : Colors.grey),
                                           fontWeight: FontWeight.w600,
                                         ),
                                   );

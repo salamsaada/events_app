@@ -104,12 +104,29 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                   
                   final String imageUrl = getSmartImageUrl(item);
 
+                  // 🚀 [هنا التعديل: الدوران على كل الباقات لمعرفة السعة الحقيقية] 🚀
                   String capacityInfo = '';
                   if (item.variants.isNotEmpty) {
-                    if (item.variants[0].capacity != null) {
-                      capacityInfo = 'السعة: ${item.variants[0].capacity}';
-                    } else if (item.variants[0].stock != null) {
-                      capacityInfo = 'الكمية: ${item.variants[0].stock}';
+                    int maxCapacity = 0;
+                    int maxStock = 0;
+
+                    for (var variant in item.variants) {
+                      if (variant.capacity != null && (variant.capacity as num).toInt() > maxCapacity) {
+                        maxCapacity = (variant.capacity as num).toInt();
+                      }
+                      if (variant.stock != null && (variant.stock as num).toInt() > maxStock) {
+                        maxStock = (variant.stock as num).toInt();
+                      }
+                    }
+
+                    final isArabic = languageCode == 'ar';
+                    
+                    if (maxCapacity > 0) {
+                      capacityInfo = isArabic ? 'السعة: $maxCapacity' : 'Capacity: $maxCapacity';
+                    } else if (maxStock > 0) {
+                      capacityInfo = isArabic ? 'الكمية: $maxStock' : 'Qty: $maxStock';
+                    } else {
+                      capacityInfo = isArabic ? 'السعة: 0' : 'Capacity: 0';
                     }
                   }
 
@@ -128,7 +145,7 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                         imageUrl: imageUrl, 
                         rating: 4.5,
                         location: item.district.name,
-                        capacity: capacityInfo, 
+                        capacity: capacityInfo, // 👈 تم تمرير السعة الصحيحة هنا
                         isFavorite: isFavorite,
                         onFavoriteToggle: () {
                           context.read<FavoritesCubit>().toggleHeart(item.id); 
