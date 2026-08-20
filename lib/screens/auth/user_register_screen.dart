@@ -60,18 +60,18 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            // 🌟 السحر الحقيقي هنا: فور نجاح عملية الساين اب، نأمر برفع التوكن صامتاً في الخلفية للسيرفر
-            try {
-              context.read<NotificationCubit>().uploadDeviceToken();
-            } catch (e) {
-              print("⚠️ فشل استدعاء رفع التوكن: $e");
-            }
-
             bool isGoogleSignIn = state.successMessage.contains(
               'success_google',
             );
 
+            // 🚀 إذا كان التسجيل عبر جوجل (تسجيل دخول فوري وحصول على توكن) نرفع رمز الجهاز هنا
             if (isGoogleSignIn) {
+              try {
+                context.read<NotificationCubit>().uploadDeviceToken();
+              } catch (e) {
+                print("⚠️ فشل استدعاء رفع التوكن بعد جوجل: $e");
+              }
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(l10n.authGoogleSignInSuccess),
@@ -86,7 +86,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
               return;
             }
 
-            // الفحص الذكي بناءً على خيار المستخدم في الواجهة
+            // 🚀 أما إذا كان تسجيل عادي (يطلب OTP)، ننتقل للشاشة التالية بدون رفع رمز الجهاز الآن
             if (_selectedRole == 'provider') {
               Navigator.pushAndRemoveUntil(
                 context,

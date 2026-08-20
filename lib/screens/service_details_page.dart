@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
-import 'package:eventsapp/cubit/user_cubit.dart'; // 🚀 استيراد الكيوبت
-import 'package:eventsapp/cubit/user_state.dart'; // 🚀 استيراد الحالات
+import 'package:eventsapp/cubit/user_cubit.dart'; 
+import 'package:eventsapp/cubit/user_state.dart'; 
 import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/screens/booking/Booking.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/core/widgets/service_reviews_section.dart';
 import 'package:eventsapp/screens/service_reviews_page.dart';
+import 'package:intl/intl.dart';
 
-// 🚀 1. تحويل الصفحة لـ StatefulWidget لاستدعاء الـ API في initState
 class ServiceDetailsPage extends StatefulWidget {
-  final ServiceItem item; // يمكننا الاحتفاظ بالـ item كبيانات أولية (Fallback)
+  final ServiceItem item; 
 
   const ServiceDetailsPage({super.key, required this.item});
 
@@ -25,43 +25,49 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   @override
   void initState() {
     super.initState();
-    // 🚀 2. استدعاء تفاصيل الخدمة فور فتح الصفحة باستخدام الـ id
     context.read<UserCubit>().getListingDetails(widget.item.id);
   }
 
-  // 🛠️ دالة مساعدة لتنسيق التاريخ (معدلة لتقبل DateTime و String بأمان)
+  // 🚀 [الدالة الذكية لجلب الصورة الخاصة بالخدمات] 🚀
+  // 🚀 [الدالة الذكية: صور مخصصة لخدمات التصوير كـ Fallback] 🚀
+  String getSmartImageUrl(ServiceItem item) {
+    // قائمة صور احترافية مخصصة للكاميرات والتصوير
+    final List<String> fallbackImages = [
+      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1000&q=80', // كاميرا وعدسات
+      'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1000&q=80', // مصور مع كاميرا
+      'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=1000&q=80', // كاميرا فيلم قديمة/كلاسيك
+    ];
+
+    // التحقق من وجود صورة حقيقية (مرفوعة من لوحة تحكم الويب)
+    if (item.images.isNotEmpty) {
+      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
+      if (url.isNotEmpty && url.startsWith('http') && !url.contains('placeholder') && !url.contains('localhost')) {
+        return url; // رجّع صورة السيرفر الحقيقية
+      }
+    }
+
+    // إذا مافي صورة حقيقية، نختار صورة تصوير بناءً على الـ ID
+    int hash = item.id.hashCode.abs();
+    return fallbackImages[hash % fallbackImages.length];
+  }
+
   String _formatDate(dynamic dateData) {
     if (dateData == null || dateData.toString().isEmpty) return 'Date not set';
     try {
       DateTime dt = dateData is DateTime
           ? dateData
           : DateTime.parse(dateData.toString());
-      List<String> months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ];
+      List<String> months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       return '${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]}, ${dt.year}';
     } catch (e) {
       return dateData.toString().split('T').first;
     }
   }
 
-  // 🛠️ دالة مساعدة لتنسيق الوقت بأمان تام
   String _formatTime(dynamic timeData) {
     if (timeData == null || timeData.toString().isEmpty) return '';
     try {
       DateTime? dt;
-      // إذا كان كائن تاريخ كامل أو نص يمثل تاريخ كامل
       if (timeData is DateTime) {
         dt = timeData;
       } else {
@@ -75,7 +81,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         h = h > 12 ? h - 12 : (h == 0 ? 12 : h);
         return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')} $ampm';
       } else {
-        // إذا كان جاي من الباك إند بصيغة "17:00:00"
         final parts = timeData.toString().split(':');
         int h = int.parse(parts[0].trim());
         int m = int.parse(parts[1].trim());
@@ -84,7 +89,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')} $ampm';
       }
     } catch (e) {
-      // في حال فشل كل شيء، نرجع النص بدون أجزاء الثانية الطويلة
       return timeData.toString().split('.').first;
     }
   }
@@ -95,7 +99,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      // 🚀 3. استخدام BlocBuilder للاستماع لحالة جلب التفاصيل
       body: BlocBuilder<UserCubit, UserState>(
         builder: (context, state) {
           if (state is GetListingDetailsLoading) {
@@ -122,19 +125,16 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
             );
           }
 
-          // 🚀 4. إذا نجح الجلب، نستخدم العنصر المحدث (state.listing) بدل القديم (widget.item)
           if (state is GetListingDetailsSuccess) {
             return _buildContent(context, state.listing, theme);
           }
 
-          // شاشة تحميل افتراضية
           return const Center(child: CircularProgressIndicator());
         },
       ),
     );
   }
 
-  // 🚀 نقلت محتوى الصفحة السابقة إلى هذه الدالة مع تمرير أحدث item
   Widget _buildContent(
     BuildContext context,
     ServiceItem item,
@@ -144,14 +144,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     final languageCode = context.watch<LanguageCubit>().languageCode;
     final loc = AppLocalizations.of(context)!;
 
-    // استخراج الصورة
-    final String imageUrl = item.images.isNotEmpty
-        ? (item.images[0] is Map
-              ? item.images[0]['url']
-              : item.images[0].toString())
-        : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
+    // 🚀 استدعاء الدالة الذكية للحصول على الصورة
+    final String imageUrl = getSmartImageUrl(item);
 
-    // استخراج السعر الافتتاحي
     final String startingPrice = item.variants.isNotEmpty
         ? '${item.variants[0].price} ${item.variants[0].currency}'
         : loc.notAvailable;
@@ -159,11 +154,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     const Color goldColor = Color(0xFFD6B237);
 
     return Stack(
-      // استخدمت Stack مشان نحط زر الحجز الثابت تحت
       children: [
         CustomScrollView(
           slivers: [
-            // === 1. الصورة العلوية مع زر الرجوع ===
             SliverAppBar(
               expandedHeight: 300,
               pinned: true,
@@ -171,22 +164,40 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               backgroundColor: theme.scaffoldBackgroundColor,
               iconTheme: theme.appBarTheme.iconTheme,
               flexibleSpace: FlexibleSpaceBar(
-                background: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: Colors.grey[300],
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      color: Colors.grey,
-                      size: 50,
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      imageUrl, // 👈 الصورة الذكية هنا
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        color: Colors.grey[300],
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          color: Colors.grey,
+                          size: 50,
+                        ),
+                      ),
                     ),
-                  ),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: FractionalOffset.topCenter,
+                          end: FractionalOffset.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.7),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
 
-            // === 2. تفاصيل الخدمة (المحتوى) ===
             SliverToBoxAdapter(
               child: Container(
                 transform: Matrix4.translationValues(0, -20, 0),
@@ -196,16 +207,10 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     top: Radius.circular(24),
                   ),
                 ),
-                padding: const EdgeInsets.fromLTRB(
-                  20,
-                  24,
-                  20,
-                  100,
-                ), // مساحة زر الحجز
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 100), 
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // العنوان الرئيسي
                     Text(
                       localizedText(item.title, languageCode),
                       style: theme.textTheme.displayLarge?.copyWith(
@@ -215,7 +220,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     const SizedBox(height: 8),
 
-                    // السعر الافتتاحي
                     Text(
                       'Starting from $startingPrice',
                       style: const TextStyle(
@@ -226,15 +230,12 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // خط فاصل
                     Divider(color: Colors.grey.shade300, thickness: 1),
                     const SizedBox(height: 16),
 
-                    // صف الموقع والتصنيف
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // الموقع
                         Row(
                           children: [
                             const Icon(
@@ -252,7 +253,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                             ),
                           ],
                         ),
-                        // التصنيف
                         Row(
                           children: [
                             const Icon(
@@ -274,11 +274,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // خط فاصل
                     Divider(color: Colors.grey.shade300, thickness: 1),
                     const SizedBox(height: 24),
 
-                    // عنوان قسم الوصف
                     const Text(
                       'Description',
                       style: TextStyle(
@@ -288,7 +286,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     const SizedBox(height: 12),
 
-                    // نص الوصف
                     Text(
                       localizedText(
                         item.description,
@@ -322,7 +319,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     const SizedBox(height: 32),
 
-                    // قسم الباقات المتاحة
                     const Text(
                       'Available Packages',
                       style: TextStyle(
@@ -332,7 +328,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // بناء كروت الباقات
                     ...item.variants
                         .map(
                           (variant) =>
@@ -348,7 +343,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
           ],
         ),
 
-        // === 3. زر الحجز الثابت ===
         Positioned(
           bottom: 0,
           left: 0,
@@ -361,14 +355,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
               height: 55,
               child: ElevatedButton(
                 onPressed: () => _showBookingSheet(context, item),
-                // onPressed: () {
-                //    Navigator.push(
-                //      context,
-                //      MaterialPageRoute(
-                //        builder: (_) => BookingPage(listingId: item.id),
-                //      ),
-                //    );
-                // },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: goldColor,
                   shape: RoundedRectangleBorder(
@@ -393,7 +379,6 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     );
   }
 
-  // 🛠️ تصميم كرت الباقة
   Widget _buildPackageCard(dynamic variant, bool isDark, String languageCode) {
     const Color goldColor = Color(0xFFD6B237);
 

@@ -31,6 +31,36 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
     });
   }
 
+  // 🚀 [الدالة الذكية للصالات: باستخدام صور الـ Assets المحلية] 🚀
+  String getSmartImageUrl(ServiceItem item) {
+    // 1. فحص صارم جداً لرابط الويب (الداتا بيز)
+    if (item.images.isNotEmpty) {
+      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
+      
+      // الفلتر: لازم يبدأ بـ http وممنوع يكون رابط محلي أو وهمي
+      if (url.isNotEmpty && 
+          url.startsWith('http') && 
+          !url.contains('localhost') && 
+          !url.contains('127.0.0.1') && 
+          !url.contains('placeholder') && 
+          !url.contains('example')) {
+        return url; 
+      }
+    }
+
+    // 2. السر لتوزيع الصور بشكل عادل ومستحيل يتكرر
+    int uniqueNum = item.id.toString().codeUnits.fold(0, (sum, char) => sum + char);
+
+    // 3. مسارات الصور الـ 3 اللي ضفتيهم بمشروعك
+    final List<String> fallbackImages = [
+      'assets/images/photo_2026-08-20_01-01-38.jpg', 
+      'assets/images/photo_2026-08-20_01-01-52.jpg', 
+      'assets/images/photo_2026-08-20_01-05-55.jpg', 
+    ];
+
+    return fallbackImages[uniqueNum % fallbackImages.length];
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -47,6 +77,12 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
         titleTextStyle: theme.appBarTheme.titleTextStyle,
       ),
       body: BlocBuilder<UserCubit, UserState>(
+        // 🚀 السطرين هدول هنن الحل: نمنع الصفحة من الانهيار لما نرجع من التفاصيل
+        buildWhen: (previous, current) {
+          return current is GetListingLoading ||
+                 current is GetListingSuccess ||
+                 current is GetListingFailure;
+        },
         builder: (context, state) {
           if (state is GetListingLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -74,7 +110,6 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
             }
 
             return RefreshIndicator(
-              // 🚀 التعديل هنا: تحديث نوع الجلب عند السحب لأسفل ليكون 'hall'
               onRefresh: () async => context.read<UserCubit>().getListing(type: 'hall'),
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
@@ -86,7 +121,8 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
             );
           }
 
-          return const SizedBox();
+          // هذا السطر اللي كان يعمل الشاشة البيضا، بس هلا مع الـ buildWhen ما عاد يوصله أبداً بعد الرجوع!
+          return const SizedBox(); 
         },
       ),
     );
@@ -107,18 +143,17 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
     final String location = item.district.name;
 
     String capacityInfo = 'N/A';
-    
+
     if (item.variants.isNotEmpty) {
-      final capacity = item.variants[0].capacity; 
-      
-      if (capacity > 0) {
+      final capacity = item.variants[0].capacity;
+
+      if (capacity != null && capacity > 0) {
         capacityInfo = 'Up to $capacity Guests';
       }
     }
 
-    final String imageUrl = item.images.isNotEmpty
-        ? item.images[0]['url'] ?? item.images[0].toString()
-        : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
+    // 🚀 استدعاء الدالة الذكية للحصول على الصورة
+    final String imageUrl = getSmartImageUrl(item);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -136,28 +171,44 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // === قسم الصورة والتقييم والمفضلة ===
           Stack(
             children: [
-              // 1. الصورة
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
-                child: Image.network(
-                  imageUrl,
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    height: 200,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.error, color: Colors.red),
-                  ),
-                ),
+                // 🚀 الفحص الذكي: هل نعرض صورة من النت أم صورة محلية من التطبيق؟
+                child: imageUrl.startsWith('http')
+                    ? Image.network(
+                        imageUrl, // رابط حقيقي من السيرفر
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        cacheWidth: 400,
+                        errorBuilder: (context, error, stackTrace) {
+                          // إذا الرابط الحقيقي ميت، نعرض صورة محلية كاحتياط
+                          int uniqueNum = item.id.toString().codeUnits.fold(0, (sum, char) => sum + char);
+                          final List<String> localFallbacks = [
+                            'assets/images/photo_2026-08-20_01-01-38.jpg', 
+                            'assets/images/photo_2026-08-20_01-01-52.jpg', 
+                            'assets/images/photo_2026-08-20_01-05-55.jpg', 
+                          ];
+                          return Image.asset(
+                            localFallbacks[uniqueNum % localFallbacks.length],
+                            height: 200,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        imageUrl, // مسار صورة محلية (لأن الباك إند ما بعت صورة صالحة)
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
               ),
 
-              // 2. التقييم (على اليمين)
               Positioned(
                 top: 15,
                 right: 15,
@@ -189,7 +240,6 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                 ),
               ),
 
-              // 3. زر المفضلة (على اليسار)
               Positioned(
                 top: 15,
                 left: 15,
@@ -222,7 +272,6 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
             ],
           ),
 
-          // === قسم النصوص والتفاصيل ===
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -281,17 +330,16 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
-                      // 🚀 جلب الكيوبت الحالي
-                      final currentCubit = context.read<UserCubit>(); // ✅ صح (حددنا إنه UserCubit)
+                      final currentCubit = context.read<UserCubit>(); 
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => BlocProvider.value(
-                            value:
-                                currentCubit, // 🚀 تمرير الكيوبت لصفحة التفاصيل
+                            value: currentCubit,
                             child: HallDetailsPage(
                               item: item,
-                            ), // 👈 غيّرنا الاسم لـ HallDetailsPage
+                              passedImageUrl: imageUrl, // 🚀 ضفنا هاد السطر لتمرير الصورة 
+                            ),
                           ),
                         ),
                       );
