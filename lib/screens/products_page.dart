@@ -7,8 +7,7 @@ import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/cubit/user_cubit.dart';
 import 'package:eventsapp/cubit/user_state.dart';
 import 'package:eventsapp/models/listing_model.dart';
-import 'package:eventsapp/screens/detailsListings.dart';
-import 'package:eventsapp/screens/service_details_page.dart';
+import 'package:eventsapp/screens/product_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -26,10 +25,54 @@ class _ProductsPageState extends State<ProductsPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<UserCubit>().state;
       if (state is! GetListingLoading) {
-        // 🚀 تم التعديل إلى physical_product
         context.read<UserCubit>().getListing(type: 'physical_product');
       }
     });
+  }
+
+  // 🚀 [الدالة الذكية: النسخة النهائية المضادة للتكرار] 🚀
+  String getSmartImageUrl(ServiceItem item) {
+    if (item.images.isNotEmpty) {
+      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
+      if (url.isNotEmpty && url.startsWith('http') && !url.contains('localhost') && !url.contains('placeholder') && !url.contains('example')) {
+        return url; 
+      }
+    }
+
+    final String title = item.title.toString().toLowerCase();
+    
+    // 🚀 الضربة القاضية: جمعنا كل أحرف الـ ID برقم واحد ضخم، مستحيل يتكرر أبداً
+    int uniqueNum = item.id.codeUnits.fold(0, (sum, char) => sum + char);
+
+    if (title.contains('chair') || title.contains('كرسي') || title.contains('كراسي')) {
+      // 7 كراسي مختلفة لضمان التنوع التام
+      List<String> chairImages = [
+        'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?auto=format&fit=crop&w=1000&q=80', 
+        'https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&w=1000&q=80', 
+        'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=1000&q=80', 
+        'https://images.unsplash.com/photo-1580480055273-228ff5388ef8?auto=format&fit=crop&w=1000&q=80', 
+        'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=1000&q=80', 
+        'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=1000&q=80', 
+        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1000&q=80', 
+      ];
+      return chairImages[uniqueNum % chairImages.length];
+    } 
+    else if (title.contains('table') || title.contains('طاولة') || title.contains('طاولات')) {
+      List<String> tableImages = [
+        'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1000&q=80',
+        'https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=1000&q=80',
+        'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=1000&q=80',
+      ];
+      return tableImages[uniqueNum % tableImages.length];
+    }
+
+    final List<String> fallbackImages = [
+      'https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=1000',
+      'https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1000',
+      'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?q=80&w=1000',
+    ];
+    
+    return fallbackImages[uniqueNum % fallbackImages.length];
   }
 
   @override
@@ -40,7 +83,7 @@ class _ProductsPageState extends State<ProductsPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('المنتجات'), // ✋ بدون ترجمة مؤقتًا
+        title: const Text('المنتجات'),
         centerTitle: true,
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
@@ -48,6 +91,12 @@ class _ProductsPageState extends State<ProductsPage> {
         titleTextStyle: theme.appBarTheme.titleTextStyle,
       ),
       body: BlocBuilder<UserCubit, UserState>(
+        // 🚀 السطرين هدول هنن الحل لمنع الشاشة البيضاء عند الرجوع
+        buildWhen: (previous, current) {
+          return current is GetListingLoading ||
+                 current is GetListingSuccess ||
+                 current is GetListingFailure;
+        },
         builder: (context, state) {
           if (state is GetListingLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -65,12 +114,12 @@ class _ProductsPageState extends State<ProductsPage> {
 
           if (state is GetListingSuccess) {
             final listings = state.listingResponse.data
-                .where((item) => item.type == 'physical_product') // 🚀 تم التعديل هنا أيضاً
+                .where((item) => item.type == 'physical_product')
                 .toList();
 
             if (listings.isEmpty) {
               return const Center(
-                child: Text('لا توجد منتجات متاحة حاليًا'), // ✋ بدون ترجمة مؤقتًا
+                child: Text('لا توجد منتجات متاحة حاليًا'),
               );
             }
 
@@ -107,9 +156,8 @@ class _ProductsPageState extends State<ProductsPage> {
         : 'N/A';
     final String location = item.district.name;
 
-    final String imageUrl = item.images.isNotEmpty
-        ? item.images[0]['url'] ?? item.images[0].toString()
-        : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
+    // 🚀 تطبيق الدالة الذكية للصورة هنا
+    final String imageUrl = getSmartImageUrl(item);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -138,8 +186,9 @@ class _ProductsPageState extends State<ProductsPage> {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(
                     height: 200,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.error, color: Colors.red),
+                    width: double.infinity, 
+                    color: Colors.grey[200],
+                    child: const Icon(Icons.image_not_supported, color: Colors.grey, size: 40),
                   ),
                 ),
               ),
@@ -232,13 +281,19 @@ class _ProductsPageState extends State<ProductsPage> {
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
+                      final currentCubit = context.read<UserCubit>();
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => ServiceDetailsPage(item: item)),
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider.value(
+                            value: currentCubit,
+                            child: ProductDetailsPage(item: item), 
+                          ),
+                        ),
                       );
                     },
                     style: theme.elevatedButtonTheme.style,
-                    child: const Text('عرض التفاصيل'), // ✋ بدون ترجمة مؤقتًا
+                    child: const Text('عرض التفاصيل'),
                   ),
                 ),
               ],

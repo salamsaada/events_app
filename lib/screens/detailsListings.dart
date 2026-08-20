@@ -14,8 +14,13 @@ import 'package:eventsapp/screens/service_reviews_page.dart';
 
 class HallDetailsPage extends StatefulWidget {
   final ServiceItem item;
+  final String? passedImageUrl; // 🚀 ضفنا هاد السطر لاستقبال الصورة من الخارج
 
-  const HallDetailsPage({super.key, required this.item});
+  const HallDetailsPage({
+    super.key, 
+    required this.item,
+    this.passedImageUrl, // 🚀 استقبلنا الصورة هنا
+  });
 
   @override
   State<HallDetailsPage> createState() => _HallDetailsPageState();
@@ -26,9 +31,29 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // ✅ مع Type الصريح — بيمنع الـ crash
       context.read<UserCubit>().getListingDetails(widget.item.id);
     });
+  }
+
+  // 🚀 دالة ذكية بتعطي الأولوية للصورة الممررة من برا، لحتى تضل مطابقة 100%
+  String getFinalImageUrl(ServiceItem item) {
+    if (widget.passedImageUrl != null && widget.passedImageUrl!.isNotEmpty) {
+      return widget.passedImageUrl!; // إذا إجت صورة من برا، اعرضها نفسها فوراً
+    }
+    
+    // كاحتياط (نفس صور الـ Assets تبع صفحة الصالات)
+    if (item.images.isNotEmpty) {
+      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
+      if (url.isNotEmpty && url.startsWith('http') && !url.contains('localhost')) return url; 
+    }
+    
+    int uniqueNum = item.id.toString().codeUnits.fold(0, (sum, char) => sum + char);
+    final List<String> localFallbacks = [
+      'assets/images/photo_2026-08-20_01-01-38.jpg', 
+      'assets/images/photo_2026-08-20_01-01-52.jpg', 
+      'assets/images/photo_2026-08-20_01-05-55.jpg', 
+    ];
+    return localFallbacks[uniqueNum % localFallbacks.length];
   }
 
   @override
@@ -37,7 +62,6 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      // ✅ BlocBuilder مع Type الصريح
       body: BlocBuilder<UserCubit, UserState>(
         builder: (context, state) {
           if (state is GetListingDetailsLoading) {
@@ -56,7 +80,6 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
                   ),
                   const SizedBox(height: 12),
                   TextButton(
-                    // ✅ مع Type الصريح
                     onPressed: () => context
                         .read<UserCubit>()
                         .getListingDetails(widget.item.id),
@@ -68,11 +91,9 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
           }
 
           if (state is GetListingDetailsSuccess) {
-            // ✅ state.item (مش state.listing)
             return _buildContent(context, state.listing, theme);
           }
 
-          // Fallback: نعرض البيانات الخفيفة القادمة من القائمة فورًا
           return _buildContent(context, widget.item, theme);
         },
       ),
@@ -84,10 +105,12 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
     ServiceItem item,
     ThemeData theme,
   ) {
-    // ✅ مع Type الصريح لكل context.read / context.watch
     final isDark = context.read<ThemeCubit>().isDark;
     final languageCode = context.watch<LanguageCubit>().languageCode;
     final loc = AppLocalizations.of(context)!;
+
+    // 🚀 جلب الصورة المتطابقة 100% مع الخارج
+    final String imageUrl = getFinalImageUrl(item);
 
     return Stack(
       children: [
@@ -103,19 +126,22 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.network(
-                      item.images.isNotEmpty
-                          ? (item.images[0] is Map
-                                ? (item.images[0]['url'] ??
-                                      'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000')
-                                : item.images[0].toString())
-                          : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000',
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.error, color: Colors.red),
-                      ),
-                    ),
+                    // 🚀 فحص ذكي לעرض الصورة بناءً على نوع الرابط
+                    imageUrl.startsWith('http')
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              color: Colors.grey[200],
+                              child: const Icon(Icons.broken_image, color: Colors.grey, size: 50),
+                            ),
+                          )
+                        : Image.asset(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                          ),
                     DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -246,7 +272,6 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
           ],
         ),
 
-        // === زر الحجز في الأسفل ===
         Positioned(
           bottom: 0,
           left: 0,

@@ -8,6 +8,7 @@ import 'package:eventsapp/cubit/favorites_cubit.dart';
 import 'package:eventsapp/cubit/favorites_state.dart';
 import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/core/widgets/common/result_card.dart';
+import 'package:eventsapp/models/listing_model.dart';
 import 'service_details_page.dart';
 
 class ServicesCategoriesPage extends StatefulWidget {
@@ -22,9 +23,27 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // 🚀 التعديل الأول: طلب الـ service بدل المنتجات
       context.read<UserCubit>().getListing(type: 'service');
     });
+  }
+
+  // 🚀 [الدالة الذكية لجلب الصورة الخاصة بالخدمات] 🚀
+  String getSmartImageUrl(ServiceItem item) {
+    final List<String> fallbackImages = [
+      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1000&q=80', // كاميرا وعدسات
+      'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1000&q=80', // مصور مع كاميرا
+      'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=1000&q=80', // كاميرا فيلم قديمة/كلاسيك
+    ];
+
+    if (item.images.isNotEmpty) {
+      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
+      if (url.isNotEmpty && url.startsWith('http') && !url.contains('placeholder') && !url.contains('localhost')) {
+        return url; 
+      }
+    }
+
+    int hash = item.id.hashCode.abs();
+    return fallbackImages[hash % fallbackImages.length];
   }
 
   @override
@@ -37,6 +56,12 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
         centerTitle: true,
       ),
       body: BlocBuilder<UserCubit, UserState>(
+        // 🚀 السطرين هدول هنن الحل لمنع الشاشة البيضاء عند الرجوع
+        buildWhen: (previous, current) {
+          return current is GetListingLoading ||
+                 current is GetListingSuccess ||
+                 current is GetListingFailure;
+        },
         builder: (context, state) {
           if (state is GetListingLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -52,7 +77,6 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
           }
 
           if (state is GetListingSuccess) {
-            // 🚀 التعديل الثاني: فلترة النتائج لعرض الخدمات فقط
             final products = state.listingResponse.data
                 .where((item) => item.type == 'service')
                 .toList();
@@ -63,7 +87,6 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
 
             return RefreshIndicator(
               onRefresh: () async {
-                // 🚀 التعديل الثالث: تحديث الصفحة يجلب الخدمات فقط
                 await context.read<UserCubit>().getListing(type: 'service');
               },
               child: ListView.builder(
@@ -79,11 +102,8 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                       ? '${item.variants[0].price} ${item.variants[0].currency}'
                       : 'غير متوفر';
                   
-                  final String imageUrl = item.images.isNotEmpty
-                      ? (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString())
-                      : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000';
+                  final String imageUrl = getSmartImageUrl(item);
 
-                  // 🚀 التعديل الرابع: معالجة السعة أو الكمية بذكاء
                   String capacityInfo = '';
                   if (item.variants.isNotEmpty) {
                     if (item.variants[0].capacity != null) {
@@ -105,36 +125,29 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                         title: title,
                         companyName: providerName,
                         price: price,
-                        imageUrl: imageUrl,
+                        imageUrl: imageUrl, 
                         rating: 4.5,
                         location: item.district.name,
                         capacity: capacityInfo, 
                         isFavorite: isFavorite,
                         onFavoriteToggle: () {
-                          // تأكدي من تمرير item المباشر أو item.id حسب دالة الكيوبت عندك
                           context.read<FavoritesCubit>().toggleHeart(item.id); 
                         },
-                        // في ملف ServicesCategoriesPage
-                        // ...
                         onTap: () {
-                          // 🚀 1. نجلب الـ Cubit الحالي قبل الانتقال
                           final currentCubit = context.read<UserCubit>();
 
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              // 🚀 2. نغلف الصفحة الجديدة بـ BlocProvider.value لنفس الكيوبت
                               builder: (_) => BlocProvider.value(
                                 value: currentCubit,
                                 child: ServiceDetailsPage(
-                                  // نمرر الـ id فقط أو الـ item كله، بس الأهم نستدعي الـ API
                                   item: item,
                                 ),
                               ),
                             ),
                           );
                         },
-                          // ...
                       );
                     },
                   );

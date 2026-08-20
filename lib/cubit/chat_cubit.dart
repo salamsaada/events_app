@@ -13,8 +13,6 @@ class ChatCubit extends Cubit<ChatState> {
   final ChatApiRepository _apiRepo;
   final PlannersRepository _plannersRepo;
 
-  static const String botId = "support_bot_id"; 
-  
   String? activeChatId; 
   StreamSubscription? _messagesSubscription;
 
@@ -55,56 +53,11 @@ class ChatCubit extends Cubit<ChatState> {
         receiverId: receiverId,
         text: text,
       );
-
-      // 2. التحقق من حالة الطرف الآخر (هل هو موجود أم لا؟)
-      // ملاحظة: تأكدي من إضافة دالة isUserOnline في الـ ChatRepository الخاص بك
-      bool isReceiverOnline = await _firebaseRepo.isUserOnline(receiverId);
-
-      // 3. إذا كان الطرف الآخر "أوفلاين"، يعمل البوت. إذا كان "أونلاين"، لا يفعل البوت شيئاً
-      if (!isReceiverOnline) {
-        _generateAutomatedResponse(chatId: chatId, userId: senderId, userMessage: text);
-      }
-
+      // 🚀 تم إزالة كود الرد التلقائي (البوت) من هنا بنجاح
     } catch (error) {
       emit(ChatError(error.toString()));
     }
   }
-
-  // 🌟 دالة الرد التلقائي (البوت)
-  void _generateAutomatedResponse({
-  required String chatId,
-  required String userId,
-  required String userMessage,
-}) async {
-  await Future.delayed(const Duration(seconds: 1));
-
-  final Map<String, String> responses = {
-    "مرحبا": "أهلاً بك! كيف يمكننا مساعدتك في Aura Events اليوم؟",
-    "hi": "Hello! How can we help you with Aura Events today?",
-    "حجز": "يمكنك حجز موعدك بسهولة من خلال تبويب 'الحجوزات' في التطبيق.",
-    "سعر": "تختلف أسعارنا بناءً على نوع الخدمة. يمكنك الاطلاع على الباقات في قسم 'الخدمات'.",
-    "شكرا": "عفواً، نحن في الخدمة دائماً! هل تحتاج لأي مساعدة أخرى؟",
-  };
-
-  String finalResponse = "عذراً، لم أفهم طلبك جيداً. سأقوم بتحويل رسالتك للفريق المختص وسيردون عليك قريباً.";
-
-  String lowerMessage = userMessage.toLowerCase();
-
-  for (var entry in responses.entries) {
-    if (lowerMessage.contains(entry.key.toLowerCase())) {
-      finalResponse = entry.value;
-      break; 
-    }
-  }
-
-  // 4. إرسال الرد
-  await _firebaseRepo.sendMessage(
-    chatId: chatId,
-    senderId: botId,
-    receiverId: userId,
-    text: finalResponse,
-  );
-}
 
   @override
   Future<void> close() {
