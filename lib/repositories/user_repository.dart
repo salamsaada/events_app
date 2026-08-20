@@ -6,6 +6,7 @@ import 'package:eventsapp/core/api/api_consumer.dart';
 import 'package:eventsapp/core/api/end_ponits.dart';
 import 'package:eventsapp/core/errors/exceptions.dart';
 import 'package:eventsapp/models/booking_model.dart';
+import 'package:eventsapp/models/cancelModele.dart';
 import 'package:eventsapp/models/getModelsReviews.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/models/myBookings_model.dart';
@@ -337,17 +338,18 @@ class UserRepository {
     }
   }
 
+  // في الـ Repository
   Future<Either<String, String>> cancelBooking(String bookingId) async {
     try {
-      final response = await api.delete('${EndPoint.cancelBooking}/$bookingId');
-      final message = response is Map<String, dynamic>
-          ? response[ApiKey.message]?.toString()
-          : null;
-      return Right(message ?? 'تم إلغاء الحجز بنجاح');
-    } on ServerException catch (e) {
-      return Left(e.errModel.errorMessage);
+      final response = await api.put(
+        // ✅ ملاحظة: اللوج السابق قال Supported methods: PUT
+        '${EndPoint.cancelBooking}/$bookingId/cancel',
+      );
+
+      final cancelResponse = CancelBookingResponsee.fromJson(response);
+      return Right(cancelResponse.message ?? 'تم إلغاء الحجز بنجاح');
     } catch (e) {
-      return Left('حدث خطأ غير متوقع: $e');
+      return Left('فشل إلغاء الحجز');
     }
   }
 

@@ -24,7 +24,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
   final TextEditingController _notesController = TextEditingController();
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 7));
   String _selectedTime = '16:00';
-  String? _selectedSlotId; 
+  String? _selectedSlotId;
   int _guestCount = 50;
   int _selectedPackageIndex = 0;
 
@@ -70,7 +70,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
             ),
           );
           // 🚀 نغلق نافذة الحجز هنا لأن الحجز تم أصلاً
-          Navigator.pop(context); 
+          Navigator.pop(context);
         }
         return;
       }
@@ -79,7 +79,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
         context.read<UserCubit>().uploadProof(
           bookingId: currentBookingId,
           filePath: file.path,
-          amount: amount, 
+          amount: amount,
         );
       }
     } else {
@@ -176,7 +176,9 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                     child: TextButton(
                       onPressed: () {
                         Navigator.pop(dialogContext); // إغلاق الحوار
-                        Navigator.pop(context); // 🚀 3. نغلق نافذة الحجز هنا لأن المستخدم اختار الدفع لاحقاً
+                        Navigator.pop(
+                          context,
+                        ); // إغلاق نافذة الحجز بعد اختيار الدفع لاحقاً
                       },
                       child: Text(
                         _tr('Pay Later', 'الدفع لاحقاً'),
@@ -201,7 +203,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
           );
         } else if (state is UploadProofSuccess) {
           // 🚀 4. نغلق نافذة الحجز ونعرض الإشعار بعد نجاح الرفع
-          if (mounted) Navigator.pop(context); 
+          if (mounted) Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -545,10 +547,10 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                                           color: isSelected
                                               ? Colors.white
                                               : (slot.remainingCapacity > 0
-                                                  ? theme
-                                                      .colorScheme
-                                                      .onSurface
-                                                  : Colors.grey),
+                                                    ? theme
+                                                          .colorScheme
+                                                          .onSurface
+                                                    : Colors.grey),
                                           fontWeight: FontWeight.w600,
                                         ),
                                   );

@@ -1,6 +1,5 @@
 ﻿import 'package:dio/dio.dart';
 import 'package:eventsapp/core/errors/error_model.dart';
-import 'package:eventsapp/core/errors/errors.dart';
 
 class ServerException implements Exception {
   final ErrorModel errModel;

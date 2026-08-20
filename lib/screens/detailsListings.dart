@@ -17,7 +17,7 @@ class HallDetailsPage extends StatefulWidget {
   final String? passedImageUrl; // 🚀 ضفنا هاد السطر لاستقبال الصورة من الخارج
 
   const HallDetailsPage({
-    super.key, 
+    super.key,
     required this.item,
     this.passedImageUrl, // 🚀 استقبلنا الصورة هنا
   });
@@ -40,18 +40,26 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
     if (widget.passedImageUrl != null && widget.passedImageUrl!.isNotEmpty) {
       return widget.passedImageUrl!; // إذا إجت صورة من برا، اعرضها نفسها فوراً
     }
-    
+
     // كاحتياط (نفس صور الـ Assets تبع صفحة الصالات)
     if (item.images.isNotEmpty) {
-      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
-      if (url.isNotEmpty && url.startsWith('http') && !url.contains('localhost')) return url; 
+      String url = (item.images[0] is Map
+          ? item.images[0]['url']
+          : item.images[0].toString());
+      if (url.isNotEmpty &&
+          url.startsWith('http') &&
+          !url.contains('localhost'))
+        return url;
     }
-    
-    int uniqueNum = item.id.toString().codeUnits.fold(0, (sum, char) => sum + char);
+
+    int uniqueNum = item.id.toString().codeUnits.fold(
+      0,
+      (sum, char) => sum + char,
+    );
     final List<String> localFallbacks = [
-      'assets/images/photo_2026-08-20_01-01-38.jpg', 
-      'assets/images/photo_2026-08-20_01-01-52.jpg', 
-      'assets/images/photo_2026-08-20_01-05-55.jpg', 
+      'assets/images/photo_2026-08-20_01-01-38.jpg',
+      'assets/images/photo_2026-08-20_01-01-52.jpg',
+      'assets/images/photo_2026-08-20_01-05-55.jpg',
     ];
     return localFallbacks[uniqueNum % localFallbacks.length];
   }
@@ -131,17 +139,19 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
                         ? Image.network(
                             imageUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              width: double.infinity,
-                              height: double.infinity,
-                              color: Colors.grey[200],
-                              child: const Icon(Icons.broken_image, color: Colors.grey, size: 50),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  color: Colors.grey[200],
+                                  child: const Icon(
+                                    Icons.broken_image,
+                                    color: Colors.grey,
+                                    size: 50,
+                                  ),
+                                ),
                           )
-                        : Image.asset(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                          ),
+                        : Image.asset(imageUrl, fit: BoxFit.cover),
                     DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -463,7 +473,7 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
                     ),
                     const Spacer(),
                     Text(
-                      '${loc.capacity}: ${variant.capacity}',
+                      '${loc.capacity}: ${slot.remainingCapacity}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: slot.remainingCapacity > 0
                             ? Colors.green

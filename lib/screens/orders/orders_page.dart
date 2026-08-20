@@ -120,7 +120,7 @@ class _OrdersPageState extends State<OrdersPage> {
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(isAr ? 'إلغاء الحجز' : 'Cancel Booking'),
+            child: Text(isAr ? 'نعم، إلغاء' : 'Yes, Cancel'),
           ),
         ],
       ),
@@ -186,7 +186,6 @@ class _OrdersPageState extends State<OrdersPage> {
                           _submittedBookingIds.add(_lastAttemptedBookingId!);
                         });
                       }
-
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
@@ -203,7 +202,6 @@ class _OrdersPageState extends State<OrdersPage> {
                           _submittedBookingIds.add(_lastAttemptedBookingId!);
                         });
                       }
-
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(state.errMessage),
@@ -279,8 +277,17 @@ class _OrdersPageState extends State<OrdersPage> {
                             ).format(booking.shift!.startTime!);
                           }
 
-                          // 🚀 تحديد إذا كان الطلب يحتاج دفع (قيد الانتظار)
-                          bool isPending = (booking.status ?? '').toLowerCase() == 'pending';
+                          // ✨ أخذ الحالة الأصلية بالإنجليزي لتطبيق الشروط
+                          final rawStatus = (booking.status ?? '')
+                              .toLowerCase();
+
+                          // ✨ تحديد الشروط هنا بدلاً من داخل الكرت
+                          final bool showPayButton = (rawStatus == 'pending');
+                          final bool showCancelButton =
+                              (rawStatus == 'pending' ||
+                              rawStatus == 'confirmed');
+                          final bool showRateButton =
+                              (rawStatus == 'completed');
 
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
@@ -296,27 +303,27 @@ class _OrdersPageState extends State<OrdersPage> {
                               date: booking.createdAtHuman ?? '--',
                               time: formattedTime,
                               guests: '--',
-                              status: _translateStatus(booking.status ?? ''),
+                              status: _translateStatus(
+                                booking.status ?? '',
+                              ), // نرسل المترجم للعرض فقط
                               amount:
                                   '${booking.price ?? '0'} ${booking.currency ?? ''}',
-                              
-                              showPayButton: isPending, // 👈 تمرير حالة إظهار زر الدفع
-                              
-                              onPayPressed: () {
-                                _pickAndUploadPdf(
-                                  context,
-                                  booking.id ?? '',
-                                  booking.price?.toString() ?? '0',
-                                );
-                              },
-                              
+
+                              // تمرير الشروط كـ Boolean
+                              showPayButton: showPayButton,
+                              showCancelButton: showCancelButton,
+                              showRateButton: showRateButton,
+
+                              onPayPressed: () => _pickAndUploadPdf(
+                                context,
+                                booking.id ?? '',
+                                booking.price?.toString() ?? '0',
+                              ),
                               onRatePressed: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (_) => RatingPage(
-                                      bookingId:
-                                          booking.id ??
-                                          '', // ✅ إرسال الـ bookingId فقط
+                                      bookingId: booking.id ?? '',
                                       serviceName:
                                           (languageCode == 'ar'
                                               ? booking.listing?.title?.ar
@@ -374,7 +381,6 @@ class _OrdersPageState extends State<OrdersPage> {
 class _OrdersHeader extends StatelessWidget {
   final ThemeData theme;
   final AppLocalizations l10n;
-
   const _OrdersHeader({required this.theme, required this.l10n});
 
   @override
@@ -434,7 +440,6 @@ class _OrdersFilter extends StatelessWidget {
   final AppLocalizations l10n;
   final String selectedFilter;
   final ValueChanged<String> onFilterChanged;
-
   const _OrdersFilter({
     required this.theme,
     required this.l10n,
@@ -515,8 +520,11 @@ class _OrderCard extends StatelessWidget {
   final String guests;
   final String status;
   final String amount;
-  final bool showPayButton; // 👈 لمعرفة متى نظهر زر الدفع
-  final VoidCallback onPayPressed; // 👈 دالة الدفع
+  final bool showPayButton;
+  final bool showCancelButton;
+  final bool showRateButton;
+
+  final VoidCallback onPayPressed;
   final VoidCallback onRatePressed;
   final VoidCallback onCancelPressed;
 
@@ -529,8 +537,10 @@ class _OrderCard extends StatelessWidget {
     required this.guests,
     required this.status,
     required this.amount,
-    required this.showPayButton, // 👈
-    required this.onPayPressed, // 👈
+    required this.showPayButton,
+    required this.showCancelButton,
+    required this.showRateButton,
+    required this.onPayPressed,
     required this.onRatePressed,
     required this.onCancelPressed,
   });
@@ -694,7 +704,7 @@ class _OrderCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // 🚀 زر رفع إيصال الدفع (يظهر فقط إذا كان الطلب Pending)
+                // 1. زر رفع الإيصال
                 if (showPayButton) ...[
                   SizedBox(
                     width: double.infinity,
@@ -717,40 +727,47 @@ class _OrderCard extends StatelessWidget {
                   const SizedBox(height: 12),
                 ],
 
-                // 🚀 أزرار التقييم والإلغاء
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: onCancelPressed,
-                        icon: const Icon(Icons.cancel_outlined, size: 18),
-                        label: Text(isAr ? 'إلغاء' : 'Cancel'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.red,
-                          side: const BorderSide(color: Colors.red),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                // 2. أزرار الإلغاء والتقييم
+                if (showCancelButton || showRateButton) ...[
+                  Row(
+                    children: [
+                      if (showCancelButton)
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: onCancelPressed,
+                            icon: const Icon(Icons.cancel_outlined, size: 18),
+                            label: Text(isAr ? 'إلغاء الحجز' : 'Cancel'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              side: const BorderSide(color: Colors.red),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: onRatePressed,
-                        icon: const Icon(Icons.star_outline, size: 18),
-                        label: Text(isAr ? 'تقييم' : 'Rate'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primaryGold,
-                          side: const BorderSide(color: AppColors.primaryGold),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      if (showCancelButton && showRateButton)
+                        const SizedBox(width: 8),
+                      if (showRateButton)
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: onRatePressed,
+                            icon: const Icon(Icons.star_outline, size: 18),
+                            label: Text(isAr ? 'تقييم الخدمة' : 'Rate Service'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primaryGold,
+                              side: const BorderSide(
+                                color: AppColors.primaryGold,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

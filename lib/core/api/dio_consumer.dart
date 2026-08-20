@@ -10,14 +10,16 @@ class DioConsumer extends ApiConsumer {
   DioConsumer({required this.dio}) {
     dio.options.baseUrl = EndPoint.baseUrl;
     dio.interceptors.add(ApiInterceptor());
-    dio.interceptors.add(LogInterceptor(
-      request: true,
-      requestHeader: true,
-      requestBody: true,
-      responseHeader: true,
-      responseBody: true,
-      error: true,
-    ));
+    dio.interceptors.add(
+      LogInterceptor(
+        request: true,
+        requestHeader: true,
+        requestBody: true,
+        responseHeader: true,
+        responseBody: true,
+        error: true,
+      ),
+    );
   }
 
   @override
@@ -40,8 +42,11 @@ class DioConsumer extends ApiConsumer {
   }
 
   @override
-  Future get(String path,
-      {Object? data, Map<String, dynamic>? queryParameters}) async {
+  Future get(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+  }) async {
     try {
       final response = await dio.get(
         path,
@@ -91,5 +96,20 @@ class DioConsumer extends ApiConsumer {
       handleDioExceptions(e);
     }
   }
-}
 
+  // ✨ انسخ دالة الـ post بالكامل، ولصقها هنا وغير اسمها لـ put
+  @override
+  Future<dynamic> put(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    bool isFromData = false,
+  }) {
+    // داخل الدالة، غير كلمة post إلى put فقط
+    return dio.put(
+      path,
+      data: isFromData ? FormData.fromMap(data as Map<String, dynamic>) : data,
+      queryParameters: queryParameters,
+    );
+  }
+}
