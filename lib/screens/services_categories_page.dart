@@ -36,9 +36,14 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
     ];
 
     if (item.images.isNotEmpty) {
-      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
-      if (url.isNotEmpty && url.startsWith('http') && !url.contains('placeholder') && !url.contains('localhost')) {
-        return url; 
+      String url = (item.images[0] is Map
+          ? item.images[0]['url']
+          : item.images[0].toString());
+      if (url.isNotEmpty &&
+          url.startsWith('http') &&
+          !url.contains('placeholder') &&
+          !url.contains('localhost')) {
+        return url;
       }
     }
 
@@ -51,16 +56,13 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.individualServices), 
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text(l10n.individualServices), centerTitle: true),
       body: BlocBuilder<UserCubit, UserState>(
         // 🚀 السطرين هدول هنن الحل لمنع الشاشة البيضاء عند الرجوع
         buildWhen: (previous, current) {
           return current is GetListingLoading ||
-                 current is GetListingSuccess ||
-                 current is GetListingFailure;
+              current is GetListingSuccess ||
+              current is GetListingFailure;
         },
         builder: (context, state) {
           if (state is GetListingLoading) {
@@ -94,14 +96,16 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   final item = products[index];
-                  final languageCode = context.watch<LanguageCubit>().languageCode;
+                  final languageCode = context
+                      .watch<LanguageCubit>()
+                      .languageCode;
 
                   final String title = localizedText(item.title, languageCode);
-                  final String providerName = item.category.name; 
+                  final String providerName = item.category.name;
                   final String price = item.variants.isNotEmpty
                       ? '${item.variants[0].price} ${item.variants[0].currency}'
                       : 'غير متوفر';
-                  
+
                   final String imageUrl = getSmartImageUrl(item);
 
                   // 🚀 [هنا التعديل: الدوران على كل الباقات لمعرفة السعة الحقيقية] 🚀
@@ -111,20 +115,26 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                     int maxStock = 0;
 
                     for (var variant in item.variants) {
-                      if (variant.capacity != null && (variant.capacity as num).toInt() > maxCapacity) {
+                      if (variant.capacity != null &&
+                          (variant.capacity as num).toInt() > maxCapacity) {
                         maxCapacity = (variant.capacity as num).toInt();
                       }
-                      if (variant.stock != null && (variant.stock as num).toInt() > maxStock) {
+                      if (variant.stock != null &&
+                          (variant.stock as num).toInt() > maxStock) {
                         maxStock = (variant.stock as num).toInt();
                       }
                     }
 
                     final isArabic = languageCode == 'ar';
-                    
+
                     if (maxCapacity > 0) {
-                      capacityInfo = isArabic ? 'السعة: $maxCapacity' : 'Capacity: $maxCapacity';
+                      capacityInfo = isArabic
+                          ? 'السعة: $maxCapacity'
+                          : 'Capacity: $maxCapacity';
                     } else if (maxStock > 0) {
-                      capacityInfo = isArabic ? 'الكمية: $maxStock' : 'Qty: $maxStock';
+                      capacityInfo = isArabic
+                          ? 'الكمية: $maxStock'
+                          : 'Qty: $maxStock';
                     } else {
                       capacityInfo = isArabic ? 'السعة: 0' : 'Capacity: 0';
                     }
@@ -134,7 +144,9 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                     builder: (context, favState) {
                       bool isFavorite = false;
                       if (favState is FavoritesLoaded) {
-                        isFavorite = favState.favorites.any((fav) => fav.id == item.id);
+                        isFavorite = favState.favorites.any(
+                          (fav) => fav.id == item.id,
+                        );
                       }
 
                       return ResultCard(
@@ -142,13 +154,13 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                         title: title,
                         companyName: providerName,
                         price: price,
-                        imageUrl: imageUrl, 
+                        imageUrl: imageUrl,
                         rating: 4.5,
                         location: item.district.name,
                         capacity: capacityInfo, // 👈 تم تمرير السعة الصحيحة هنا
                         isFavorite: isFavorite,
                         onFavoriteToggle: () {
-                          context.read<FavoritesCubit>().toggleHeart(item.id); 
+                          context.read<FavoritesCubit>().toggleHeart(item.id);
                         },
                         onTap: () {
                           final currentCubit = context.read<UserCubit>();
@@ -158,9 +170,7 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                             MaterialPageRoute(
                               builder: (_) => BlocProvider.value(
                                 value: currentCubit,
-                                child: ServiceDetailsPage(
-                                  item: item,
-                                ),
+                                child: ServiceDetailsPage(item: item),
                               ),
                             ),
                           );

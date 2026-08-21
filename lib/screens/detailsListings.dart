@@ -473,7 +473,7 @@ class _HallDetailsPageState extends State<HallDetailsPage> {
                     ),
                     const Spacer(),
                     Text(
-                      '${loc.capacity}: ${slot.remainingCapacity}',
+                      '${loc.capacity}: ${variant.capacity}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: slot.remainingCapacity > 0
                             ? Colors.green

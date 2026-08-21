@@ -1,6 +1,8 @@
 class EndPoint {
   static const String baseUrl =
       "https://preflight-refusal-luminous.ngrok-free.dev/api/";
+  // static const String baseUrl = "http://192.168.1.105:8000/api/";
+
   static const String getProviderReviews =
       "providers"; // يجب إضافة هذا الـ Endpoint في كلاس EndPoint
   static const String signIn = "login";

@@ -35,27 +35,32 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
   String getSmartImageUrl(ServiceItem item) {
     // 1. فحص صارم جداً لرابط الويب (الداتا بيز)
     if (item.images.isNotEmpty) {
-      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
-      
+      String url = (item.images[0] is Map
+          ? item.images[0]['url']
+          : item.images[0].toString());
+
       // الفلتر: لازم يبدأ بـ http وممنوع يكون رابط محلي أو وهمي
-      if (url.isNotEmpty && 
-          url.startsWith('http') && 
-          !url.contains('localhost') && 
-          !url.contains('127.0.0.1') && 
-          !url.contains('placeholder') && 
+      if (url.isNotEmpty &&
+          url.startsWith('http') &&
+          !url.contains('localhost') &&
+          !url.contains('127.0.0.1') &&
+          !url.contains('placeholder') &&
           !url.contains('example')) {
-        return url; 
+        return url;
       }
     }
 
     // 2. السر لتوزيع الصور بشكل عادل ومستحيل يتكرر
-    int uniqueNum = item.id.toString().codeUnits.fold(0, (sum, char) => sum + char);
+    int uniqueNum = item.id.toString().codeUnits.fold(
+      0,
+      (sum, char) => sum + char,
+    );
 
     // 3. مسارات الصور الـ 3 اللي ضفتيهم بمشروعك
     final List<String> fallbackImages = [
-      'assets/images/photo_2026-08-20_01-01-38.jpg', 
-      'assets/images/photo_2026-08-20_01-01-52.jpg', 
-      'assets/images/photo_2026-08-20_01-05-55.jpg', 
+      'assets/images/photo_2026-08-20_01-01-38.jpg',
+      'assets/images/photo_2026-08-20_01-01-52.jpg',
+      'assets/images/photo_2026-08-20_01-05-55.jpg',
     ];
 
     return fallbackImages[uniqueNum % fallbackImages.length];
@@ -80,8 +85,8 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
         // 🚀 السطرين هدول هنن الحل: نمنع الصفحة من الانهيار لما نرجع من التفاصيل
         buildWhen: (previous, current) {
           return current is GetListingLoading ||
-                 current is GetListingSuccess ||
-                 current is GetListingFailure;
+              current is GetListingSuccess ||
+              current is GetListingFailure;
         },
         builder: (context, state) {
           if (state is GetListingLoading) {
@@ -110,7 +115,8 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
             }
 
             return RefreshIndicator(
-              onRefresh: () async => context.read<UserCubit>().getListing(type: 'hall'),
+              onRefresh: () async =>
+                  context.read<UserCubit>().getListing(type: 'hall'),
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: listings.length,
@@ -122,7 +128,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
           }
 
           // هذا السطر اللي كان يعمل الشاشة البيضا، بس هلا مع الـ buildWhen ما عاد يوصله أبداً بعد الرجوع!
-          return const SizedBox(); 
+          return const SizedBox();
         },
       ),
     );
@@ -187,11 +193,14 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                         cacheWidth: 400,
                         errorBuilder: (context, error, stackTrace) {
                           // إذا الرابط الحقيقي ميت، نعرض صورة محلية كاحتياط
-                          int uniqueNum = item.id.toString().codeUnits.fold(0, (sum, char) => sum + char);
+                          int uniqueNum = item.id.toString().codeUnits.fold(
+                            0,
+                            (sum, char) => sum + char,
+                          );
                           final List<String> localFallbacks = [
-                            'assets/images/photo_2026-08-20_01-01-38.jpg', 
-                            'assets/images/photo_2026-08-20_01-01-52.jpg', 
-                            'assets/images/photo_2026-08-20_01-05-55.jpg', 
+                            'assets/images/photo_2026-08-20_01-01-38.jpg',
+                            'assets/images/photo_2026-08-20_01-01-52.jpg',
+                            'assets/images/photo_2026-08-20_01-05-55.jpg',
                           ];
                           return Image.asset(
                             localFallbacks[uniqueNum % localFallbacks.length],
@@ -330,7 +339,7 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
-                      final currentCubit = context.read<UserCubit>(); 
+                      final currentCubit = context.read<UserCubit>();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -338,7 +347,8 @@ class _WeddingHallsPageState extends State<WeddingHallsPage> {
                             value: currentCubit,
                             child: HallDetailsPage(
                               item: item,
-                              passedImageUrl: imageUrl, // 🚀 ضفنا هاد السطر لتمرير الصورة 
+                              passedImageUrl:
+                                  imageUrl, // 🚀 ضفنا هاد السطر لتمرير الصورة
                             ),
                           ),
                         ),

@@ -341,7 +341,7 @@ class UserRepository {
   // في الـ Repository
   Future<Either<String, String>> cancelBooking(String bookingId) async {
     try {
-      final response = await api.put(
+      final response = await api.post(
         // ✅ ملاحظة: اللوج السابق قال Supported methods: PUT
         '${EndPoint.cancelBooking}/$bookingId/cancel',
       );

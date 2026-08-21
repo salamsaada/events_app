@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventsapp/cubit/theme_cubit.dart';
 import 'package:eventsapp/cubit/language_cubit.dart';
-import 'package:eventsapp/cubit/user_cubit.dart'; 
-import 'package:eventsapp/cubit/user_state.dart'; 
+import 'package:eventsapp/cubit/user_cubit.dart';
+import 'package:eventsapp/cubit/user_state.dart';
 import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'package:eventsapp/screens/booking/Booking.dart';
@@ -11,9 +11,10 @@ import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/core/widgets/service_reviews_section.dart';
 import 'package:eventsapp/screens/service_reviews_page.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/intl.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
-  final ServiceItem item; 
+  final ServiceItem item;
 
   const ServiceDetailsPage({super.key, required this.item});
 
@@ -40,8 +41,13 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
     // التحقق من وجود صورة حقيقية (مرفوعة من لوحة تحكم الويب)
     if (item.images.isNotEmpty) {
-      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
-      if (url.isNotEmpty && url.startsWith('http') && !url.contains('placeholder') && !url.contains('localhost')) {
+      String url = (item.images[0] is Map
+          ? item.images[0]['url']
+          : item.images[0].toString());
+      if (url.isNotEmpty &&
+          url.startsWith('http') &&
+          !url.contains('placeholder') &&
+          !url.contains('localhost')) {
         return url; // رجّع صورة السيرفر الحقيقية
       }
     }
@@ -57,7 +63,20 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
       DateTime dt = dateData is DateTime
           ? dateData
           : DateTime.parse(dateData.toString());
-      List<String> months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      List<String> months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       return '${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]}, ${dt.year}';
     } catch (e) {
       return dateData.toString().split('T').first;
@@ -207,7 +226,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     top: Radius.circular(24),
                   ),
                 ),
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 100), 
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

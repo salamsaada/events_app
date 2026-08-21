@@ -36,9 +36,15 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
   // 🚀 [الدالة الذكية: تعتمد على البصمة الفريدة hashCode لمنع التغير] 🚀
   String getSmartImageUrl(ServiceItem item) {
     if (item.images.isNotEmpty) {
-      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
-      if (url.isNotEmpty && url.startsWith('http') && !url.contains('localhost') && !url.contains('placeholder') && !url.contains('example')) {
-        return url; 
+      String url = (item.images[0] is Map
+          ? item.images[0]['url']
+          : item.images[0].toString());
+      if (url.isNotEmpty &&
+          url.startsWith('http') &&
+          !url.contains('localhost') &&
+          !url.contains('placeholder') &&
+          !url.contains('example')) {
+        return url;
       }
     }
 
@@ -71,8 +77,8 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
       body: BlocBuilder<UserCubit, UserState>(
         buildWhen: (previous, current) {
           return current is GetListingLoading ||
-                 current is GetListingSuccess ||
-                 current is GetListingFailure;
+              current is GetListingSuccess ||
+              current is GetListingFailure;
         },
         builder: (context, state) {
           if (state is GetListingLoading) {
@@ -121,7 +127,11 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: listings.length,
                       itemBuilder: (context, index) {
-                        return _buildPackageCard(context, isDark, listings[index]);
+                        return _buildPackageCard(
+                          context,
+                          isDark,
+                          listings[index],
+                        );
                       },
                     ),
                   ),
@@ -136,12 +146,22 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
     );
   }
 
-  Widget _buildPackageCard(BuildContext context, bool isDark, ServiceItem item) {
+  Widget _buildPackageCard(
+    BuildContext context,
+    bool isDark,
+    ServiceItem item,
+  ) {
     final theme = Theme.of(context);
     final languageCode = context.watch<LanguageCubit>().languageCode;
 
-    final String packageName = localizedText(item.title, languageCode, fallback: 'Unknown Package');
-    final String price = item.variants.isNotEmpty ? '${item.variants[0].price} ${item.variants[0].currency}' : 'N/A';
+    final String packageName = localizedText(
+      item.title,
+      languageCode,
+      fallback: 'Unknown Package',
+    );
+    final String price = item.variants.isNotEmpty
+        ? '${item.variants[0].price} ${item.variants[0].currency}'
+        : 'N/A';
     final String location = item.district.name;
 
     String capacityInfo = 'N/A';
@@ -160,7 +180,11 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(isDark ? 0.4 : 0.08), blurRadius: 15, offset: const Offset(0, 8)),
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.4 : 0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
       child: Column(
@@ -169,14 +193,16 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
           Stack(
             children: [
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
                 child: imageUrl.startsWith('http')
                     ? Image.network(
                         imageUrl,
                         height: 200,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        cacheWidth: 400, 
+                        cacheWidth: 400,
                         errorBuilder: (context, error, stackTrace) {
                           int uniqueNum = item.id.hashCode.abs();
                           final List<String> localFallbacks = [
@@ -193,7 +219,7 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                         },
                       )
                     : Image.asset(
-                        imageUrl, 
+                        imageUrl,
                         height: 200,
                         width: double.infinity,
                         fit: BoxFit.cover,
@@ -203,15 +229,28 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                 top: 15,
                 right: 15,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.star, color: theme.colorScheme.primary, size: 16),
-                      const Text(" 4.9", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Icon(
+                        Icons.star,
+                        color: theme.colorScheme.primary,
+                        size: 16,
+                      ),
+                      const Text(
+                        " 4.9",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -221,13 +260,17 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                 left: 15,
                 child: CircleAvatar(
                   radius: 20,
-                  backgroundColor: isDark ? Colors.black.withOpacity(0.6) : Colors.white.withOpacity(0.9),
+                  backgroundColor: isDark
+                      ? Colors.black.withOpacity(0.6)
+                      : Colors.white.withOpacity(0.9),
                   child: Center(
                     child: BlocBuilder<FavoritesCubit, FavoritesState>(
                       builder: (context, favState) {
                         bool isFav = false;
                         if (favState is FavoritesLoaded) {
-                          isFav = favState.favorites.any((favItem) => favItem.id == item.id);
+                          isFav = favState.favorites.any(
+                            (favItem) => favItem.id == item.id,
+                          );
                         }
                         return FavoriteButton(
                           key: ValueKey('${item.id}_$isFav'),
@@ -252,31 +295,47 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                     Expanded(
                       child: Text(
                         packageName,
-                        style: theme.textTheme.displayLarge?.copyWith(fontSize: 18),
+                        style: theme.textTheme.displayLarge?.copyWith(
+                          fontSize: 18,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Text(
                       price,
-                      style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Icon(Icons.location_on, color: isDark ? Colors.grey[500] : Colors.grey[400], size: 18),
+                    Icon(
+                      Icons.location_on,
+                      color: isDark ? Colors.grey[500] : Colors.grey[400],
+                      size: 18,
+                    ),
                     const SizedBox(width: 5),
                     Text(location, style: theme.textTheme.bodySmall),
                     const SizedBox(width: 20),
-                    Icon(Icons.line_weight_sharp, color: isDark ? Colors.grey[500] : Colors.grey[400], size: 18),
+                    Icon(
+                      Icons.line_weight_sharp,
+                      color: isDark ? Colors.grey[500] : Colors.grey[400],
+                      size: 18,
+                    ),
                     const SizedBox(width: 5),
                     Text(capacityInfo, style: theme.textTheme.bodySmall),
                   ],
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Divider(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+                  child: Divider(
+                    color: theme.colorScheme.onSurface.withOpacity(0.1),
+                  ),
                 ),
                 SizedBox(
                   width: double.infinity,
@@ -291,7 +350,8 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
                             value: currentCubit,
                             child: DetailsPage(
                               listingId: item.id,
-                              passedImageUrl: imageUrl, // 🚀 تمرير الصورة لصفحة التفاصيل
+                              passedImageUrl:
+                                  imageUrl, // 🚀 تمرير الصورة لصفحة التفاصيل
                             ),
                           ),
                         ),
