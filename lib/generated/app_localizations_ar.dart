@@ -123,6 +123,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get accountInfo => 'معلومات الحساب';
 
   @override
+  String get emailAddress => 'البريد الإلكتروني';
+
+  @override
   String get phone => 'رقم الجوال';
 
   @override
@@ -236,6 +239,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get professionalStaff => 'الكادر المهني';
+
+  @override
+  String get readyMadePackages => 'حزم جاهزة';
+
+  @override
+  String get readyMadePackagesDescription =>
+      'تجارب حفلات متكاملة مع تخطيط وتنفيذ شاملين';
+
+  @override
+  String get products => 'المنتجات';
+
+  @override
+  String get productsDescription => 'تصفح مجموعة واسعة من منتجات الفعاليات';
 
   @override
   String get serviceDescription =>

@@ -7,230 +7,229 @@ import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 import '../../../generated/app_localizations.dart';
- 
+
 class ServicesSection extends StatelessWidget {
- const ServicesSection({super.key});
- 
- @override
- Widget build(BuildContext context) {
-   final theme = Theme.of(context);
-   final subtitleColor = theme.colorScheme.onSurface.withValues(alpha: 0.7);
- 
-   return Padding(
-     padding: const EdgeInsets.symmetric(horizontal: 24),
-     child: Column(
-       children: [
-         Row(
-           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-           children: [
-             TextButton(
-               onPressed: () {},
-               child: Container(
-                 padding: const EdgeInsets.only(bottom: 8),
-                 decoration: BoxDecoration(
-                   border: Border(
-                     bottom: BorderSide(
-                       color: AppColors.primaryGold.withValues(alpha: 0.3),
-                       width: 1,
-                     ),
-                   ),
-                 ),
-                 child: Text(
-                   AppLocalizations.of(context)!.viewAll,
-                   style: const TextStyle(
-                     color: AppColors.primaryGold,
-                     fontSize: 12,
-                     fontWeight: FontWeight.bold,
-                     letterSpacing: 1.8,
-                   ),
-                 ),
-               ),
-             ),
-             Flexible(
-               child: Column(
-                 crossAxisAlignment: CrossAxisAlignment.end,
-                 mainAxisSize: MainAxisSize.min,
-                 children: [
-                   Text(
-                     AppLocalizations.of(context)!.luxuryServices,
-                     textAlign: TextAlign.right,
-                     maxLines: 2,
-                     overflow: TextOverflow.ellipsis,
-                     style: AppTextStyles.mainTitle.copyWith(
-                       color: AppColors.primaryGold,
-                       fontSize: 25,
-                       fontWeight: FontWeight.bold,
-                     ),
-                   ),
-                   const SizedBox(height: 4),
-                   Text(
-                     AppLocalizations.of(context)!.selectedCarefully,
-                     style: AppTextStyles.bodyGrey.copyWith(
-                       color: subtitleColor,
-                       fontSize: 16,
-                     ),
-                   ),
-                 ],
-               ),
-             ),
-           ],
-         ),
-         const SizedBox(height: 32),
-         _ServiceCard(
-           icon: Icons.star,
-           title: AppLocalizations.of(context)!.individualServices,
-           description: AppLocalizations.of(context)!.flowerArrangement,
-           onTap: () {
-             Navigator.push(
-               context,
-               MaterialPageRoute(
-                 builder: (context) => ServicesCategoriesPage(),
-               ),
-             );
-           },
-         ),
-         const SizedBox(height: 24),
-         _ServiceCard(
-           icon: Icons.celebration,
-           title: AppLocalizations.of(context)!.weddingHalls,
-           description: AppLocalizations.of(context)!.historicalPalaces,
- 
-           onTap: () {
-             Navigator.push(
-               context,
-               MaterialPageRoute(
-                 builder: (context) => WeddingHallsPage(),
-               ),
-             );
-           },
-         ),
-         const SizedBox(height: 24),
-         _ServiceCard(
-           icon: Icons.people,
-           title: AppLocalizations.of(context)!.professionalStaff,
-           description: AppLocalizations.of(context)!.serviceDescription,
-           onTap: () {
-             Navigator.push(
-               context,
-               MaterialPageRoute(
-                 builder: (context) =>
-                     ProfessionalStaffPage(eventName: 'Professional Staff'),
-               ),
-             );
-           },
-         ),
-         const SizedBox(height: 24),
- 
-         _ServiceCard(
-           icon: Icons.celebration,
-           title: 'Ready-Made Packages',
-           description:
-               'Complete party experiences with comprehensive planning and execution',
- 
-           onTap: () {
-             Navigator.push(
-               context,
-               MaterialPageRoute(
-                 builder: (context) => ReadyMadePackagesPage(
-                   categoryName: "Ready-Made Packages",
-                 ),
-               ),
-             );
-           },
-         ),
-         const SizedBox(height: 24),
- 
-         // 🆕 Products Card (Translated to English)
-         _ServiceCard(
-           icon: Icons.shopping_bag,
-           title: 'Products',
-           description: 'Browse a wide range of event products',
-           onTap: () {
-             Navigator.push(
-               context,
-               MaterialPageRoute(
-                 builder: (context) => const ProductsPage(),
-               ),
-             );
-           },
-         ),
-       ],
-     ),
-   );
- }
+  const ServicesSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subtitleColor = theme.colorScheme.onSurface.withValues(alpha: 0.7);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () {},
+                child: Container(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: AppColors.primaryGold.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context)!.viewAll,
+                    style: const TextStyle(
+                      color: AppColors.primaryGold,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.8,
+                    ),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.luxuryServices,
+                      textAlign: TextAlign.right,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.mainTitle.copyWith(
+                        color: AppColors.primaryGold,
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      AppLocalizations.of(context)!.selectedCarefully,
+                      style: AppTextStyles.bodyGrey.copyWith(
+                        color: subtitleColor,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          _ServiceCard(
+            icon: Icons.star,
+            title: AppLocalizations.of(context)!.individualServices,
+            description: AppLocalizations.of(context)!.flowerArrangement,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ServicesCategoriesPage(),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          _ServiceCard(
+            icon: Icons.celebration,
+            title: AppLocalizations.of(context)!.weddingHalls,
+            description: AppLocalizations.of(context)!.historicalPalaces,
+
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => WeddingHallsPage()),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          _ServiceCard(
+            icon: Icons.people,
+            title: AppLocalizations.of(context)!.professionalStaff,
+            description: AppLocalizations.of(context)!.serviceDescription,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfessionalStaffPage(
+                    eventName: AppLocalizations.of(context)!.professionalStaff,
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+
+          _ServiceCard(
+            icon: Icons.celebration,
+            title: AppLocalizations.of(context)!.readyMadePackages,
+            description: AppLocalizations.of(
+              context,
+            )!.readyMadePackagesDescription,
+
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReadyMadePackagesPage(
+                    categoryName: AppLocalizations.of(
+                      context,
+                    )!.readyMadePackages,
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+
+          _ServiceCard(
+            icon: Icons.shopping_bag,
+            title: AppLocalizations.of(context)!.products,
+            description: AppLocalizations.of(context)!.productsDescription,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProductsPage()),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }
- 
+
 class _ServiceCard extends StatelessWidget {
- final IconData icon;
- final String title;
- final String description;
- final VoidCallback onTap;
- 
- const _ServiceCard({
-   required this.icon,
-   required this.title,
-   required this.description,
-   required this.onTap,
- });
- 
- @override
- Widget build(BuildContext context) {
-   final theme = Theme.of(context);
-   final isDark = theme.brightness == Brightness.dark;
-   final cardBackground = isDark
-       ? AppColors.surface
-       : theme.colorScheme.surface;
-   final tileBackground = isDark
-       ? const Color(0xFF25282E)
-       : AppColors.primaryGold.withValues(alpha: 0.12);
-   final bodyColor = theme.colorScheme.onSurface.withValues(alpha: 0.7);
- 
-   return InkWell(
-     onTap: onTap,
-     borderRadius: BorderRadius.circular(8),
-     child: Container(
-       width: double.infinity,
-       padding: const EdgeInsets.all(33),
-       decoration: BoxDecoration(
-         color: cardBackground,
-         borderRadius: BorderRadius.circular(8),
-         border: Border.all(
-           color: AppColors.primaryGold.withValues(alpha: 0.05),
-           width: 1,
-         ),
-       ),
-       child: Column(
-         crossAxisAlignment: CrossAxisAlignment.end,
-         children: [
-           Container(
-             width: 48,
-             height: 48,
-             decoration: BoxDecoration(
-               color: tileBackground,
-               borderRadius: BorderRadius.circular(24),
-             ),
-             child: Icon(icon, color: AppColors.primaryGold, size: 24),
-           ),
-           const SizedBox(height: 17),
-           Text(
-             title,
-             textAlign: TextAlign.right,
-             style: AppTextStyles.subtitle.copyWith(
-               color: theme.colorScheme.onSurface,
-             ),
-           ),
-           const SizedBox(height: 8),
-           Text(
-             description,
-             textAlign: TextAlign.right,
-             style: AppTextStyles.bodyMain.copyWith(
-               color: bodyColor,
-               fontSize: 16,
-             ),
-           ),
-         ],
-       ),
-     ),
-   );
- }
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+
+  const _ServiceCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBackground = isDark
+        ? AppColors.surface
+        : theme.colorScheme.surface;
+    final tileBackground = isDark
+        ? const Color(0xFF25282E)
+        : AppColors.primaryGold.withValues(alpha: 0.12);
+    final bodyColor = theme.colorScheme.onSurface.withValues(alpha: 0.7);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(33),
+        decoration: BoxDecoration(
+          color: cardBackground,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: AppColors.primaryGold.withValues(alpha: 0.05),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: tileBackground,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Icon(icon, color: AppColors.primaryGold, size: 24),
+            ),
+            const SizedBox(height: 17),
+            Text(
+              title,
+              textAlign: TextAlign.right,
+              style: AppTextStyles.subtitle.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              textAlign: TextAlign.right,
+              style: AppTextStyles.bodyMain.copyWith(
+                color: bodyColor,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

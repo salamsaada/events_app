@@ -124,6 +124,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountInfo => 'Account Information';
 
   @override
+  String get emailAddress => 'Email Address';
+
+  @override
   String get phone => 'Phone Number';
 
   @override
@@ -239,6 +242,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get professionalStaff => 'Professional Staff';
+
+  @override
+  String get readyMadePackages => 'Ready-Made Packages';
+
+  @override
+  String get readyMadePackagesDescription =>
+      'Complete party experiences with comprehensive planning and execution';
+
+  @override
+  String get products => 'Products';
+
+  @override
+  String get productsDescription => 'Browse a wide range of event products';
 
   @override
   String get serviceDescription =>

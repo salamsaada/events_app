@@ -26,7 +26,9 @@ class ProfilePage extends StatelessWidget {
       body: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
           if (state is ProfileLoading) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primaryGold));
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGold),
+            );
           }
           if (state is ProfileLoaded) {
             return _buildProfileView(context, l10n, state.user);
@@ -38,20 +40,24 @@ class ProfilePage extends StatelessWidget {
         },
       ),
       bottomNavigationBar: AppBottomNavigation(
-        selectedIndex: 3, 
+        selectedIndex: 3,
         onItemSelected: (index) {},
       ),
     );
   }
 
-  Widget _buildProfileView(BuildContext context, AppLocalizations l10n, UserModel user) {
+  Widget _buildProfileView(
+    BuildContext context,
+    AppLocalizations l10n,
+    UserModel user,
+  ) {
     // Logic: Display phone number if available, otherwise fallback to email
-    final String contactInfo = (user.phone != null && user.phone!.isNotEmpty) 
-        ? user.phone! 
+    final String contactInfo = (user.phone != null && user.phone!.isNotEmpty)
+        ? user.phone!
         : user.email;
-    final String contactLabel = (user.phone != null && user.phone!.isNotEmpty) 
-        ? "Phone Number" 
-        : "Email Address";
+    final String contactLabel = (user.phone != null && user.phone!.isNotEmpty)
+        ? l10n.phone
+        : l10n.emailAddress;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -66,7 +72,10 @@ class ProfilePage extends StatelessWidget {
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const SettingsPage()),
                   ),
-                  icon: const Icon(Icons.settings, color: AppColors.primaryGold),
+                  icon: const Icon(
+                    Icons.settings,
+                    color: AppColors.primaryGold,
+                  ),
                 ),
                 Text(l10n.profileTitle, style: AppTextStyles.mainTitle),
               ],
@@ -84,7 +93,7 @@ class ProfilePage extends StatelessWidget {
                     color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
-                  )
+                  ),
                 ],
               ),
               child: Row(
@@ -103,10 +112,7 @@ class ProfilePage extends StatelessWidget {
                           "${user.firstName} ${user.lastName}",
                           style: AppTextStyles.mainTitle.copyWith(fontSize: 20),
                         ),
-                        Text(
-                          contactInfo,
-                          style: AppTextStyles.tileCaption,
-                        ),
+                        Text(contactInfo, style: AppTextStyles.tileCaption),
                       ],
                     ),
                   ),
@@ -117,10 +123,8 @@ class ProfilePage extends StatelessWidget {
 
             // Account Information Card
             _ProfileInfoCard(
-              title: "Account Details",
-              rows: [
-                _InfoRowData(contactLabel, contactInfo),
-              ],
+              title: l10n.accountInfo,
+              rows: [_InfoRowData(contactLabel, contactInfo)],
             ),
           ],
         ),
@@ -150,7 +154,10 @@ class _ProfileInfoCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: AppTextStyles.sectionTitle.copyWith(color: AppColors.primaryGold, fontSize: 16),
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: AppColors.primaryGold,
+              fontSize: 16,
+            ),
           ),
           const Divider(height: 24),
           ...rows.map(
@@ -161,11 +168,17 @@ class _ProfileInfoCard extends StatelessWidget {
                 children: [
                   Text(
                     row.value,
-                    style: AppTextStyles.tileCaption.copyWith(color: Theme.of(context).colorScheme.onSurface),
+                    style: AppTextStyles.tileCaption.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   Text(
                     row.label,
-                    style: AppTextStyles.tileTitle.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
+                    style: AppTextStyles.tileTitle.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
                   ),
                 ],
               ),

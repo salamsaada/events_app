@@ -320,6 +320,12 @@ abstract class AppLocalizations {
   /// **'Account Information'**
   String get accountInfo;
 
+  /// No description provided for @emailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get emailAddress;
+
   /// No description provided for @phone.
   ///
   /// In en, this message translates to:
@@ -547,6 +553,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Professional Staff'**
   String get professionalStaff;
+
+  /// No description provided for @readyMadePackages.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready-Made Packages'**
+  String get readyMadePackages;
+
+  /// No description provided for @readyMadePackagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete party experiences with comprehensive planning and execution'**
+  String get readyMadePackagesDescription;
+
+  /// No description provided for @products.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get products;
+
+  /// No description provided for @productsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse a wide range of event products'**
+  String get productsDescription;
 
   /// No description provided for @serviceDescription.
   ///
