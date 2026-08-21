@@ -25,7 +25,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 7));
   String _selectedTime = '16:00';
   String? _selectedSlotId; 
-  int _guestCount = 50;
+  int _guestCount = 1; 
   int _selectedPackageIndex = 0;
 
   String _tr(String en, String ar) {
@@ -39,7 +39,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
     super.dispose();
   }
 
-  // 🚀 دالة لاختيار ملف الـ PDF ورفعه
   Future<void> _pickAndUploadPdf(
     BuildContext context,
     String currentBookingId,
@@ -69,7 +68,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
               backgroundColor: Colors.red,
             ),
           );
-          // 🚀 نغلق نافذة الحجز هنا لأن الحجز تم أصلاً
           Navigator.pop(context); 
         }
         return;
@@ -83,7 +81,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
         );
       }
     } else {
-      // 🚀 إذا تراجع المستخدم عن اختيار الملف، نغلق النافذة لمنعه من تكرار الحجز
       if (mounted) {
         Navigator.pop(context);
       }
@@ -105,16 +102,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
     return BlocConsumer<UserCubit, UserState>(
       listener: (context, state) {
         if (state is CreateBookingSuccess) {
-          // 🚀 1. تم إزالة إغلاق النافذة من هنا لتبقى المحادثة حية مع الكيوبت!
-
           context.read<NotificationCubit>().fetchNotifications();
-
-          String currentBookingId = '';
-          try {
-            currentBookingId = state.bookingResponse.data!.id.toString();
-          } catch (e) {
-            print("خطأ في استخراج رقم الحجز: $e");
-          }
 
           showDialog(
             context: context,
@@ -136,14 +124,13 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                 ),
                 content: Text(
                   _tr(
-                    'You have 48 hours to upload the payment proof to confirm your booking, otherwise it will be cancelled automatically.',
-                    'لديك 48 ساعة لرفع إيصال الدفع وتأكيد حجزك بشكل نهائي، وإلا سيتم إلغاء الحجز تلقائياً.',
+                    'Your booking request is under review. Once accepted, you can upload the payment proof from your orders page.',
+                    'طلب الحجز الخاص بك قيد المراجعة. بمجرد قبوله من قبل المزود، ستتمكن من رفع إيصال الدفع لإتمام الحجز من صفحة طلباتي.',
                   ),
                   textAlign: TextAlign.center,
                   style: const TextStyle(height: 1.5),
                 ),
                 actionsAlignment: MainAxisAlignment.center,
-                actionsOverflowDirection: VerticalDirection.down,
                 actions: [
                   SizedBox(
                     width: double.infinity,
@@ -155,35 +142,12 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pop(dialogContext); // إغلاق حوار الدفع
-
-                        // 🚀 2. استدعاء دالة الرفع بحرية والنافذة الأساسية لا تزال حية
-                        _pickAndUploadPdf(
-                          context,
-                          currentBookingId,
-                          selectedVariant?.price.toString() ?? '0',
-                        );
-                      },
-                      child: Text(
-                        _tr('Upload Proof Now', 'رفع إيصال الدفع الآن'),
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      onPressed: () {
                         Navigator.pop(dialogContext); // إغلاق الحوار
-                        Navigator.pop(context); // 🚀 3. نغلق نافذة الحجز هنا لأن المستخدم اختار الدفع لاحقاً
+                        Navigator.pop(context); // إغلاق نافذة الحجز
                       },
                       child: Text(
-                        _tr('Pay Later', 'الدفع لاحقاً'),
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
+                        _tr('Done', 'حسناً'),
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ),
                   ),
@@ -200,7 +164,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
             ),
           );
         } else if (state is UploadProofSuccess) {
-          // 🚀 4. نغلق نافذة الحجز ونعرض الإشعار بعد نجاح الرفع
           if (mounted) Navigator.pop(context); 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -215,7 +178,6 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
             ),
           );
         } else if (state is UploadProofFailure) {
-          // 🚀 5. نغلق نافذة الحجز لتجنب تكرار ضغط المستخدم على الحجز، ونظهر الخطأ
           if (mounted) Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -229,7 +191,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
       builder: (context, state) {
         final isLoading =
             state is CreateBookingLoading ||
-            state is UploadProofLoading; // 🚀 سيعرض الدائرة أثناء الرفع أيضاً
+            state is UploadProofLoading;
 
         return DraggableScrollableSheet(
           initialChildSize: 0.9,
@@ -361,8 +323,8 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                                 theme,
                                 icon: Icons.groups_outlined,
                                 label: _tr(
-                                  '$_guestCount guests',
-                                  '$_guestCount ضيف',
+                                  '$_guestCount guests/qty',
+                                  '$_guestCount ضيف/كمية',
                                 ),
                                 fullWidth: true,
                               ),
@@ -372,7 +334,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        _tr('Choose a package', 'اختر باقة'),
+                        _tr('Choose a package', 'اختر باقة/منتج'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -399,7 +361,16 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                                 selected: isSelected,
                                 label: Text(packageName),
                                 onSelected: (_) {
-                                  setState(() => _selectedPackageIndex = index);
+                                  setState(() {
+                                    _selectedPackageIndex = index;
+                                    // 🚀 التعديل: الاعتماد على الـ Capacity 
+                                    int maxForPackage = variant.capacity > 0 
+                                          ? variant.capacity 
+                                          : (variant.stock ?? 10000);
+                                    if (_guestCount > maxForPackage && maxForPackage > 0) {
+                                      _guestCount = maxForPackage;
+                                    }
+                                  });
                                 },
                                 selectedColor: theme.colorScheme.primary,
                                 labelStyle: theme.textTheme.bodyMedium
@@ -426,7 +397,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                           child: Text(
                             _tr(
                               'No package variants are available for this listing.',
-                              'لا توجد باقات متاحة لهذه الخدمة.',
+                              'لا توجد خيارات متاحة لهذا العنصر.',
                             ),
                             style: theme.textTheme.bodyMedium,
                           ),
@@ -524,18 +495,33 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
 
                                   final isSelected = _selectedSlotId == slot.id;
 
+                                  final bool isProduct = widget.item.type == 'physical_product';
+                                  
+                                  // 🚀 التعديل: الاعتماد على الـ Capacity الخاصة بالباقة بدلاً من remainingCapacity
+                                  final int currentCapacity = isProduct ? (selectedVariant.stock ?? 0) : selectedVariant.capacity;
+                                  
+                                  // 🚀 التعديل: الفترات الزمنية تعتبر متاحة دائماً طالما رجعت من السيرفر (بالنسبة للصالات والخدمات)
+                                  final bool isSlotAvailable = isProduct ? currentCapacity > 0 : true;
+
+                                  // 🚀 التعديل: عرض كلمة (السعة) بدل (متاح)
+                                  final String chipLabel = isProduct
+                                      ? '$slotTime (${currentCapacity > 0 ? "$currentCapacity ${_tr('available', 'متاح')}" : _tr('Full', 'مكتمل')})'
+                                      : '$slotTime (${currentCapacity > 0 ? "${_tr('Capacity:', 'السعة:')} $currentCapacity" : _tr('Available', 'متاح')})';
+
                                   return ChoiceChip(
                                     selected: isSelected,
-                                    label: Text(
-                                      '$slotTime (${slot.remainingCapacity > 0 ? "${slot.remainingCapacity} متاح" : "مكتمل"})',
-                                    ),
+                                    label: Text(chipLabel),
                                     onSelected: (chosen) {
-                                      if (slot.remainingCapacity > 0) {
+                                      if (isSlotAvailable) {
                                         setState(() {
                                           _selectedSlotId = slot.id;
                                           _selectedTime = timeFormat.format(
                                             slot.startTime.toLocal(),
                                           );
+                                          // 🚀 التعديل: حماية العداد بناءً على السعة الحقيقية
+                                          if (_guestCount > currentCapacity && currentCapacity > 0) {
+                                            _guestCount = currentCapacity;
+                                          }
                                         });
                                       }
                                     },
@@ -544,10 +530,8 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                                         ?.copyWith(
                                           color: isSelected
                                               ? Colors.white
-                                              : (slot.remainingCapacity > 0
-                                                  ? theme
-                                                      .colorScheme
-                                                      .onSurface
+                                              : (isSlotAvailable
+                                                  ? theme.colorScheme.onSurface
                                                   : Colors.grey),
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -575,7 +559,7 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                         ),
                       const SizedBox(height: 20),
                       Text(
-                        _tr('Guest count', 'عدد الضيوف'),
+                        _tr('Guest count / Qty', 'العدد / الكمية'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -598,8 +582,8 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                         child: Row(
                           children: [
                             IconButton(
-                              onPressed: _guestCount >= 10
-                                  ? () => setState(() => _guestCount -= 10)
+                              onPressed: _guestCount > 1
+                                  ? () => setState(() => _guestCount -= 1)
                                   : null,
                               icon: const Icon(Icons.remove_circle_outline),
                             ),
@@ -614,8 +598,29 @@ class _BookingRequestSheetState extends State<BookingRequestSheet> {
                               ),
                             ),
                             IconButton(
-                              onPressed: () =>
-                                  setState(() => _guestCount += 10),
+                              onPressed: () {
+                                int maxAllowed = 10000;
+                                final bool isProduct = widget.item.type == 'physical_product';
+                                
+                                // 🚀 التعديل الأخير: جلب الحد الأقصى من السعة مباشرة دون الدوران داخل الـ slots
+                                if (selectedVariant != null) {
+                                  maxAllowed = isProduct ? (selectedVariant.stock ?? 0) : selectedVariant.capacity;
+                                  if (maxAllowed <= 0) maxAllowed = 10000; // لحماية العداد في حال السعة صفر
+                                }
+
+                                if (_guestCount < maxAllowed) {
+                                  setState(() => _guestCount += 1);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        _tr('Maximum capacity reached.', 'وصلت للحد الأقصى للسعة.')
+                                      ),
+                                      backgroundColor: Colors.orange,
+                                    ),
+                                  );
+                                }
+                              },
                               icon: const Icon(Icons.add_circle_outline),
                             ),
                           ],

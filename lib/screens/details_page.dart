@@ -269,6 +269,10 @@ class _DetailsPageState extends State<DetailsPage> {
   }
 
   Widget _buildVariantCard(Variant variant, ThemeData theme, String languageCode, AppLocalizations loc) {
+    // التحقق من وجود منتجات أو فريلانسرز داخل الباقة
+    final bool hasItems = variant.packageItems.isNotEmpty;
+    final bool hasFreelancers = variant.packageFreelancers.isNotEmpty;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(15),
@@ -295,8 +299,128 @@ class _DetailsPageState extends State<DetailsPage> {
               ),
             ],
           ),
+          
           if (variant.availabilities.isNotEmpty)
             ...variant.availabilities.map((avail) => _buildAvailabilityRow(avail, variant, theme, loc)),
+
+          // ========================================================
+          // 🚀 الكود الجديد لعرض محتويات التنسيق (منتجات + فريلانسرز)
+          // ========================================================
+          if (hasItems || hasFreelancers) ...[
+            const SizedBox(height: 16),
+            Divider(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+            const SizedBox(height: 16),
+
+            // 1️⃣ قسم المنتجات المرفقة
+            if (hasItems) ...[
+              Text(
+                languageCode == 'ar' ? 'المنتجات المتضمنة في الباقة:' : 'Included Products:',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 70,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: variant.packageItems.length,
+                  itemBuilder: (context, index) {
+                    final pItem = variant.packageItems[index];
+                    // استخراج اسم المنتج بأمان
+                    final titleMap = pItem.includedVariant?.listing?.title ?? {};
+                    final String itemName = titleMap[languageCode] ?? titleMap['en'] ?? titleMap['ar'] ?? 'Product';
+                    final int qty = pItem.quantity;
+
+                    return Container(
+                      width: 200,
+                      margin: EdgeInsets.only(right: languageCode == 'ar' ? 0 : 12, left: languageCode == 'ar' ? 12 : 0),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: theme.colorScheme.onSurface.withOpacity(0.05)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(Icons.inventory_2_outlined, color: theme.colorScheme.primary, size: 20),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(itemName, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                Text('${languageCode == 'ar' ? 'الكمية:' : 'Qty:'} $qty', style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 11)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // 2️⃣ قسم الفريلانسرز (طاقم العمل)
+            if (hasFreelancers) ...[
+              Text(
+                languageCode == 'ar' ? 'طاقم العمل المتضمن:' : 'Included Staff:',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 70,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: variant.packageFreelancers.length,
+                  itemBuilder: (context, index) {
+                    final fItem = variant.packageFreelancers[index];
+                    final String name = fItem.freelancer?.name ?? 'Staff';
+                    // استخراج الإيميل من البيانات الخام بشكل آمن
+                    final String email = fItem.rawData['freelancer']?['email'] ?? 'No email';
+
+                    return Container(
+                      width: 220,
+                      margin: EdgeInsets.only(right: languageCode == 'ar' ? 0 : 12, left: languageCode == 'ar' ? 12 : 0),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: theme.colorScheme.onSurface.withOpacity(0.05)),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                            child: Text(name.isNotEmpty ? name[0].toUpperCase() : 'S', style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                Text(email, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey.shade500, fontSize: 10)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ]
         ],
       ),
     );

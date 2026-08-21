@@ -43,6 +43,9 @@ class _OrdersPageState extends State<OrdersPage> {
     switch (status.toLowerCase()) {
       case 'pending':
         return isAr ? 'قيد الانتظار' : 'Pending';
+      // 🚀 التعديل 1: إضافة ترجمة حالة القبول
+      case 'accepted':
+        return isAr ? 'مقبول' : 'Accepted';
       case 'confirmed':
         return isAr ? 'مؤكد' : 'Confirmed';
       case 'completed':
@@ -279,8 +282,15 @@ class _OrdersPageState extends State<OrdersPage> {
                             ).format(booking.shift!.startTime!);
                           }
 
-                          // 🚀 تحديد إذا كان الطلب يحتاج دفع (قيد الانتظار)
-                          bool isPending = (booking.status ?? '').toLowerCase() == 'pending';
+                          // 🚀 التعديل 2: تحديد ما إذا كان الطلب مقبول لإظهار زر الدفع
+                          // 💡 1. التحقق من أن حالة الطلب "مقبول"
+                          bool isAccepted =
+                              (booking.status ?? '').toLowerCase() ==
+                              'accepted';
+
+                          // 🚀 2. التحقق مما إذا كان المستخدم قد قام برفع إيصال دفع لهذا الطلب (موجود في قائمة المدفوعات)
+                          bool hasSubmittedPayment = _submittedBookingIds
+                              .contains(booking.id);
 
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
@@ -299,9 +309,10 @@ class _OrdersPageState extends State<OrdersPage> {
                               status: _translateStatus(booking.status ?? ''),
                               amount:
                                   '${booking.price ?? '0'} ${booking.currency ?? ''}',
-                              
-                              showPayButton: isPending, // 👈 تمرير حالة إظهار زر الدفع
-                              
+
+                              // 🚀 3. الزر سيظهر فقط إذا كان "مقبولاً" وَ "لم يتم الدفع بعد"
+                              showPayButton: isAccepted && !hasSubmittedPayment,
+
                               onPayPressed: () {
                                 _pickAndUploadPdf(
                                   context,
@@ -309,14 +320,11 @@ class _OrdersPageState extends State<OrdersPage> {
                                   booking.price?.toString() ?? '0',
                                 );
                               },
-                              
                               onRatePressed: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (_) => RatingPage(
-                                      bookingId:
-                                          booking.id ??
-                                          '', // ✅ إرسال الـ bookingId فقط
+                                      bookingId: booking.id ?? '',
                                       serviceName:
                                           (languageCode == 'ar'
                                               ? booking.listing?.title?.ar
@@ -515,8 +523,8 @@ class _OrderCard extends StatelessWidget {
   final String guests;
   final String status;
   final String amount;
-  final bool showPayButton; // 👈 لمعرفة متى نظهر زر الدفع
-  final VoidCallback onPayPressed; // 👈 دالة الدفع
+  final bool showPayButton;
+  final VoidCallback onPayPressed;
   final VoidCallback onRatePressed;
   final VoidCallback onCancelPressed;
 
@@ -529,8 +537,8 @@ class _OrderCard extends StatelessWidget {
     required this.guests,
     required this.status,
     required this.amount,
-    required this.showPayButton, // 👈
-    required this.onPayPressed, // 👈
+    required this.showPayButton, 
+    required this.onPayPressed, 
     required this.onRatePressed,
     required this.onCancelPressed,
   });
@@ -544,6 +552,12 @@ class _OrderCard extends StatelessWidget {
     IconData statusIcon;
 
     switch (status.toLowerCase()) {
+      // 🚀 التعديل 3: إضافة لون وأيقونة لحالة القبول (accepted)
+      case 'accepted':
+      case 'مقبول':
+        statusColor = const Color(0xFF6366F1); // لون أزرق أنيق
+        statusIcon = Icons.thumb_up_alt_outlined;
+        break;
       case 'completed':
       case 'مكتمل':
         statusColor = const Color(0xFF10B981);
@@ -694,7 +708,7 @@ class _OrderCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // 🚀 زر رفع إيصال الدفع (يظهر فقط إذا كان الطلب Pending)
+                // 🚀 زر رفع إيصال الدفع (يظهر فقط إذا كان الطلب Accepted)
                 if (showPayButton) ...[
                   SizedBox(
                     width: double.infinity,

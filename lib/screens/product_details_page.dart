@@ -225,28 +225,45 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     const SizedBox(height: 16),
 
                     // الموقع والتصنيف
+                    // الموقع والتصنيف
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.location_on, color: goldColor, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              item.district.name,
-                              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500, fontSize: 15),
-                            ),
-                          ],
+                        // القسم الأول (الموقع)
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(Icons.location_on, color: goldColor, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  item.district.name,
+                                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500, fontSize: 15),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis, // 👈 هون السحر ليقص النص الطويل
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        Row(
-                          children: [
-                            const Icon(Icons.category, color: goldColor, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              item.category.name,
-                              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500, fontSize: 15),
-                            ),
-                          ],
+                        
+                        const SizedBox(width: 10), // مسافة بين القسمين
+                        
+                        // القسم الثاني (التصنيف)
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(Icons.category, color: goldColor, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  item.category.name,
+                                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500, fontSize: 15),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis, // 👈 وهون كمان
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
