@@ -11,6 +11,9 @@ import 'package:eventsapp/core/widgets/common/result_card.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'service_details_page.dart';
 
+// 🚀 لا تنسي إضافة مسار ملف الكلاس المساعد للصور هنا (تأكدي من مسارك الصحيح)
+import 'package:eventsapp/core/utils/image_helper.dart';
+
 class ServicesCategoriesPage extends StatefulWidget {
   const ServicesCategoriesPage({super.key});
 
@@ -19,6 +22,9 @@ class ServicesCategoriesPage extends StatefulWidget {
 }
 
 class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
+  // 🆕 خريطة تخزّن التقييم الحقيقي لكل عرض: listingId → average rating
+  Map<String, double> _ratingsMap = {};
+
   @override
   void initState() {
     super.initState();
@@ -27,24 +33,7 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
     });
   }
 
-  // 🚀 [الدالة الذكية لجلب الصورة الخاصة بالخدمات] 🚀
-  String getSmartImageUrl(ServiceItem item) {
-    final List<String> fallbackImages = [
-      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1000&q=80', // كاميرا وعدسات
-      'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1000&q=80', // مصور مع كاميرا
-      'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=1000&q=80', // كاميرا فيلم قديمة/كلاسيك
-    ];
-
-    if (item.images.isNotEmpty) {
-      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
-      if (url.isNotEmpty && url.startsWith('http') && !url.contains('placeholder') && !url.contains('localhost')) {
-        return url; 
-      }
-    }
-
-    int hash = item.id.hashCode.abs();
-    return fallbackImages[hash % fallbackImages.length];
-  }
+  // 🚀 تم حذف دالة getSmartImageUrl القديمة من هنا لأننا سنستخدم ImageHelper الموحد
 
   @override
   Widget build(BuildContext context) {
@@ -52,15 +41,38 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.individualServices), 
+        title: Text(l10n.individualServices),
         centerTitle: true,
       ),
-      body: BlocBuilder<UserCubit, UserState>(
+      body: BlocConsumer<UserCubit, UserState>( // 👈 تغيّر من BlocBuilder لـ BlocConsumer
+        listenWhen: (previous, current) =>
+            current is GetListingSuccess || current is GetListingRatingsSuccess,
+        listener: (context, state) {
+          if (state is GetListingSuccess) {
+            // 🆕 بعد ما تجيب العروض، اطلب تقييماتها الحقيقية فوراً
+            final ids = state.listingResponse.data
+                .where((item) => item.type == 'service')
+                .map((item) => item.id)
+                .toList();
+            if (ids.isNotEmpty) {
+              context.read<UserCubit>().getListingRatings(ids);
+            }
+          } else if (state is GetListingRatingsSuccess) {
+            // 🆕 خزّن التقييمات محلياً وحدّث الواجهة
+            final Map<String, double> newRatings = {};
+            for (final item in state.ratingsResponse.data) {
+              if (item.listingId != null && item.rating?.average != null) {
+                newRatings[item.listingId!] = item.rating!.average!;
+              }
+            }
+            setState(() => _ratingsMap = newRatings);
+          }
+        },
         // 🚀 السطرين هدول هنن الحل لمنع الشاشة البيضاء عند الرجوع
         buildWhen: (previous, current) {
           return current is GetListingLoading ||
-                 current is GetListingSuccess ||
-                 current is GetListingFailure;
+              current is GetListingSuccess ||
+              current is GetListingFailure;
         },
         builder: (context, state) {
           if (state is GetListingLoading) {
@@ -97,14 +109,18 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                   final languageCode = context.watch<LanguageCubit>().languageCode;
 
                   final String title = localizedText(item.title, languageCode);
-                  final String providerName = item.category.name; 
+                  final String providerName = item.category.name;
                   final String price = item.variants.isNotEmpty
                       ? '${item.variants[0].price} ${item.variants[0].currency}'
                       : 'غير متوفر';
-                  
-                  final String imageUrl = getSmartImageUrl(item);
 
-                  // 🚀 [هنا التعديل: الدوران على كل الباقات لمعرفة السعة الحقيقية] 🚀
+                  // 🚀 [استدعاء الدالة الموحدة الذكية من الكلاس المساعد] 🚀
+                  final String imageUrl = ImageHelper.getSmartImageUrl(item);
+
+                  // 🆕 التقييم الحقيقي بدل الرقم الثابت 4.5
+                  final double rating = _ratingsMap[item.id] ?? 0.0;
+
+                  // 🚀 [الدوران على كل الباقات لمعرفة السعة الحقيقية] 🚀
                   String capacityInfo = '';
                   if (item.variants.isNotEmpty) {
                     int maxCapacity = 0;
@@ -120,7 +136,7 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                     }
 
                     final isArabic = languageCode == 'ar';
-                    
+
                     if (maxCapacity > 0) {
                       capacityInfo = isArabic ? 'السعة: $maxCapacity' : 'Capacity: $maxCapacity';
                     } else if (maxStock > 0) {
@@ -142,13 +158,13 @@ class _ServicesCategoriesPageState extends State<ServicesCategoriesPage> {
                         title: title,
                         companyName: providerName,
                         price: price,
-                        imageUrl: imageUrl, 
-                        rating: 4.5,
+                        imageUrl: imageUrl, // 👈 التمرير للكرت
+                        rating: rating, // 👈 عدّلنا هون: تقييم حقيقي بدل 4.5
                         location: item.district.name,
-                        capacity: capacityInfo, // 👈 تم تمرير السعة الصحيحة هنا
+                        capacity: capacityInfo,
                         isFavorite: isFavorite,
                         onFavoriteToggle: () {
-                          context.read<FavoritesCubit>().toggleHeart(item.id); 
+                          context.read<FavoritesCubit>().toggleHeart(item.id);
                         },
                         onTap: () {
                           final currentCubit = context.read<UserCubit>();

@@ -245,5 +245,11 @@
 "chatBadgeOfficial": "OFFICIAL",
 "chatBadgeIndie": "INDIE",
 "chatNoMessagesYet": "No messages yet\nStart the conversation now!",
-"chatTypeMessageHint": "Type your message..."
+"chatTypeMessageHint": "Type your message...",
+
+"readyMadePackagesTitle": "Ready-Made Packages",
+"readyMadePackagesDesc": "Complete party experiences with comprehensive planning and execution",
+"productsTitle": "Products",
+"productsDesc": "Browse a wide range of event products",
+"filterOptions": "Filter Options"
 }

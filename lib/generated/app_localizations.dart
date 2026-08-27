@@ -1525,6 +1525,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Type your message...'**
   String get chatTypeMessageHint;
+
+  /// No description provided for @readyMadePackagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready-Made Packages'**
+  String get readyMadePackagesTitle;
+
+  /// No description provided for @readyMadePackagesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete party experiences with comprehensive planning and execution'**
+  String get readyMadePackagesDesc;
+
+  /// No description provided for @productsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get productsTitle;
+
+  /// No description provided for @productsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse a wide range of event products'**
+  String get productsDesc;
+
+  /// No description provided for @filterOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Options'**
+  String get filterOptions;
 }
 
 class _AppLocalizationsDelegate

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:eventsapp/generated/app_localizations.dart';   // 👈 ضيف هاد الاستيراد
 
 class FilterButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -29,7 +30,7 @@ class FilterButton extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                "Filter Options",
+                AppLocalizations.of(context)!.filterOptions,   
                 style: TextStyle(
                   fontSize: 14,
                   color: colorScheme.onSurface, 

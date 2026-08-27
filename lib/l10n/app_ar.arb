@@ -245,6 +245,12 @@
 "chatBadgeOfficial": "رسمي",
 "chatBadgeIndie": "مستقل",
 "chatNoMessagesYet": "لا توجد رسائل بعد\nابدأ المحادثة الآن!",
-"chatTypeMessageHint": "اكتب رسالتك..."
+"chatTypeMessageHint": "اكتب رسالتك...",
+
+"readyMadePackagesTitle": "الباقات الجاهزة",
+"readyMadePackagesDesc": "تجارب احتفالية متكاملة مع تخطيط وتنفيذ شامل",
+"productsTitle": "المنتجات",
+"productsDesc": "تصفح مجموعة واسعة من منتجات المناسبات",
+"filterOptions": "خيارات الفلترة"
 
 }

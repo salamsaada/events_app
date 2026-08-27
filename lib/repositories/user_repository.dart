@@ -8,6 +8,7 @@ import 'package:eventsapp/core/errors/exceptions.dart';
 import 'package:eventsapp/models/booking_model.dart';
 import 'package:eventsapp/models/getModelsReviews.dart';
 import 'package:eventsapp/models/listing_model.dart';
+import 'package:eventsapp/models/listing_rating_model.dart';
 import 'package:eventsapp/models/myBookings_model.dart';
 import 'package:eventsapp/models/planner_model.dart';
 import 'package:eventsapp/models/sendReviwe.dart';
@@ -136,6 +137,7 @@ class UserRepository {
     }
   }
 
+  // 🚀 (كودك الأساسي) تم الحفاظ على إضافاتك بالكامل هنا 🚀
   Future<Either<String, BookingResponse>> createBooking({
     String? providerId,
     required String listingId,
@@ -146,6 +148,9 @@ class UserRepository {
     String? bookedDate,
     String? bookedStartTime,
     String? customerNotes,
+    // 🚀 1. إضافة بارامتر المنتجات المخصصة هنا
+    List<Map<String, dynamic>>? customItems,
+    List<String>? customFreelancers,
   }) async {
     try {
       final response = await api.post(
@@ -156,10 +161,14 @@ class UserRepository {
           ApiKey.listing_variant_id: listingVariantId,
           ApiKey.listing_slot_id: listingSlotId,
           ApiKey.booking_type: bookingType,
-          ApiKey.quantity: quantity,
+          ApiKey.quantity: quantity, // 💡 أصبح يعبر عن عدد الضيوف
           ApiKey.booked_date: bookedDate,
           ApiKey.booked_start_time: bookedStartTime,
           ApiKey.customer_notes: customerNotes,
+          // 🚀 2. إرسال المنتجات المخصصة وكمياتها الفعلية إلى الباك إند
+          if (customItems != null && customItems.isNotEmpty) 'custom_items': customItems,
+          // 🚀 التعديل: إرسال المصفوفة حتى لو كانت فارغة لكي يمسحهم الباك إند
+          if (customFreelancers != null) 'custom_freelancers': customFreelancers,
         },
       );
 
@@ -240,7 +249,7 @@ class UserRepository {
       }
 
       final detailsData =
-          (response is Map<String, dynamic> && response.containsKey('data'))
+      (response is Map<String, dynamic> && response.containsKey('data'))
           ? response['data']
           : response;
 
@@ -275,7 +284,7 @@ class UserRepository {
     } on DioException catch (e) {
       final statusCode = e.response?.statusCode ?? 0;
       final serverMessage =
-          (e.response?.data is Map && e.response?.data['message'] != null)
+      (e.response?.data is Map && e.response?.data['message'] != null)
           ? e.response!.data['message'].toString()
           : 'حدث خطأ غير متوقع، حاول مرة أخرى.';
 
@@ -337,9 +346,35 @@ class UserRepository {
     }
   }
 
+
+  Future<Either<String, ListingRatingsResponse>> getListingRatings(
+  List<String> listingIds,
+) async {
+  try {
+    if (listingIds.isEmpty) {
+      return const Right(ListingRatingsResponse(success: true, data: []));
+    }
+
+    final response = await api.get(
+      'listing-ratings',
+      queryParameters: {
+        'listing_ids[]': listingIds, // 👈 Dio بيكررها تلقائياً بنفس المفتاح لكل عنصر
+      },
+    );
+
+    return Right(ListingRatingsResponse.fromJson(response));
+  } on ServerException catch (e) {
+    return Left(e.errModel.errorMessage);
+  } catch (e) {
+    return Left('حدث خطأ غير متوقع: $e');
+  }
+}
+
+
+  // 🌟 (كود صديقك) تم إدراج تعديله لإلغاء الحجز عبر post بدلاً من delete 🌟
   Future<Either<String, String>> cancelBooking(String bookingId) async {
     try {
-      final response = await api.delete('${EndPoint.cancelBooking}/$bookingId');
+      final response = await api.post('bookings/$bookingId/cancel'); // 👈 تعديل صديقك
       final message = response is Map<String, dynamic>
           ? response[ApiKey.message]?.toString()
           : null;
@@ -356,29 +391,46 @@ class UserRepository {
     int page = 1, // ✨ دعم الصفحات (Pagination)
   }) async {
     try {
-      // ✨ استبدل EndPoint.getProviderReviews بالرابط الخاص بك
-      // إذا كان الرابط يتطلب إضافة الـ ID في النص مثلاً: '/providers/$providerId/reviews'
       final response = await api.get(
         '${EndPoint.getProviderReviews}/$providerId/reviews',
         queryParameters: {
-          'page': page, // ✨ إرسال رقم الصفحة للسيرفر
+          'page': page,
         },
       );
-      // ✅ حالة النجاح
       if (response['success'] == true) {
         return Right(ReviewsResponsee.fromJson(response));
-      }
-      // ✅ حالة الفشل (مثلاً: مزود الخدمة غير موجود)
-      else {
+      } else {
         final String errorMsg =
             response['message'] ?? 'حدث خطأ أثناء جلب التقييمات';
         return Left(errorMsg);
       }
     } on ServerException catch (e) {
-      // ✨ نفس أسلوب التقييم في استخراج رسالة الخطأ
       return Left(e.errModel.errorMessage);
     } catch (e) {
       return Left('حدث خطأ غير متوقع أثناء تحميل التقييمات');
     }
   }
+
+  Future<Either<String, String>> getProviderQrCode(String providerId) async {
+  try {
+    final response = await api.get('providers/$providerId/qr-code');
+    final qrUrl = response is Map<String, dynamic> ? response['qr_url'] as String? : null;
+
+    if (qrUrl != null && qrUrl.isNotEmpty) {
+      return Right(qrUrl);
+    }
+    return const Left('لم يتم العثور على رابط الـ QR.');
+  } on DioException catch (e) {
+    // 👇 بيغطي حالتي الـ 404 (المزود غير موجود / ما رفع QR بعد) برسالة الباك اند نفسها
+    final serverMessage =
+        (e.response?.data is Map && e.response?.data['message'] != null)
+        ? e.response!.data['message'].toString()
+        : 'لا يوجد كود QR متاح لهذا المزود حالياً.';
+    return Left(serverMessage);
+  } on ServerException catch (e) {
+    return Left(e.errModel.errorMessage);
+  } catch (e) {
+    return Left('حدث خطأ غير متوقع: $e');
+  }
+}
 }

@@ -56,7 +56,8 @@ class ResultCard extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(15),
                   ),
-                  child: Image.network(
+                  child: imageUrl.startsWith('http')
+                      ? Image.network(
                     imageUrl,
                     height: 180,
                     width: double.infinity,
@@ -64,7 +65,18 @@ class ResultCard extends StatelessWidget {
                     errorBuilder: (context, error, stackTrace) => Container(
                       height: 180,
                       color: Colors.grey[300],
-                      child: const Icon(Icons.image_not_supported),
+                      child: const Icon(Icons.image_not_supported, color: Colors.grey, size: 40),
+                    ),
+                  )
+                      : Image.asset(
+                    imageUrl,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 180,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.broken_image, color: Colors.grey, size: 40),
                     ),
                   ),
                 ),

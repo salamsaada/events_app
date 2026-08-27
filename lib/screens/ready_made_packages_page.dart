@@ -11,6 +11,7 @@ import 'package:eventsapp/core/utils/localized_value.dart';
 import 'package:eventsapp/core/widgets/common/favorite_button.dart';
 import 'package:eventsapp/models/listing_model.dart';
 import 'details_page.dart';
+import 'package:eventsapp/core/api/end_ponits.dart'; // 👈 مسار ملف الـ EndPoint
 
 class ReadyMadePackagesPage extends StatefulWidget {
   final String categoryName;
@@ -35,10 +36,15 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
 
   // 🚀 [الدالة الذكية: تعتمد على البصمة الفريدة hashCode لمنع التغير] 🚀
   String getSmartImageUrl(ServiceItem item) {
+    final String activeHost = EndPoint.baseUrl.split('/api')[0];
+
     if (item.images.isNotEmpty) {
       String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
-      if (url.isNotEmpty && url.startsWith('http') && !url.contains('localhost') && !url.contains('placeholder') && !url.contains('example')) {
-        return url; 
+      if (url.isNotEmpty && url.startsWith('http') && !url.contains('placeholder')) {
+        if (url.contains('127.0.0.1:8000') || url.contains('localhost:8000') || url.contains('10.0.2.2:8000')) {
+          url = url.replaceAll(RegExp(r'http://(127\.0\.0\.1|localhost|10\.0\.2\.2):8000'), activeHost);
+        }
+        return url;
       }
     }
 
@@ -47,8 +53,6 @@ class _ReadyMadePackagesPageState extends State<ReadyMadePackagesPage> {
       'assets/images/photo_2026-08-20_01-44-14.jpg',
       'assets/images/photo_2026-08-20_01-44-19.jpg',
     ];
-
-    // 🚀 استخدام بصمة الـ ID لتثبيت الصورة
     int uniqueNum = item.id.hashCode.abs();
     return fallbackImages[uniqueNum % fallbackImages.length];
   }

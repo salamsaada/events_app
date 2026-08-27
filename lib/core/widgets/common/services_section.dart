@@ -121,39 +121,34 @@ class ServicesSection extends StatelessWidget {
          ),
          const SizedBox(height: 24),
  
-         _ServiceCard(
-           icon: Icons.celebration,
-           title: 'Ready-Made Packages',
-           description:
-               'Complete party experiences with comprehensive planning and execution',
- 
-           onTap: () {
-             Navigator.push(
-               context,
-               MaterialPageRoute(
-                 builder: (context) => ReadyMadePackagesPage(
-                   categoryName: "Ready-Made Packages",
-                 ),
-               ),
-             );
-           },
-         ),
-         const SizedBox(height: 24),
- 
-         // 🆕 Products Card (Translated to English)
-         _ServiceCard(
-           icon: Icons.shopping_bag,
-           title: 'Products',
-           description: 'Browse a wide range of event products',
-           onTap: () {
-             Navigator.push(
-               context,
-               MaterialPageRoute(
-                 builder: (context) => const ProductsPage(),
-               ),
-             );
-           },
-         ),
+          _ServiceCard(
+            icon: Icons.celebration,
+            title: AppLocalizations.of(context)!.readyMadePackagesTitle,
+            description: AppLocalizations.of(context)!.readyMadePackagesDesc,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReadyMadePackagesPage(
+                    categoryName: "Ready-Made Packages",
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+
+          _ServiceCard(
+            icon: Icons.shopping_bag,
+            title: AppLocalizations.of(context)!.productsTitle,
+            description: AppLocalizations.of(context)!.productsDesc,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProductsPage()),
+              );
+            },
+          ),
        ],
      ),
    );

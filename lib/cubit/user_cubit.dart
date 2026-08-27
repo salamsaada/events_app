@@ -53,6 +53,9 @@ class UserCubit extends Cubit<UserState> {
     String? bookedDate,
     String? bookedStartTime,
     String? customerNotes,
+    // 🚀 التعديل: إضافة بارامتر المنتجات المخصصة
+    List<Map<String, dynamic>>? customItems,
+    List<String>? customFreelancers,
   }) async {
     emit(CreateBookingLoading());
 
@@ -66,11 +69,13 @@ class UserCubit extends Cubit<UserState> {
       bookedDate: bookedDate,
       bookedStartTime: bookedStartTime,
       customerNotes: customerNotes,
+      customItems: customItems, // 🚀 التمرير للـ Repository
+      customFreelancers: customFreelancers,
     );
 
     response.fold(
-      (errMessage) => emit(CreateBookingFailure(errMessage: errMessage)),
-      (bookingResponse) =>
+          (errMessage) => emit(CreateBookingFailure(errMessage: errMessage)),
+          (bookingResponse) =>
           emit(CreateBookingSuccess(bookingResponse: bookingResponse)),
     );
   }
@@ -203,4 +208,24 @@ class UserCubit extends Cubit<UserState> {
       (reviews) => emit(GetReviewsSuccess(reviewsResponse: reviews)),
     );
   }
+
+  Future<void> getListingRatings(List<String> listingIds) async {
+  emit(GetListingRatingsLoading());
+  final response = await userRepository.getListingRatings(listingIds);
+  response.fold(
+    (errMessage) => emit(GetListingRatingsFailure(errMessage)),
+    (ratingsResponse) => emit(GetListingRatingsSuccess(ratingsResponse)),
+  );
+}
+
+
+Future<void> getProviderQrCode(String providerId) async {
+  emit(GetProviderQrCodeLoading());
+  final response = await userRepository.getProviderQrCode(providerId);
+  response.fold(
+    (errMessage) => emit(GetProviderQrCodeFailure(errMessage)),
+    (qrUrl) => emit(GetProviderQrCodeSuccess(qrUrl)),
+  );
+}
+
 }

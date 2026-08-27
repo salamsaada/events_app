@@ -756,4 +756,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatTypeMessageHint => 'Type your message...';
+
+  @override
+  String get readyMadePackagesTitle => 'Ready-Made Packages';
+
+  @override
+  String get readyMadePackagesDesc =>
+      'Complete party experiences with comprehensive planning and execution';
+
+  @override
+  String get productsTitle => 'Products';
+
+  @override
+  String get productsDesc => 'Browse a wide range of event products';
+
+  @override
+  String get filterOptions => 'Filter Options';
 }

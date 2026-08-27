@@ -750,4 +750,20 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get chatTypeMessageHint => 'اكتب رسالتك...';
+
+  @override
+  String get readyMadePackagesTitle => 'الباقات الجاهزة';
+
+  @override
+  String get readyMadePackagesDesc =>
+      'تجارب احتفالية متكاملة مع تخطيط وتنفيذ شامل';
+
+  @override
+  String get productsTitle => 'المنتجات';
+
+  @override
+  String get productsDesc => 'تصفح مجموعة واسعة من منتجات المناسبات';
+
+  @override
+  String get filterOptions => 'خيارات الفلترة';
 }

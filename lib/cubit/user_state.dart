@@ -1,6 +1,7 @@
 ﻿import 'package:eventsapp/models/booking_model.dart';
 import 'package:eventsapp/models/getModelsReviews.dart';
 import 'package:eventsapp/models/listing_model.dart';
+import 'package:eventsapp/models/listing_rating_model.dart';
 import 'package:eventsapp/models/myBookings_model.dart';
 import 'package:eventsapp/models/planner_model.dart';
 import 'package:eventsapp/models/sendReviwe.dart';
@@ -178,4 +179,30 @@ class GetReviewsSuccess extends UserState {
 class GetReviewsFailure extends UserState {
   final String errMessage;
   GetReviewsFailure({required this.errMessage});
+}
+
+
+class GetListingRatingsLoading extends UserState {}
+
+class GetListingRatingsSuccess extends UserState {
+  final ListingRatingsResponse ratingsResponse;
+  GetListingRatingsSuccess(this.ratingsResponse);
+}
+
+class GetListingRatingsFailure extends UserState {
+  final String errMessage;
+  GetListingRatingsFailure(this.errMessage);
+}
+
+
+class GetProviderQrCodeLoading extends UserState {}
+
+class GetProviderQrCodeSuccess extends UserState {
+  final String qrUrl;
+  GetProviderQrCodeSuccess(this.qrUrl);
+}
+
+class GetProviderQrCodeFailure extends UserState {
+  final String errMessage;
+  GetProviderQrCodeFailure(this.errMessage);
 }

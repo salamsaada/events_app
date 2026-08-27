@@ -10,7 +10,7 @@ import 'package:eventsapp/screens/booking/Booking.dart';
 import 'package:eventsapp/generated/app_localizations.dart';
 import 'package:eventsapp/core/widgets/service_reviews_section.dart';
 import 'package:eventsapp/screens/service_reviews_page.dart';
-
+import 'package:eventsapp/core/api/end_ponits.dart'; // 👈 مسار ملف الـ EndPoint
 class ProductDetailsPage extends StatefulWidget {
   final ServiceItem item;
 
@@ -31,47 +31,54 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   }
 
   // 🚀 [الدالة الذكية: النسخة النهائية المضادة للتكرار للمنتجات] 🚀
+  // 🚀 الدالة الشاملة لجلب الصور والتي تتأقلم تلقائياً مع EndPoint.baseUrl 🚀
+  // 🚀 الدالة الشاملة لجلب الصور وإصلاح الروابط 🚀
   String getSmartImageUrl(ServiceItem item) {
-    if (item.images.isNotEmpty) {
-      String url = (item.images[0] is Map ? item.images[0]['url'] : item.images[0].toString());
-      if (url.isNotEmpty && url.startsWith('http') && !url.contains('localhost') && !url.contains('placeholder') && !url.contains('example')) {
-        return url; 
+    final String activeHost = EndPoint.baseUrl.split('/api')[0];
+
+    String? extractValidUrl(List<dynamic>? images) {
+      if (images == null || images.isEmpty) return null;
+      String url = (images[0] is Map ? images[0]['url'] : images[0].toString());
+      if (url.isNotEmpty && url.startsWith('http') && !url.contains('placeholder')) {
+        if (url.contains('127.0.0.1:8000') || url.contains('localhost:8000') || url.contains('10.0.2.2:8000')) {
+          url = url.replaceAll(RegExp(r'http://(127\.0\.0\.1|localhost|10\.0\.2\.2):8000'), activeHost);
+        }
+        return url;
+      }
+      return null;
+    }
+
+    // 1. نبحث عن الصورة الأساسية أولاً
+    String? finalUrl = extractValidUrl(item.images);
+
+    // 2. إذا لم نجدها (مثل حالة المنتجات)، نبحث داخل الخيارات
+    if (finalUrl == null && item.variants.isNotEmpty) {
+      for (var variant in item.variants) {
+        finalUrl = extractValidUrl(variant.images);
+        if (finalUrl != null) break;
       }
     }
 
+    if (finalUrl != null) return finalUrl;
+
+    // 3. الصور الافتراضية كخطة بديلة
+    int uniqueNum = item.id.hashCode.abs();
     final String title = item.title.toString().toLowerCase();
-    int uniqueNum = item.id.codeUnits.fold(0, (sum, char) => sum + char);
 
-    if (title.contains('chair') || title.contains('كرسي') || title.contains('كراسي')) {
-      List<String> chairImages = [
-        'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?auto=format&fit=crop&w=1000&q=80', 
-        'https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&w=1000&q=80', 
-        'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=1000&q=80', 
-        'https://images.unsplash.com/photo-1580480055273-228ff5388ef8?auto=format&fit=crop&w=1000&q=80', 
-        'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=1000&q=80', 
-        'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=1000&q=80', 
-        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1000&q=80', 
+    if (title.contains('chair') || title.contains('كرسي')) {
+      List<String> chairImgs = [
+        'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&w=800&q=80',
       ];
-      return chairImages[uniqueNum % chairImages.length];
-    } 
-    else if (title.contains('table') || title.contains('طاولة') || title.contains('طاولات')) {
-      List<String> tableImages = [
-        'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1000&q=80',
-        'https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=1000&q=80',
-        'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=1000&q=80',
+      return chairImgs[uniqueNum % chairImgs.length];
+    } else {
+      List<String> tableImgs = [
+        'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=800&q=80',
       ];
-      return tableImages[uniqueNum % tableImages.length];
+      return tableImgs[uniqueNum % tableImgs.length];
     }
-
-    final List<String> fallbackImages = [
-      'https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=1000',
-      'https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1000',
-      'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?q=80&w=1000',
-    ];
-    
-    return fallbackImages[uniqueNum % fallbackImages.length];
   }
-
   // 🛠 دالة مساعدة لتنسيق التاريخ بأمان
   String _formatDate(dynamic dateData) {
     if (dateData == null || dateData.toString().isEmpty) return 'Date not set';
@@ -177,13 +184,19 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.network(
+                    // 🚀 عرض الصورة بذكاء سواء كانت سيرفر أو احتياطية
+                    imageUrl.startsWith('http')
+                        ? Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
                         color: Colors.grey[300],
                         child: const Icon(Icons.image_not_supported, color: Colors.grey, size: 50),
                       ),
+                    )
+                        : Image.asset(
+                      imageUrl,
+                      fit: BoxFit.cover,
                     ),
                     DecoratedBox(
                       decoration: BoxDecoration(
@@ -307,7 +320,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                           setState(() {
                             _selectedVariantId = variant.id;
                             // البحث عن صورة لهذا الـ Variant وتحديثها
-                            if (variant.images.isNotEmpty) {
+                            if (variant.images != null && variant.images.isNotEmpty) {
                               var vImg = variant.images.first;
                               String? newUrl;
                               if (vImg is Map) {
@@ -316,9 +329,15 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                 // في حال كانت كائن (Object) من كلاس
                                 try { newUrl = vImg.url; } catch (_) { newUrl = vImg.toString(); }
                               }
-                              
+
                               if (newUrl != null && newUrl.isNotEmpty) {
-                                _currentDisplayImage = newUrl;
+                                // 🚀 السحر هنا: تنظيف الرابط الجديد قبل عرضه في الصورة العلوية!
+                                final String activeHost = EndPoint.baseUrl.split('/api')[0];
+                                if (newUrl.contains('127.0.0.1:8000') || newUrl.contains('localhost:8000') || newUrl.contains('10.0.2.2:8000')) {
+                                  newUrl = newUrl.replaceAll(RegExp(r'http://(127\.0\.0\.1|localhost|10\.0\.2\.2):8000'), activeHost);
+                                }
+
+                                _currentDisplayImage = newUrl; // تحديث الصورة العلوية بالرابط النظيف
                               }
                             }
                           });
@@ -366,29 +385,36 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   }
 
   // 🚀 تصميم كرت الخيارات المطور المشابه للصورة 🚀
+  // 🚀 تصميم كرت الخيارات المطور المشابه للصورة 🚀
   Widget _buildVariantCard(dynamic variant, bool isDark, String languageCode, String itemType, bool isSelected) {
     const Color goldColor = Color(0xFFD6B237);
 
     String variantName = 'Product Variant';
     if (variant.name != null && variant.name.toString().isNotEmpty && variant.name.toString() != "null") {
-      variantName = variant.name is Map 
-          ? (variant.name[languageCode] ?? variant.name['en'] ?? variant.name['ar'] ?? 'Product Variant') 
+      variantName = variant.name is Map
+          ? (variant.name[languageCode] ?? variant.name['en'] ?? variant.name['ar'] ?? 'Product Variant')
           : variant.name.toString();
     }
 
     String dateStr = 'No Date';
     String timeStr = '';
 
+    // 🚀 التعديل الذكي هنا لمعرفة إذا كان هناك تواريخ متعددة
     if (variant.availabilities != null && variant.availabilities.isNotEmpty) {
-      final avail = variant.availabilities[0];
-      dateStr = _formatDate(avail.availableDate ?? avail.available_date);
+      if (variant.availabilities.length > 1) {
+        dateStr = languageCode == 'ar' ? 'عدة تواريخ متاحة' : 'Multiple dates';
+        timeStr = languageCode == 'ar' ? 'أوقات متعددة (اختر للحجز)' : 'Multiple slots (Tap to book)';
+      } else {
+        final avail = variant.availabilities[0];
+        dateStr = _formatDate(avail.availableDate ?? avail.available_date);
 
-      if (avail.slots != null && avail.slots.isNotEmpty) {
-        final slot = avail.slots[0];
-        final start = _formatTime(slot.startTime ?? slot.start_time);
-        final end = _formatTime(slot.endTime ?? slot.end_time);
-        if (start.isNotEmpty && end.isNotEmpty) {
-          timeStr = '$start - $end';
+        if (avail.slots != null && avail.slots.isNotEmpty) {
+          final slot = avail.slots[0];
+          final start = _formatTime(slot.startTime ?? slot.start_time);
+          final end = _formatTime(slot.endTime ?? slot.end_time);
+          if (start.isNotEmpty && end.isNotEmpty) {
+            timeStr = '$start - $end';
+          }
         }
       }
     }
@@ -406,10 +432,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        // 💡 إبراز الكرت المختار بخلفية خفيفة جداً
         color: isSelected ? (isDark ? Colors.grey[800] : goldColor.withOpacity(0.05)) : (isDark ? Colors.grey[900] : Colors.white),
         borderRadius: BorderRadius.circular(16),
-        // 💡 تلوين الإطار بالذهبي إذا كان مختاراً
         border: Border.all(
           color: isSelected ? goldColor : Colors.grey.shade200,
           width: isSelected ? 2 : 1,
